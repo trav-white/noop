@@ -72,7 +72,7 @@ import kotlin.math.roundToInt
 
 // MARK: - Liquid hero tokens (the liquid Trends restyle)
 //
-// The Charge hero card floats over the day-of-sky, so it carries the liquid translucent near-black fill
+// The Charge hero card floats over the WHOOP slate backdrop, so it carries the liquid translucent near-black fill
 // (rgba(13,14,20,.80)) rather than the classic frosted surface — the card does the contrast work so the
 // crisp line chart + the count-up vessel accent read clean over the sky. Radius 26 + a white@0.11 hairline
 // give it the frosted-glass edge. Mirrors the liquid Today heroCard (LiquidTodayView / TodayScreen).
@@ -145,11 +145,11 @@ fun TrendsScreen(vm: AppViewModel) {
     LazyScreenScaffold(
         title = "Trends",
         subtitle = "The thread of you over time.",
-        // LIQUID SKY BACKDROP (the pilot pattern — LiquidScreenSky.kt): the time-of-day liquid sky settles
-        // into the theme canvas behind the header + top rows, full-bleed via the scaffold's topBackground
-        // plumbing. Static (LiquidSkyStatic, inside the helper) — never an animated sky behind a scrolling
-        // list. Gated on the same day-cycle pref as Today; when off, the scaffold paints the flat canvas.
-        topBackground = if (showDayCycleBackground) { { LiquidScreenSky() } } else null,
+        // WHOOP SLATE BACKDROP: the flat WHOOP canvas gradient (WhoopScreenSky) settles into the theme
+        // canvas behind the header and top rows, full-bleed via the scaffold's topBackground plumbing.
+        // Static, no per-frame cost behind a scrolling list. Gated on the same day-cycle pref as Today; when
+        // off, the scaffold paints the flat canvas.
+        topBackground = if (showDayCycleBackground) { { WhoopScreenSky() } } else null,
     ) {
         if (days.isEmpty()) {
             item { EmptyTrends() }
@@ -686,7 +686,7 @@ private fun ChartCard(
     }
 
     if (liquidHero) {
-        // The liquid hero surface: a translucent near-black that floats over the day-of-sky so the crisp
+        // The liquid hero surface: a translucent near-black that floats over the WHOOP slate backdrop so the crisp
         // chart + the vessel accent read clean — the card does the contrast work, not a muted sky. Radius 26
         // + a faint white hairline give the frosted-glass edge of the iOS liquid heroCard. Mirrors Today.
         Box(
@@ -705,29 +705,24 @@ private fun ChartCard(
 }
 
 /**
- * The screen's single liquid accent: a small [LiquidVessel] filled to [value] (0..100 → 0..1) in the
- * charge [tint], the number rolling up over it via [CountUpText] (white, tabular, a soft shadow so it reads
- * on the vessel, hit-transparent so a tap falls through to the vessel's own splash). The Trends echo of the
- * liquid Today `HeroScoreVessel`, sized down to a header readout so it accents the headline value without
- * competing with the crisp chart below.
+ * The screen's single headline accent: a small WHOOP ring dial filled to [value] (0..100 -> 0..1) in the
+ * charge [tint], with the value shown as a centred D-DIN numeral. The Trends echo of the shared
+ * `com.noop.ui.components.RingDial`, sized down to a header readout so it accents the headline value
+ * without competing with the crisp chart below.
  */
 @Composable
 private fun HeadlineVessel(value: Double, tint: Color) {
-    val diameter = 44.dp
-    Box(modifier = Modifier.size(diameter), contentAlignment = Alignment.Center) {
-        LiquidVessel(
+    // WHOOP ring dial (replaces the old LiquidVessel): the diameter (44dp) matches
+    // com.noop.ui.components.RingDialSize.Mini exactly, so this is a straight swap to the shared crisp
+    // WHOOP ring, no label (the headline value beside it already carries the word).
+    Box(modifier = Modifier.size(44.dp), contentAlignment = Alignment.Center) {
+        com.noop.ui.components.RingDial(
             value = (value / 100.0).coerceIn(0.0, 1.0),
+            display = "${value.roundToInt()}",
+            label = "",
             tint = tint,
-            animated = true,
-            modifier = Modifier.size(diameter),
-        )
-        CountUpText(
-            value = value,
-            format = { "${it.roundToInt()}" },
-            style = NoopType.number(17f, weight = FontWeight.Bold)
-                .copy(shadow = Shadow(color = Color.Black.copy(alpha = 0.5f), offset = Offset(0f, 1f), blurRadius = 6f)),
-            color = Color.White,
-            modifier = Modifier.clearAndSetSemantics {},
+            size = com.noop.ui.components.RingDialSize.Mini,
+            showsLabel = false,
         )
     }
 }

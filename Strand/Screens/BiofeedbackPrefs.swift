@@ -1,9 +1,9 @@
 import Foundation
 import StrandAnalytics
 
-// BiofeedbackPrefs.swift — the small, on-device pref surface for the haptic-biofeedback pillar:
+// BiofeedbackPrefs.swift: the small, on-device pref surface for the haptic-biofeedback pillar:
 // the locked resonance pace + its date (L1), and the "stress check-ins (haptic)" master/sub toggles
-// + the replay-safe StressOnsetDetector state (L3). UserDefaults-backed, single-user, no store table —
+// + the replay-safe StressOnsetDetector state (L3). UserDefaults-backed, single-user, no store table,
 // the same lightweight pattern Breathe's `@AppStorage("breathe.lastOutcome")` and `InactivityPrefs` use.
 //
 // Nothing here leaves the device (the spec's "resonance pace + outcomes are local prefs"). The toggles
@@ -37,7 +37,7 @@ enum BiofeedbackPrefs {
         return v > 0 ? v : nil
     }
 
-    /// When the locked pace was measured — shown dated on the result card ("locked 19 Jun"); the pace
+    /// When the locked pace was measured, shown dated on the result card ("locked 19 Jun"); the pace
     /// drifts, so we never claim it's permanent.
     static var lockedPaceDate: Date? {
         let t = d.double(forKey: K.lockedDate)

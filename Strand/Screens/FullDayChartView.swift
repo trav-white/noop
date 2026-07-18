@@ -2,10 +2,10 @@ import SwiftUI
 import StrandDesign
 import WhoopStore
 
-// MARK: - Deep Timeline (full-day, full-resolution metric viewer) — #575
+// MARK: - Deep Timeline (full-day, full-resolution metric viewer), #575
 //
 // The headline tap-through from Explore: a whole-day line for one metric that the user can ZOOM and PAN
-// down to the raw per-second signal. The hard problem — never drawing ~86k points for a worn 24h — is
+// down to the raw per-second signal. The hard problem, never drawing ~86k points for a worn 24h, is
 // solved in the read layer (`Repository.timelineSeries` picks coarse SQL buckets at day scale and raw
 // seconds when zoomed in), so this screen only ever receives ~targetPoints points regardless of zoom.
 //
@@ -14,7 +14,7 @@ import WhoopStore
 // adds scroll-to-zoom (no pinch); both platforms drag-to-pan. Serves #574 (owned-source filter / honest
 // "Other sources" disclosure) and is the detail surface behind #582.
 //
-// #979 spin-offs: (1) annotation parity with the classic Today whole-day chart — the main night's sleep
+// #979 spin-offs: (1) annotation parity with the classic Today whole-day chart, the main night's sleep
 // band + a sport glyph at each workout, fed through the SAME OverviewHRChart layers Today uses (this
 // screen previously drew a bare line, despite being sold as "the whole-day trend with bands"); (2) an
 // iPhone touch-and-hold scrub (`touchScrub: true`) so the crosshair readout the Mac pointer hover gets
@@ -25,7 +25,7 @@ struct FullDayChartView: View {
 
     /// The day this timeline is showing (its real calendar midnight). Defaults to the logical day so an
     /// after-midnight open still lands on the night the user is living, not an empty new calendar day (#144).
-    /// Mutable so the user can step back through previous days (#597 — was today-only with no way back).
+    /// Mutable so the user can step back through previous days (#597, was today-only with no way back).
     @State private var dayStart: Date
     /// True once we've done the one-shot "open on the most recent day with data" jump (or the caller pinned
     /// an explicit day, in which case we never override it). Stops the jump from fighting manual navigation.
@@ -42,9 +42,9 @@ struct FullDayChartView: View {
     @State private var ownedOnly = true
 
     @State private var series: Repository.TimelineSeries = .empty
-    // #979 spin-off — day annotations, mirroring the classic Today's Overview HR markers: the main
+    // #979 spin-off: day annotations, mirroring the classic Today's Overview HR markers: the main
     // night's band (labelled with its duration) and each workout's sport glyph. Day-scoped facts, so
-    // they're loaded per shown day (NOT per zoom window — the chart clamps them into the visible
+    // they're loaded per shown day (NOT per zoom window, the chart clamps them into the visible
     // window itself), keeping the zoom/pan re-read path untouched.
     @State private var sleepSpan: OverviewHRChart.SleepSpan? = nil
     @State private var workoutSpans: [OverviewHRChart.WorkoutSpan] = []
@@ -54,7 +54,7 @@ struct FullDayChartView: View {
     /// Bumped on every settled zoom/metric change so the re-read task re-runs at the new resolution.
     @State private var reloadTick = 0
 
-    /// The full clamp the zoom window can never escape — the selected calendar day.
+    /// The full clamp the zoom window can never escape, the selected calendar day.
     private var dayBounds: ClosedRange<Date> {
         dayStart...dayStart.addingTimeInterval(86_400)
     }
@@ -83,7 +83,7 @@ struct FullDayChartView: View {
         .task { await landOnLatestDayIfNeeded() }
     }
 
-    /// Annotations re-read only when the shown day changes or fresh strap data lands — deliberately NOT
+    /// Annotations re-read only when the shown day changes or fresh strap data lands, deliberately NOT
     /// on zoom (see `sleepSpan` above), so scrubbing/pinching never re-queries sleeps/workouts.
     private var annotationKey: String {
         "\(Int(dayStart.timeIntervalSince1970))|\(repo.refreshSeq)"
@@ -91,7 +91,7 @@ struct FullDayChartView: View {
 
     /// Re-read whenever the metric, the day, the source scope, the settled zoom window, or fresh strap
     /// data changes. The window is bucketed to whole seconds so micro-jitter during a drag doesn't thrash
-    /// the DB — the chart redraws smoothly from the in-hand domain while the data settles.
+    /// the DB; the chart redraws smoothly from the in-hand domain while the data settles.
     private var taskKey: String {
         let lo = Int(visibleWindow.lowerBound.timeIntervalSince1970)
         let hi = Int(visibleWindow.upperBound.timeIntervalSince1970)
@@ -116,7 +116,7 @@ struct FullDayChartView: View {
                 .font(StrandFont.footnote)
                 .foregroundStyle(StrandPalette.textSecondary)
             Spacer()
-            // #574 — owned-source scope. The strap is the owned source; "All sources" reveals the honest
+            // #574: owned-source scope. The strap is the owned source; "All sources" reveals the honest
             // disclosure that other sources' raw per-second streams aren't offloaded on-device.
             SegmentedPillControl([true, false], selection: $ownedOnly) { $0 ? String(localized: "Owned") : String(localized: "All") }
                 .fixedSize()
@@ -124,7 +124,7 @@ struct FullDayChartView: View {
         .padding(.horizontal, NoopMetrics.space1)
     }
 
-    /// Day stepper — move the whole timeline back/forward a day so a user can reach the days that actually
+    /// Day stepper: move the whole timeline back/forward a day so a user can reach the days that actually
     /// hold their data, not just today (#597). Forward is clamped at today (no future days).
     private var dayNav: some View {
         HStack(spacing: NoopMetrics.cardInnerSpacing) {
@@ -202,7 +202,7 @@ struct FullDayChartView: View {
     private var chart: some View {
         OverviewHRChart(
             points: series.points,
-            // #979 spin-off — the same sleep-band + workout-glyph layers the classic Today feeds. Passed
+            // #979 spin-off: the same sleep-band + workout-glyph layers the classic Today feeds. Passed
             // on EVERY metric track (they're time annotations, so "when was I asleep / training" reads
             // against skin temp or HRV just as it does against HR); the glyph anchors at the shown
             // metric's peak inside the workout window, and the chart clamps both into the zoom window.
@@ -212,7 +212,7 @@ struct FullDayChartView: View {
             valueRange: valueRange(series.points),
             xRange: dayBounds,
             height: 280,
-            // #979 spin-off — iPhone touch scrub: hold to pin the crosshair, drag to read values under
+            // #979 spin-off: iPhone touch scrub: hold to pin the crosshair, drag to read values under
             // the finger (the Mac pointer hover's readout, made reachable on touch). Opt-in here only.
             touchScrub: true,
             zoomDomain: $zoomDomain,
@@ -243,7 +243,7 @@ struct FullDayChartView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    /// Honest empty/dash state — a window the strap offloaded nothing for (a not-yet-synced stretch, an
+    /// Honest empty/dash state, a window the strap offloaded nothing for (a not-yet-synced stretch, an
     /// off-wrist gap, or a metric this device doesn't record). Never a fabricated flat line.
     private var emptyState: some View {
         VStack(spacing: NoopMetrics.space2) {
@@ -271,7 +271,7 @@ struct FullDayChartView: View {
             #if os(macOS)
             Text(zoomDomain == nil ? "Scroll to zoom · drag to pan" : "Zoomed in. Drag to pan")
             #else
-            // #979 spin-off: name the hold-to-scrub affordance — a hidden gesture nobody tries is a
+            // #979 spin-off: name the hold-to-scrub affordance, a hidden gesture nobody tries is a
             // feature that doesn't exist. (On the Mac the pointer hover is self-discovering.)
             Text(zoomDomain == nil ? "Pinch to zoom · drag to pan · hold to read" : "Zoomed in. Drag to pan · hold to read")
             #endif
@@ -326,8 +326,8 @@ struct FullDayChartView: View {
         loading = false
     }
 
-    /// #979 spin-off — load the shown day's sleep + workouts and scope them EXACTLY like the classic
-    /// Today's Overview HR markers: `allSleepSessions` (imported AND on-device computed sources — a
+    /// #979 spin-off: load the shown day's sleep + workouts and scope them EXACTLY like the classic
+    /// Today's Overview HR markers: `allSleepSessions` (imported AND on-device computed sources, a
     /// Bluetooth-only user's sleep lives under the computed source), longest overlapping block = the main
     /// night, never a nap; `workoutRows` (already dedup/dismiss-filtered) kept where they overlap the day.
     /// The band + duration use the EFFECTIVE onset so a hand-corrected bedtime shows the same band here as
@@ -349,12 +349,12 @@ struct FullDayChartView: View {
                       symbol: sportSymbol(w.sport))
             }
         guard !Task.isCancelled else { return }
-        // The pure, headless-tested selection (StrandDesignTests) — window = the shown DAY, not the zoom.
+        // The pure, headless-tested selection (StrandDesignTests): window = the shown DAY, not the zoom.
         sleepSpan = OverviewHRChart.mainSleep(sleepCandidates, overlapping: dayBounds)
         workoutSpans = OverviewHRChart.workouts(workoutCandidates, overlapping: dayBounds)
     }
 
-    /// "H:MM" for a duration in seconds (e.g. a 6h06m night → "6:06") — mirrors TodayView.hoursMinutes
+    /// "H:MM" for a duration in seconds (e.g. a 6h06m night to "6:06"), mirrors TodayView.hoursMinutes
     /// so the band label reads identically on both whole-day charts.
     private static func hoursMinutes(_ seconds: Int) -> String {
         let h = max(0, seconds) / 3600, m = (max(0, seconds) % 3600) / 60
@@ -396,7 +396,7 @@ struct FullDayChartView: View {
     }
 
     /// #175: map the band's 0-3 sleep_state code to its word. A bucket-averaged fractional value (when
-    /// zoomed out) is rounded to the nearest code — honest for a readout label; the track itself plots the
+    /// zoomed out) is rounded to the nearest code, honest for a readout label; the track itself plots the
     /// numeric code. This names the BAND's own reported state, never a stage NOOP derives.
     static func bandStateLabel(_ v: Double) -> String {
         switch Int(v.rounded()) {

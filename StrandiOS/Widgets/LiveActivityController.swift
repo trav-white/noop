@@ -8,7 +8,7 @@ import ActivityKit
 final class LiveActivityController {
     private var activity: Activity<NOOPActivityAttributes>?
     private var lastPush: Date = .distantPast
-    /// Cached `ActivityAuthorizationInfo` — `update` runs at ~1 Hz off the live HR stream, and
+    /// Cached `ActivityAuthorizationInfo` , `update` runs at ~1 Hz off the live HR stream, and
     /// instantiating this system bridge per tick is needless allocation. ActivityKit's auth status
     /// only changes via Settings, so caching for the controller's lifetime is safe.
     private let authInfo = ActivityAuthorizationInfo()
@@ -32,19 +32,19 @@ final class LiveActivityController {
         // Re-adopt an activity that outlived a previous app session. ActivityKit keeps Live Activities
         // alive across launches/relaunches, but a fresh controller starts with `activity == nil`, so
         // without recovering the handle here we can neither update nor END an already-showing activity
-        // — which made the #336 opt-out a no-op (#341: toggle off, heart stays) and risked spawning a
+        // , which made the #336 opt-out a no-op (#341: toggle off, heart stays) and risked spawning a
         // duplicate on the start path below. Done on the HR tick rather than in `init` because
         // `Activity.activities` isn't reliably hydrated at the instant of process launch.
         if activity == nil { activity = Activity<NOOPActivityAttributes>.activities.first }
 
-        // User opt-out (#336): if the in-app toggle is off, never start — and end any activity that's
+        // User opt-out (#336): if the in-app toggle is off, never start , and end any activity that's
         // already showing (the user just turned it off; this fires on the next ~1 Hz HR tick).
         guard UnitPrefs.liveActivityEnabled() else {
             if activity != nil { Task { await end() } }
             return
         }
 
-        // End the moment the live link drops — `bonded` stays true across every disconnect (it means
+        // End the moment the live link drops , `bonded` stays true across every disconnect (it means
         // "this strap is paired"), so keying off it left a frozen, fabricated "live" HR on the Lock
         // Screen / Dynamic Island indefinitely after the strap went out of range.
         if !connected {
@@ -82,7 +82,7 @@ final class LiveActivityController {
     }
 
     func end() async {
-        // End every NOOP Live Activity, not just our cached handle — covers a straggler from a prior
+        // End every NOOP Live Activity, not just our cached handle , covers a straggler from a prior
         // session we never re-adopted (#341) and any rare duplicate. Iterating the live list is the
         // only way to reach activities this controller instance never started.
         for act in Activity<NOOPActivityAttributes>.activities {

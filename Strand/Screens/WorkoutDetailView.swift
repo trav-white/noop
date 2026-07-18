@@ -11,7 +11,7 @@ import MapKit
 //
 // A READ-ONLY drill-down for one tapped session, built ONLY from the locked Noop component system
 // (NoopCard / ChartCard / SectionHeader / StatTile / SegmentBar idiom) so it sits in the same
-// instrument-grade, Effort-amber colour world as the Workouts list it opens from.
+// instrument-grade, Effort-blue colour world as the Workouts list it opens from.
 //
 //   • a header (sport displayName · date · duration) with the source badge,
 //   • a 3-up StatTile strip (avg HR · max HR · calories / distance),
@@ -60,8 +60,8 @@ struct WorkoutDetailView: View {
                        // ones on demand — byte-identical layout — so a tall detail doesn't materialise the
                        // map + both charts before the header is even on screen.
                        lazy: true,
-                       // The day-of-sky liquid backdrop, matching the Workouts list this detail opens from
-                       // and every other liquid screen. Fixed and full-bleed; it does not scroll. This
+                       // The WHOOP slate canvas backdrop, matching the Workouts list this detail opens from
+                       // and every other screen. Fixed and full-bleed; it does not scroll. This
                        // screen is presented in a sheet wrapped in a NavigationStack by WorkoutsView, so it
                        // needs no extra macOS NavigationStack of its own.
                        topBackground: AnyView(CanvasBackground())) {
@@ -373,10 +373,8 @@ struct WorkoutDetailView: View {
     // MARK: - Effort contribution
 
     private func effortCard(strain: Double) -> some View {
-        // The session's Effort as the signature liquid gauge: a `LiquidVessel` tinted Effort, filled to the
-        // session's contribution on the user's selected scale, with the value counting up over it — the
-        // same hero language as the Workouts list's Typical Effort gauge and the Sleep Rest hero. The
-        // explanatory sentence keeps its place beside the gauge.
+        // The session's Effort on a WHOOP RingDial, tinted Effort, filled to the session's contribution
+        // on the user's selected scale. The explanatory sentence keeps its place beside the dial.
         let displayValue = UnitFormatter.effortValue(strain, scale: effortScale)
         let scaleMax: Double = effortScale == .whoop ? 21 : 100
         let fraction = max(0, min(1, displayValue / scaleMax))
@@ -384,25 +382,13 @@ struct WorkoutDetailView: View {
             SectionHeader("Effort", overline: "This session")
             NoopCard(tint: StrandPalette.effortColor) {
                 HStack(alignment: .center, spacing: 18) {
-                    ZStack {
-                        // Static (posed) vessel — a compact liquid gauge inside a card, so it costs a single
-                        // cached frame rather than a live canvas (same call as Trends' pip vessels).
-                        LiquidVessel(value: fraction, tint: StrandPalette.effortColor, animated: false)
-                            .frame(width: 88, height: 88)
-                        VStack(spacing: 0) {
-                            // The session's Effort contribution ticks up to its value — the NOOP signature.
-                            CountUpText(value: displayValue,
-                                        format: { String(format: "%.1f", $0) },
-                                        font: StrandFont.rounded(28),
-                                        color: StrandPalette.textPrimary)
-                                .shadow(color: .black.opacity(0.5), radius: 5, y: 1)
-                            Text(effortScale == .whoop ? "of 21" : "of 100")
-                                .font(StrandFont.caption)
-                                .foregroundStyle(StrandPalette.textSecondary)
-                        }
-                        .allowsHitTesting(false)
-                    }
-                    .accessibilityElement(children: .ignore)
+                    RingDial(
+                        value: fraction,
+                        display: String(format: "%.1f", displayValue),
+                        label: effortScale == .whoop ? "of 21" : "of 100",
+                        tint: StrandPalette.effortColor,
+                        size: .trio
+                    )
                     .accessibilityLabel(String(localized: "Effort \(UnitFormatter.effortDisplay(strain, scale: effortScale)) \(effortScale == .whoop ? "of 21" : "of 100")"))
                     Spacer(minLength: 0)
                     Text("This session's contribution to the day's Effort, as captured during the workout.")
@@ -547,8 +533,8 @@ struct WorkoutRouteMap: RouteMapRepresentable {
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             guard let line = overlay as? MKPolyline else { return MKOverlayRenderer(overlay: overlay) }
             let r = MKPolylineRenderer(polyline: line)
-            // Effort-amber world, matching the rest of the workout detail. A platform colour (the
-            // renderer needs a UIColor/NSColor, not a SwiftUI Color); kept close to the Effort accent.
+            // Effort-blue world, matching the rest of the workout detail. A platform colour (the
+            // renderer needs a UIColor/NSColor, not a SwiftUI Color); reads straight from the Effort token.
             r.strokeColor = RoutePlatformColor.effort
             r.lineWidth = 4
             r.lineJoin = .round
@@ -568,13 +554,14 @@ struct WorkoutRouteMap: RouteMapRepresentable {
     #endif
 }
 
-/// The route stroke colour as a platform colour (MapKit's renderer can't take a SwiftUI `Color`). A fixed
-/// Effort-amber so it reads in the same colour world as the rest of the screen on both platforms.
+/// The route stroke colour as a platform colour (MapKit's renderer can't take a SwiftUI `Color`). Reads
+/// straight from `StrandPalette.effortColor` so it reads in the same colour world as the rest of the
+/// screen on both platforms, and stays in lock-step with any future re-theme.
 private enum RoutePlatformColor {
     #if canImport(UIKit)
-    static let effort = UIColor(red: 0.98, green: 0.62, blue: 0.16, alpha: 1.0)
+    static let effort = UIColor(StrandPalette.effortColor)
     #elseif canImport(AppKit)
-    static let effort = NSColor(red: 0.98, green: 0.62, blue: 0.16, alpha: 1.0)
+    static let effort = NSColor(StrandPalette.effortColor)
     #endif
 }
 #else

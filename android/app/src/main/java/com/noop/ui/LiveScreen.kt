@@ -84,7 +84,7 @@ import com.noop.ble.WhoopModel
 // MARK: - Liquid hero tokens (the liquid Live restyle)
 //
 // The hero card the live HR vessel floats on, mirroring the liquid Today hero. A translucent near-black
-// (mock rgba(13,14,20,.80)) so it floats over the day-of-sky; the vessel + the white count-up number read
+// (mock rgba(13,14,20,.80)) so it floats over the WHOOP slate backdrop; the vessel + the white count-up number read
 // crisp on it. Radius 26 + a white@0.11 hairline give the frosted-glass edge. (Twins of the liquid Today
 // LIQUID_HERO_FILL / LIQUID_HERO_RADIUS, redeclared here since those are file-private to TodayScreen.)
 private val LIVE_HERO_FILL: Color = Color(red = 13f / 255f, green = 14f / 255f, blue = 20f / 255f, alpha = 0.80f)
@@ -106,8 +106,8 @@ fun LiveScreen(viewModel: AppViewModel, onManageDevices: () -> Unit = {}) {
     val unitSystem = UnitPrefs.system(context)
     // Effort display scale (#268) — routes the live + saved workout Effort read-outs. Display-only.
     val effortScale = UnitPrefs.effortScale(context)
-    // Same day-cycle gate as the liquid Today (LiquidScreenSky.kt): the time-of-day sky settles behind the
-    // top content when the user hasn't opted out; otherwise the scaffold paints the plain dark canvas.
+    // Same day-cycle gate as Today (WhoopScreenSky): the WHOOP slate backdrop settles behind the top
+    // content when the user hasn't opted out; otherwise the scaffold paints the plain dark canvas.
     val showDayCycleBackground = remember { NoopPrefs.showDayCycleBackground(context) }
 
     // The runtime Bluetooth permission gates scanning. If it isn't granted, the Connect button
@@ -202,11 +202,11 @@ fun LiveScreen(viewModel: AppViewModel, onManageDevices: () -> Unit = {}) {
     LazyScreenScaffold(
         title = "Live Body Console",
         subtitle = "Current physiology, strap trust, and session controls",
-        // LIQUID SKY BACKDROP (the pilot pattern — LiquidScreenSky.kt): the time-of-day liquid sky settles
-        // behind the header + hero and the cards float over the flat canvas below. Reuses the shared
-        // LiquidScreenSky() slot verbatim; when the day-cycle background is off, the scaffold paints the
-        // plain surface instead (matching the liquid Today's showDayCycleBackground gate).
-        topBackground = if (showDayCycleBackground) { { LiquidScreenSky() } } else null,
+        // WHOOP SLATE BACKDROP: the flat WHOOP canvas gradient settles behind the header and hero, and the
+        // cards float over the flat canvas below. Reuses the shared WhoopScreenSky() slot verbatim; when the
+        // day-cycle background is off, the scaffold paints the plain surface instead (matching Today's
+        // showDayCycleBackground gate).
+        topBackground = if (showDayCycleBackground) { { WhoopScreenSky() } } else null,
     ) {
 
         // Active band row (MW-6) — names the band the console is reading, with a "Manage devices"
@@ -883,7 +883,7 @@ private fun lastSyncLabel(live: LiveState): String =
 
 @Composable
 private fun BodyConsole(live: LiveState, bpm: Int?, activeConnection: Boolean, zone: Int, hrMax: Int) {
-    // The liquid hero CARD: a translucent near-black that floats over the day-of-sky so the HR vessel + the
+    // The liquid hero CARD: a translucent near-black that floats over the WHOOP slate backdrop so the HR vessel + the
     // white count-up number stay crisp — the card does the contrast work, not a muted sky. A rounded 26
     // corner + a faint white hairline give it the frosted-glass edge of the liquid Today heroCard
     // (heroFill = rgba(13,14,20,.80), stroke white@0.11). Mirrors the pilot LiquidTodayView heroCard.

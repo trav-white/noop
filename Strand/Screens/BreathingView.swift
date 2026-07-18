@@ -4,22 +4,22 @@ import AVFoundation
 import StrandDesign
 import StrandAnalytics
 
-/// HRV haptic breathing biofeedback trainer — Strand's flagship novel feature, now a closed-loop
+/// HRV haptic breathing biofeedback trainer: Strand's flagship novel feature, now a closed-loop
 /// biofeedback instrument with three layers (v5 "the strap that breathes you down").
 ///
 /// The strap both *measures* HRV (via R-R intervals) and *buzzes* (haptic strap motor), so we can pace
-/// the user's breath with a felt cue and watch their HRV respond in real time — and now also *find* the
+/// the user's breath with a felt cue and watch their HRV respond in real time, and now also *find* the
 /// user's personal resonance pace (L1) and offer a below-HR "Calm me" metronome (L2). A passive stress
 /// check-in card (L3) surfaces when the shipped StressOnsetDetector fires. All layers are opt-in,
 /// user-stoppable, and quiet-hours-aware.
 ///
 /// Mode switch:
-///  • **Breathe** — the shipped fixed-pace trainer (presets + the locked resonance pill), unchanged.
-///  • **Resonance** — the one-time "find your pace" sweep + the dated result card.
-///  • **Calm me** — the L2 below-HR relaxation metronome.
+///  • **Breathe**: the shipped fixed-pace trainer (presets + the locked resonance pill), unchanged.
+///  • **Resonance**: the one-time "find your pace" sweep + the dated result card.
+///  • **Calm me**: the L2 below-HR relaxation metronome.
 ///
-/// Public entry point keeps its zero-arg init (every existing call site — RootView, RootTabView,
-/// StressView — constructs `BreathingView()`), then defers to `BreathingContent` once the environment's
+/// Public entry point keeps its zero-arg init (every existing call site: RootView, RootTabView,
+/// StressView, constructs `BreathingView()`), then defers to `BreathingContent` once the environment's
 /// `AppModel`/`LiveState` are available so the `BiofeedbackController` `@StateObject` can be built from
 /// them. The L3 `StressNudgeCenter` is OPTIONAL via the environment: Wave 3 injects a shared instance;
 /// absent that we fall back to a local one, so the view always compiles + the card surface always exists.
@@ -32,15 +32,15 @@ private struct BreathingContent: View {
     @EnvironmentObject private var model: AppModel
     @EnvironmentObject private var live: LiveState
     /// When the user has Reduce Motion on, the large repeating inhale/exhale orb zoom is
-    /// suppressed — the breath is cued by the phase word + haptics instead. (a11y)
+    /// suppressed: the breath is cued by the phase word + haptics instead. (a11y)
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// The L1/L2 session controller (walks the engines, fires the buzz path). View-owned, created lazily
     /// from the environment model + live state on first appear (a `@StateObject` can't read the
-    /// environment at init, so we build it in `.onAppear`). Self-contained — the spec's view-specific
+    /// environment at init, so we build it in `.onAppear`). Self-contained: the spec's view-specific
     /// controller; it never edits the shared AppModel.
     @StateObject private var controllerBox = ControllerBox()
-    /// The L3 passive-nudge surface — Wave 3 injects a shared instance; this local fallback keeps the
+    /// The L3 passive-nudge surface: Wave 3 injects a shared instance; this local fallback keeps the
     /// card surface present whether or not central wiring has landed.
     @StateObject private var fallbackNudge = StressNudgeCenter()
     @Environment(\.stressNudgeCenter) private var injectedNudge
@@ -79,7 +79,7 @@ private struct BreathingContent: View {
             }
         }
 
-        /// Inhale seconds — for `.resonance` it derives from the locked bpm at a 40:60 inhale:exhale split.
+        /// Inhale seconds: for `.resonance` it derives from the locked bpm at a 40:60 inhale:exhale split.
         func inhale(lockedBpm: Double?) -> Double {
             switch self {
             case .relax:     return 4.0
@@ -118,7 +118,7 @@ private struct BreathingContent: View {
 
     private enum Phase { case inhale, exhale }
 
-    // MARK: State (fixed-pace Breathe — unchanged behaviour)
+    // MARK: State (fixed-pace Breathe, unchanged behaviour)
 
     @State private var pace: Pace = .coherence
     @State private var running = false
@@ -143,7 +143,7 @@ private struct BreathingContent: View {
 
     @AppStorage("breathe.lastOutcome") private var lastStoredOutcome = ""
 
-    /// Opt-in audio pacer — a soft tone at each phase change (rising on the inhale, falling on the
+    /// Opt-in audio pacer: a soft tone at each phase change (rising on the inhale, falling on the
     /// exhale). Default OFF (manual-first). The tones go through an ambient session category, so the
     /// iOS silent switch mutes them like any other ambient sound. Persists across launches.
     @AppStorage("breathe.audioCues") private var audioCues = false
@@ -226,7 +226,7 @@ private struct BreathingContent: View {
         if !live.bonded { hapticHint }
     }
 
-    /// Start a one-minute haptic breathing cue at the user's locked resonance pace (or 5.5 fallback) —
+    /// Start a one-minute haptic breathing cue at the user's locked resonance pace (or 5.5 fallback),
     /// the L3 card's "Breathe now" action. Switches to Resonance/Breathe context and runs the controller.
     private func startOneMinuteCue() {
         if running { stop() }
@@ -322,14 +322,14 @@ private struct BreathingContent: View {
         }
     }
 
-    /// Preset pills — the locked-resonance pill only shows once a pace has been locked (it reads the
+    /// Preset pills: the locked-resonance pill only shows once a pace has been locked (it reads the
     /// stored value), so a never-swept user sees the three shipped presets exactly as before.
     private var availablePaces: [Pace] {
         lockedBpm != nil ? [.relax, .coherence, .box, .resonance] : [.relax, .coherence, .box]
     }
 
     private var pacePills: some View {
-        // Up to four pills (incl. locked Resonance) overflow a narrow iPhone — let a
+        // Up to four pills (incl. locked Resonance) overflow a narrow iPhone, let a
         // horizontal scroll govern the width rather than truncating inside a fixed frame.
         ScrollView(.horizontal, showsIndicators: false) {
             SegmentedPillControl(availablePaces, selection: $pace) { $0.label }
@@ -346,7 +346,7 @@ private struct BreathingContent: View {
     private var breathingOrb: some View {
         GeometryReader { geo in
             let maxDiameter = min(geo.size.width, geo.size.height)
-            // The breath ring — the resting track the vessel breathes within. Crisp 1px stroke, no glow.
+            // The breath ring: the resting track the vessel breathes within. Crisp 1px stroke, no glow.
             ZStack {
                 Circle()
                     .strokeBorder(StrandPalette.restColor.opacity(0.28), lineWidth: 1)
@@ -514,7 +514,7 @@ private struct BreathingContent: View {
                 }
 
                 // The coherence estimate as a filling liquid tube (the same horizontal vessel Today's Key
-                // Metrics use), Rest-tinted, filling to the RMSSD-derived fraction — replaces the flat
+                // Metrics use), Rest-tinted, filling to the RMSSD-derived fraction, replaces the flat
                 // gradient capsule. Live so it sloshes as the reading updates through a session.
                 LiquidTube(frac: coherenceFraction, tint: StrandPalette.restBright, height: 10)
                     .accessibilityLabel("Coherence estimate")
@@ -573,7 +573,7 @@ private struct BreathingContent: View {
         )
     }
 
-    // MARK: - Session control (fixed-pace Breathe — unchanged)
+    // MARK: - Session control (fixed-pace Breathe, unchanged)
 
     private func start() {
         running = true
@@ -719,7 +719,7 @@ private final class ControllerBox: ObservableObject {
 /// A tiny on-device tone player for the opt-in audio pacer. It synthesises a short, soft sine "ding"
 /// for each phase (a higher note on the inhale, a lower one on the exhale) and plays it through an
 /// **ambient** audio session, so the iOS silent switch mutes it like any other ambient sound and it
-/// never interrupts other audio. No bundled assets — the buffers are generated once and reused.
+/// never interrupts other audio. No bundled assets: the buffers are generated once and reused.
 ///
 /// Self-contained and view-owned: `activate()` spins the engine up when the user opts in, `deactivate()`
 /// tears it down when they switch off or leave the screen, so we hold the audio session only while it's
@@ -735,13 +735,13 @@ final class BreathTonePlayer: ObservableObject {
     private var exhaleBuffer: AVAudioPCMBuffer?
     private var active = false
 
-    /// Phase tone frequencies (Hz). A gentle rising/falling pair — a soft cue, not a chime.
+    /// Phase tone frequencies (Hz). A gentle rising/falling pair, a soft cue, not a chime.
     private let inhaleHz: Double = 440   // A4, brighter for "in"
     private let exhaleHz: Double = 330   // E4, lower for "out"
     private let toneSeconds: Double = 0.45
     private let sampleRate: Double = 44_100
 
-    /// Bring the engine and audio session up. Idempotent — safe to call on every appear.
+    /// Bring the engine and audio session up. Idempotent: safe to call on every appear.
     func activate() {
         guard !active else { return }
 #if os(iOS)
@@ -763,7 +763,7 @@ final class BreathTonePlayer: ObservableObject {
             player.play()
             active = true
         } catch {
-            // Audio is a nicety, never load-bearing — if it can't start we just stay silent.
+            // Audio is a nicety, never load-bearing: if it can't start we just stay silent.
             active = false
         }
     }
@@ -781,7 +781,7 @@ final class BreathTonePlayer: ObservableObject {
         active = false
     }
 
-    /// Play the phase tone. No-op if the engine isn't up (e.g. start-up race) — the haptic + visual cues
+    /// Play the phase tone. No-op if the engine isn't up (e.g. start-up race); the haptic + visual cues
     /// still carry the pace, so a missed tone is harmless.
     func play(_ tone: Tone) {
         guard active else { return }
@@ -802,7 +802,7 @@ final class BreathTonePlayer: ObservableObject {
         let total = Int(frameCount)
         let attack = Int(0.02 * sampleRate)
         let release = Int(0.18 * sampleRate)
-        let peak: Float = 0.28   // kept quiet — a gentle cue, not a beep
+        let peak: Float = 0.28   // kept quiet, a gentle cue, not a beep
 
         for i in 0..<total {
             let t = Double(i) / sampleRate
@@ -838,7 +838,7 @@ extension EnvironmentValues {
 
 /// The L1 surface: an explainer, the full/quick sweep start, a live "Testing 5.5 br/min…" label + RSA
 /// progress while sweeping, and the dated result card (locked pace + per-pace RSA curve, or the honest
-/// "couldn't lock today" fallback). Self-contained — drives the shared `BiofeedbackController`.
+/// "couldn't lock today" fallback). Self-contained: drives the shared `BiofeedbackController`.
 private struct ResonanceModeView: View {
     @ObservedObject var controller: BiofeedbackController
     @ObservedObject var live: LiveState
@@ -1002,7 +1002,7 @@ private struct ResonanceModeView: View {
                         .font(StrandFont.captionNumber)
                         .foregroundStyle(StrandPalette.textSecondary)
                         .frame(width: 34, alignment: .leading)
-                    // Each pace's RSA amplitude as a static liquid tube — the same horizontal vessel used
+                    // Each pace's RSA amplitude as a static liquid tube, the same horizontal vessel used
                     // across the redesign. An unscored pace reads muted via a dimmed Rest tint.
                     LiquidTube(frac: (s.rsaAmplitude ?? 0) / max(maxRsa, 0.0001),
                                tint: StrandPalette.restBright.opacity(s.scored ? 1 : 0.35),
@@ -1046,7 +1046,7 @@ private struct ResonanceModeView: View {
 
 /// The L2 surface: a "Calm me · 3 min" button that runs `HRDownPacer`, a minimal live "HR 78 → settling"
 /// readout, a stop control, and an honest outcome line. Haptic-first → disabled (not faked) when the
-/// encrypted channel isn't up. Self-contained — drives the shared `BiofeedbackController`.
+/// encrypted channel isn't up. Self-contained: drives the shared `BiofeedbackController`.
 private struct CalmModeView: View {
     @ObservedObject var controller: BiofeedbackController
     @ObservedObject var live: LiveState

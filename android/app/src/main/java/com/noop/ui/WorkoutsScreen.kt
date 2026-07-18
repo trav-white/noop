@@ -199,12 +199,11 @@ fun WorkoutsScreen(vm: AppViewModel) {
     LazyScreenScaffold(
         title = "Workouts",
         subtitle = "Every session, threaded together.",
-        // LIQUID SKY BACKDROP (the pilot pattern — LiquidScreenSky.kt): the time-of-day liquid sky settles
-        // into the theme canvas behind the header + top rows (bled full-width up behind the status bar via
-        // the scaffold's topBackground plumbing), and the cards float OVER it on the flat surface below. The
-        // Android equivalent of the iOS `ScreenScaffold(topBackground: liquidScaffoldSky())`. This screen has
-        // no day-cycle preference gate (unlike Today), so the sky is always on.
-        topBackground = { LiquidScreenSky() },
+        // WHOOP SLATE BACKDROP: the flat WHOOP canvas gradient (WhoopScreenSky) settles into the theme
+        // canvas behind the header and top rows (bled full-width up behind the status bar via the
+        // scaffold's topBackground plumbing), and the cards float OVER it on the flat surface below. This
+        // screen has no day-cycle preference gate (unlike Today), so it is always on.
+        topBackground = { WhoopScreenSky() },
     ) {
         // Start (or stop) a workout right here, not only on Live — mirrors the Live control (#115).
         item {
@@ -593,13 +592,13 @@ private fun sessionSelectionKey(row: WorkoutRow): String = "${row.startTs}|${row
 // MARK: - Liquid hero tokens (the liquid Workouts restyle)
 //
 // The frosted card the Effort vessel floats on, mirroring the iOS/Today LiquidTodayView heroCard. `fill`
-// is a translucent near-black (mock rgba(13,14,20,.80)) so it floats over the day-of-sky; the vessel + the
+// is a translucent near-black (mock rgba(13,14,20,.80)) so it floats over the WHOOP slate backdrop; the vessel + the
 // white count-up read crisp on it. Radius 26 + a white@0.11 hairline give the frosted-glass edge. (These
 // are file-scoped to Workouts — the Today equivalents are private to that file.)
 private val LIQUID_HERO_FILL: Color = Color(red = 13f / 255f, green = 14f / 255f, blue = 20f / 255f, alpha = 0.80f)
 private val LIQUID_HERO_RADIUS: Dp = 26.dp
 
-// MARK: - Effort hero (typical-effort liquid vessel over the day-of-sky)
+// MARK: - Effort hero (typical-effort liquid vessel over the WHOOP slate backdrop)
 //
 // The liquid restyle of the Effort hero: the typical session Effort as a filling LiquidVessel with the
 // headline number counting up over it (the Today HeroScoreVessel idiom), inside a translucent near-black
@@ -626,7 +625,7 @@ private fun EffortHero(
     val totalTimeH = rows.mapNotNull { it.durationS }.sum() / 3600.0
     val modal = groups.firstOrNull()
 
-    // The liquid hero CARD: a translucent near-black that floats over the day-of-sky so the vessel + white
+    // The liquid hero CARD: a translucent near-black that floats over the WHOOP slate backdrop so the vessel + white
     // count-up read crisp. Radius 26 + a faint white hairline give the frosted-glass edge of the iOS liquid
     // heroCard (heroFill = rgba(13,14,20,.80), stroke white@0.11). Matches the Today pilot.
     Box(

@@ -1,7 +1,7 @@
 import SwiftUI
 import StrandDesign
 
-/// Automations — turn the strap's physical inputs (double-tap, wrist on/off) and live biometrics
+/// Automations: turn the strap's physical inputs (double-tap, wrist on/off) and live biometrics
 /// into actions (Shortcuts, and Mac-only screen lock) and haptic coaching. All on-device.
 struct AutomationsView: View {
     @EnvironmentObject var model: AppModel
@@ -14,7 +14,7 @@ struct AutomationsView: View {
     /// Deep-link into the experimental Rhythm visualization (it self-gates on its own consent).
     @EnvironmentObject var router: NavRouter
 
-    /// v5 cycle-awareness opt-in (default OFF — the most sensitive health category, manual-first).
+    /// v5 cycle-awareness opt-in (default OFF, the most sensitive health category, manual-first).
     @AppStorage(AppModel.cycleAwarenessKey) private var cycleAwareness = false
 
     /// Whether the cycle-awareness opt-in is offered for this profile (#801). Delegates to the shared
@@ -23,14 +23,14 @@ struct AutomationsView: View {
     private var cycleOptInApplies: Bool { model.profile.cycleAwarenessApplies }
     /// v5 Rhythm experimental gate (the screen still shows its own consent clickwrap when opened).
     @AppStorage(RhythmConsent.enabledKey) private var rhythmEnabled = false
-    /// Inactivity reminder (#419) — UI-local store, persisted in UserDefaults. The buzz itself fires
+    /// Inactivity reminder (#419): UI-local store, persisted in UserDefaults. The buzz itself fires
     /// from the BLE offload path (BLEManager.maybeBuzzInactivity → the shipped SedentaryDetector); this
     /// screen only edits the prefs the engine reads.
     @StateObject private var inactivity = InactivityPrefs()
     #if os(iOS)
     /// Wrist-alerts master gate (PR #572). On iOS the NotificationSettingsView (and its store) are
-    /// excluded by project.yml, so `notif.masterEnabled` — the key SedentaryDetector + the wrist-buzz
-    /// posting read — has no UI to flip and is stuck at its default OFF. Bind the SAME raw key here so
+    /// excluded by project.yml, so `notif.masterEnabled` (the key SedentaryDetector + the wrist-buzz
+    /// posting read) has no UI to flip and is stuck at its default OFF. Bind the SAME raw key here so
     /// iPhone users can actually turn wrist alerts on. Default OFF, matching the store's default.
     @AppStorage("notif.masterEnabled") private var wristAlertsMaster = false
     #endif
@@ -58,7 +58,7 @@ struct AutomationsView: View {
         }
     }
 
-    // MARK: - Wrist alerts master (iOS only — PR #572)
+    // MARK: - Wrist alerts master (iOS only, PR #572)
 
     #if os(iOS)
     /// The master switch for wrist-buzz notifications. On macOS this lives in its own Notifications
@@ -261,12 +261,12 @@ struct AutomationsView: View {
         }
     }
 
-    /// The reused global notification master (notif.masterEnabled, default OFF) — drives the inert-feature
+    /// The reused global notification master (notif.masterEnabled, default OFF): drives the inert-feature
     /// warning so enabling the reminder while master is off isn't silently a no-op.
     private var notifMasterOn: Bool {
         UserDefaults.standard.object(forKey: "notif.masterEnabled") as? Bool ?? false
     }
-    /// The reused only-when-worn gate (notif.onlyWhenWorn, default ON) — the SAME key the notifications
+    /// The reused only-when-worn gate (notif.onlyWhenWorn, default ON), the SAME key the notifications
     /// screen and the engine read, so the two screens stay in sync.
     private var onlyWhenWornBinding: Binding<Bool> {
         Binding(get: { UserDefaults.standard.object(forKey: "notif.onlyWhenWorn") as? Bool ?? true },
@@ -385,7 +385,7 @@ struct AutomationsView: View {
     /// Wear & presence blurb. macOS mentions the auto-lock affordance (and the Apple-Watch unlock
     /// caveat); iOS, where that toggle is hidden, describes the Shortcut-driven presence reactions.
     /// Wear & presence is "active" when any of its reactions are configured: a wrist-on/off Shortcut,
-    /// or (macOS) the auto-lock toggle. Presentation-only — drives the card's accent state.
+    /// or (macOS) the auto-lock toggle. Presentation-only: drives the card's accent state.
     private var wearActive: Bool {
         let shortcuts = !behavior.wristOffShortcut.isEmpty || !behavior.wristOnShortcut.isEmpty
         #if os(macOS)
@@ -457,7 +457,7 @@ private struct BondStatePill: View {
 private struct Section2<Content: View>: View {
     let icon: String; let title: String; var blurb: String? = nil
     /// When this automation is enabled the card carries a brighter brand-green wash; otherwise a
-    /// faint one — so an active automation reads at a glance. Presentation-only.
+    /// faint one, so an active automation reads at a glance. Presentation-only.
     var active: Bool = false
     @ViewBuilder var content: () -> Content
     var body: some View {

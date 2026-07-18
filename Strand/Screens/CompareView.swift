@@ -7,9 +7,9 @@ import WhoopStore
 
 // MARK: - Compare
 //
-// The "overlay metrics & draw conclusions" screen. Pick 2–4 metrics from the
+// The "overlay metrics & draw conclusions" screen. Pick 2-4 metrics from the
 // catalog, choose a time window, and read them on a single normalized overlay
-// chart (each metric min–max scaled to 0–1 within the window so different units
+// chart (each metric min-max scaled to 0-1 within the window so different units
 // share an axis). Below, every pair of selected metrics gets a live Pearson-r
 // correlation readout with a plain-English conclusion. Pure read-side: each
 // metric loads from repo.resolvedSeries (freshest-wins across imported / NOOP-computed /
@@ -26,7 +26,7 @@ private let compareDayParser: DateFormatter = {
 
 private func parseCompareDay(_ day: String) -> Date? { compareDayParser.date(from: day) }
 
-// MARK: - Range control (shared spec — W / M / 3M / 6M / 1Y / ALL)
+// MARK: - Range control (shared spec: W / M / 3M / 6M / 1Y / ALL)
 
 /// The canonical Strand range window. `days == nil` means ALL of history.
 enum CompareRange: String, CaseIterable, Identifiable {
@@ -68,7 +68,7 @@ enum CompareRange: String, CaseIterable, Identifiable {
         }
     }
 
-    /// This range plus every LARGER range, ascending — the auto-expand search order
+    /// This range plus every LARGER range, ascending: the auto-expand search order
     /// when a selected window holds zero points for a series.
     var widening: [CompareRange] {
         let order: [CompareRange] = [.week, .month, .quarter, .half, .year, .all]
@@ -104,7 +104,7 @@ private struct CompareSeries: Identifiable {
         self.realMax = values.max() ?? 0
     }
 
-    /// Min–max normalize a value into 0…1 within this series' window. Flat series
+    /// Min-max normalize a value into 0...1 within this series' window. Flat series
     /// (max == min) collapse to the mid-line so they still render.
     func normalized(_ v: Double) -> Double {
         let lo = realMin, hi = realMax
@@ -118,8 +118,8 @@ private struct CompareSeries: Identifiable {
 struct CompareView: View {
     @EnvironmentObject var repo: Repository
 
-    // Effort display scale (#268) — routes the Effort metric's min/max + hover read-outs onto WHOOP's
-    // 0–21 axis; display-only, the normalized overlay shape is untouched. Every other metric is
+    // Effort display scale (#268): routes the Effort metric's min/max + hover read-outs onto WHOOP's
+    // 0-21 axis; display-only, the normalized overlay shape is untouched. Every other metric is
     // scale-agnostic (see MetricDescriptor.format).
     @AppStorage(UnitPrefs.effortScaleKey) private var effortScaleRaw = EffortScale.hundred.rawValue
     private var effortScale: EffortScale { UnitPrefs.resolveEffortScale(effortScaleRaw) }
@@ -145,7 +145,7 @@ struct CompareView: View {
 
     /// Cache of the last pairwise-correlation scan + the inputs it was computed for.
     /// The scan (alignByDay + Pearson over full windows) is expensive and was re-run on
-    /// every body evaluation — including hover/animation/HR ticks. We recompute it only
+    /// every body evaluation, including hover/animation/HR ticks. We recompute it only
     /// when the windowed series content actually changes (see `correlationKey`).
     @State private var pairCache: [PairResult] = []
     @State private var pairCacheKey: String = ""
@@ -156,7 +156,7 @@ struct CompareView: View {
 
     var body: some View {
         ScreenScaffold(title: "Compare", subtitle: "Overlay signals, draw conclusions.",
-                       // PERF (scroll): lazy column — byte-identical layout (LazyVStack == eager VStack
+                       // PERF (scroll): lazy column, byte-identical layout (LazyVStack == eager VStack
                        // alignment/spacing/header). The content is one inner eager VStack; no staggered
                        // reveals, and the only GeometryReaders are chart-local (.chartOverlay plot rects),
                        // so nothing depends on eager layout of the scroll column.
@@ -244,7 +244,7 @@ struct CompareView: View {
 
     /// How the overlay subtitle tells the user to read real (un-normalized) values.
     /// The chart axis is normalized, so the only readout of real numbers is the
-    /// crosshair tooltip — driven by pointer hover on macOS, by tap/drag on iOS.
+    /// crosshair tooltip, driven by pointer hover on macOS, by tap/drag on iOS.
     private var inspectHint: String {
         #if os(iOS)
         return String(localized: "tap or drag for real values")
@@ -406,7 +406,7 @@ struct CompareView: View {
                 // categorical series colour so the lines stay distinguishable against the wash.
                 tint: StrandPalette.accent
             ) {
-                // The overlay is min–max NORMALIZED 0–1, so the Effort scale never touches the line shape;
+                // The overlay is min-max NORMALIZED 0-1, so the Effort scale never touches the line shape;
                 // only the per-series hover read-outs convert (passed through to the tooltip). (#268)
                 OverlayChart(series: nonEmpty, effortScale: effortScale, height: NoopMetrics.chartHeight)
             } footer: {
@@ -419,8 +419,8 @@ struct CompareView: View {
         VStack(spacing: 0) {
             ForEach(Array(series.enumerated()), id: \.element.id) { idx, s in
                 HStack(spacing: 10) {
-                    // A small liquid vessel posed at this series' LATEST value within its own min–max
-                    // window (the same 0–1 position the overlay's "now" end-cap sits at) — the liquid
+                    // A small liquid vessel posed at this series' LATEST value within its own min-max
+                    // window (the same 0-1 position the overlay's "now" end-cap sits at), the liquid
                     // accent tying the legend to the real series. Static, decorative (the min/max text
                     // + colour swatch carry the meaning for VoiceOver).
                     LiquidVessel(value: s.rows.last.map { s.normalized($0.value) },
@@ -472,14 +472,14 @@ struct CompareView: View {
 
     /// Cached accessor used by the body. Returns the memoized scan when the inputs
     /// match `pairCacheKey`; otherwise computes once for THIS render (without mutating
-    /// state — that would be illegal mid-body) so the visible result is never stale by
+    /// state, that would be illegal mid-body) so the visible result is never stale by
     /// a frame. The matching `.onChange`/`.task` then persists the same result into
     /// `@State`, so subsequent renders (hover/animation/HR ticks) hit the cache.
     private func pairResults(_ series: [CompareSeries]) -> [PairResult] {
         correlationKey(series) == pairCacheKey ? pairCache : computePairResults(series)
     }
 
-    /// The actual (expensive) pairwise scan. Pure — no view state read/written.
+    /// The actual (expensive) pairwise scan. Pure: no view state read/written.
     private func computePairResults(_ series: [CompareSeries]) -> [PairResult] {
         var out: [PairResult] = []
         let s = series.filter { !$0.rows.isEmpty }
@@ -537,14 +537,14 @@ struct CompareView: View {
     private func pairCard(_ p: PairResult) -> some View {
         let tint = correlationColor(p.r)
         // Frosted card washed by the relationship's own colour (green positive / rose negative), with a
-        // TrendChip surfacing the signed direction at a glance — the Today delta idiom, applied to r.
+        // TrendChip surfacing the signed direction at a glance, the Today delta idiom, applied to r.
         return NoopCard(tint: tint) {
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 10) {
-                    // A small liquid vessel filled to the correlation STRENGTH (|r|, a neutral 0–1
-                    // magnitude — not a health value), tinted by the relationship's own colour. Static
+                    // A small liquid vessel filled to the correlation STRENGTH (|r|, a neutral 0-1
+                    // magnitude, not a health value), tinted by the relationship's own colour. Static
                     // (posed) so a page of pair cards costs one cached frame each, matching Today's small
-                    // vessels. Decorative — the r read-out + sentence carry the meaning for VoiceOver.
+                    // vessels. Decorative: the r read-out + sentence carry the meaning for VoiceOver.
                     LiquidVessel(value: min(abs(p.r), 1), tint: tint, animated: false)
                         .frame(width: 30, height: 30)
                         .accessibilityHidden(true)
@@ -568,7 +568,7 @@ struct CompareView: View {
                     .foregroundStyle(StrandPalette.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
 
-                // The strength magnitude drawn as a liquid tube — the horizontal progress idiom Today
+                // The strength magnitude drawn as a liquid tube, the horizontal progress idiom Today
                 // uses for its key-metric fills, here reading |r| from none (0) to a perfect link (1).
                 LiquidTube(frac: min(abs(p.r), 1), tint: tint, height: 8, animated: false)
                     .accessibilityHidden(true)
@@ -668,15 +668,15 @@ private struct FlowChips: View {
     }
 }
 
-// MARK: - Overlay chart (custom multi-line Swift Chart, normalized 0–1)
+// MARK: - Overlay chart (custom multi-line Swift Chart, normalized 0-1)
 
 /// Draws each series as its own colored line on a shared 0…1 normalized y-axis.
 /// Hovering reveals a crosshair plus a tooltip listing every series' REAL value on
 /// the nearest day.
 private struct OverlayChart: View {
     let series: [CompareSeries]
-    /// Effort display scale (#268) — passed through to the hover tooltip's real-value read-outs. The
-    /// plotted points stay min–max normalized 0–1, so the line shape is unaffected.
+    /// Effort display scale (#268): passed through to the hover tooltip's real-value read-outs. The
+    /// plotted points stay min-max normalized 0-1, so the line shape is unaffected.
     var effortScale: EffortScale = .hundred
     var height: CGFloat = 260
 
@@ -691,10 +691,10 @@ private struct OverlayChart: View {
     @State private var modelCacheKey: String = ""
 
     // A flat, plottable point: the series title (drives the categorical color
-    // scale), the date, and the min–max normalized y.
+    // scale), the date, and the min-max normalized y.
     private struct Plot: Identifiable {
         // Stable identity (one value per metric per day) so Chart can diff across renders instead
-        // of treating every point as new on each hover tick — was `UUID()`, which forced full rebuilds.
+        // of treating every point as new on each hover tick, was `UUID()`, which forced full rebuilds.
         var id: String { title + "@" + String(date.timeIntervalSince1970) }
         let title: String
         let date: Date
@@ -852,7 +852,7 @@ private struct OverlayChart: View {
         modelCache = Model(series: series)
     }
 
-    /// The series colour for a metric title — drives the matching "now" end-cap glow.
+    /// The series colour for a metric title, drives the matching "now" end-cap glow.
     private func colorFor(_ title: String) -> Color? {
         series.first(where: { $0.metric.title == title })?.color
     }
@@ -880,7 +880,7 @@ private struct OverlayChart: View {
                 .foregroundStyle(by: .value("Metric", p.title))
             }
         }
-        // Bevel "now" end-caps — a soft halo + bright core on each series' latest point, drawn on top.
+        // Bevel "now" end-caps: a soft halo + bright core on each series' latest point, drawn on top.
         .chartOverlay { proxy in
             GeometryReader { geo in
                 let plot = proxy.plotRectCompat(in: geo)
@@ -903,7 +903,7 @@ private struct OverlayChart: View {
         .chartForegroundStyleScale(range: series.map(\.color))
         .chartYScale(domain: 0...1)
         .chartYAxis {
-            // Normalized axis — label endpoints as low/high rather than raw numbers.
+            // Normalized axis: label endpoints as low/high rather than raw numbers.
             AxisMarks(position: .leading, values: [0.0, 0.5, 1.0]) { value in
                 AxisGridLine().foregroundStyle(StrandPalette.hairline.opacity(0.4))
                 AxisValueLabel {
@@ -1026,7 +1026,7 @@ private struct MultiTooltip: View {
     /// Real values on the hovered day keyed by series id, precomputed in the chart's
     /// model. Replaces a per-frame linear `rows` scan per series.
     let values: [String: Double]
-    /// Effort display scale (#268) — the per-series real value converts onto WHOOP's 0–21 axis when set.
+    /// Effort display scale (#268): the per-series real value converts onto WHOOP's 0-21 axis when set.
     var effortScale: EffortScale = .hundred
     let anchorX: CGFloat
     let container: CGSize

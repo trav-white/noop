@@ -79,10 +79,10 @@ fun CoachScreen(vm: CoachViewModel = viewModel()) {
     ScreenScaffold(
         title = "Coach",
         subtitle = "Ask about your recovery, strain, sleep and HRV, grounded in your own numbers.",
-        // LIQUID SKY BACKDROP (the pilot pattern — LiquidScreenSky.kt): the liquid sky sits behind the
-        // header and the cards float over the flat canvas below. Reuses the shared LiquidScreenSky() slot
-        // verbatim; when the day-cycle background is off, the scaffold paints the plain surface instead.
-        topBackground = if (showDayCycleBackground) { { LiquidScreenSky() } } else null,
+        // WHOOP SLATE BACKDROP: the flat WHOOP canvas gradient sits behind the header and the cards float
+        // over the flat canvas below. Reuses the shared WhoopScreenSky() slot verbatim; when the day-cycle
+        // background is off, the scaffold paints the plain surface instead.
+        topBackground = if (showDayCycleBackground) { { WhoopScreenSky() } } else null,
     ) {
         if (!configured) {
             CoachSetup(vm = vm)

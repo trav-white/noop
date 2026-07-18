@@ -209,7 +209,7 @@ struct InsightsView: View {
                        // alignment/spacing/header). The content is one inner eager VStack, so any nested
                        // staggered reveals are unchanged; this only defers building that stack on scroll-in.
                        lazy: true,
-                       // Liquid finish: the same full-bleed day-of-sky backdrop Today + the other liquid
+                       // WHOOP finish: the same full-bleed slate canvas backdrop Today + the other
                        // tabs carry, so Insights sits in one atmosphere ("the options change, not the page").
                        // Static + non-interactive; the cards below sit on the opaque canvas and stay legible.
                        topBackground: AnyView(CanvasBackground())) {
@@ -1037,12 +1037,14 @@ struct InsightsView: View {
         return NoopCard(tint: outcome.domain.color) {
             VStack(alignment: .leading, spacing: NoopMetrics.gap) {
 
-                // Header: behaviour name + significance pill. The old direction dot becomes a small liquid
-                // vessel filled to the effect magnitude (|Cohen's d|, capped where large is about 0.8+) in
+                // Header: behaviour name + significance pill. The old direction dot becomes a small ring
+                // dial filled to the effect magnitude (|Cohen's d|, capped where large is about 0.8+) in
                 // the sign-aware tint, the leading-gauge idiom Today uses, so the strength reads at a glance.
                 HStack(alignment: .center) {
                     HStack(spacing: 10) {
-                        LiquidVessel(value: min(1, abs(e.cohensD) / 0.8), tint: tintColor, animated: false)
+                        RingDial(value: min(1, abs(e.cohensD) / 0.8), display: "", label: "",
+                                 tint: tintColor, size: .mini)
+                            .scaleEffect(26 / 44.0)
                             .frame(width: 26, height: 26)
                             .accessibilityHidden(true)
                         Text(e.behavior)
@@ -1271,10 +1273,11 @@ struct InsightsView: View {
         let sentence = relationshipSentence(rel)
         return VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
-                // Liquid magnitude accent: a small filling vessel showing |r| in the correlation's
-                // strength colour, the same leading-gauge idiom Today's card rows + vitals use. Static
-                // (a small gauge doesn't need live slosh); decorative, the exact r + a11y read below.
-                LiquidVessel(value: min(1, abs(r)), tint: strength, animated: false)
+                // Magnitude accent: a small ring dial showing |r| in the correlation's strength colour,
+                // the same leading-gauge idiom Today's card rows + vitals use. Static (a small gauge
+                // doesn't need animation); decorative, the exact r + a11y read below.
+                RingDial(value: min(1, abs(r)), display: "", label: "", tint: strength, size: .mini)
+                    .scaleEffect(28 / 44.0)
                     .frame(width: 28, height: 28)
                     .accessibilityHidden(true)
                 Text(rel.title)

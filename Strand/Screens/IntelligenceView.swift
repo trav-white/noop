@@ -25,7 +25,7 @@ struct IntelligenceView: View {
         ScreenScaffold(title: "Intelligence",
                        subtitle: "NOOP scores your charge, effort and rest itself: on-device, no cloud.",
                        lazy: true,
-                       // Liquid finish: the same full-bleed day-of-sky backdrop Today + the other liquid
+                       // WHOOP finish: the same full-bleed slate canvas backdrop Today + the other
                        // tabs carry, so Intelligence sits in one atmosphere. Static + non-interactive; the
                        // frosted cards below sit on the opaque canvas and stay legible.
                        topBackground: AnyView(CanvasBackground())) {
@@ -133,21 +133,23 @@ struct IntelligenceView: View {
                                            plannedSleepHours: plannedHours)
     }
 
-    /// The forecast hero — tomorrow-morning Charge as the canonical liquid `LiquidVessel` gauge in the
-    /// Charge tint, with the estimate counting up over it (the SAME hero language Sleep + Today use), on a
-    /// frosted Charge-tinted card, with the plain-English estimate read-out beneath. A real forecast number,
-    /// so it earns a liquid gauge. The number, ± band and copy are unchanged.
+    /// The forecast hero: tomorrow-morning Charge as a `RingDial` gauge in the Charge tint, with the
+    /// estimate counting up over it (the SAME hero language Sleep + Today use), on a frosted
+    /// Charge-tinted card, with the plain-English estimate read-out beneath. A real forecast number,
+    /// so it earns a ring gauge. The number, ± band and copy are unchanged.
     private func forecastCard(_ f: RecoveryForecast) -> some View {
         let frac = min(max(f.charge / 100.0, 0), 1)
         return VStack(alignment: .leading, spacing: NoopMetrics.gap) {
             SectionHeader("Tomorrow's Charge", overline: "Evening forecast", trailing: String(localized: "Estimate"))
             NoopCard(padding: 20, tint: StrandPalette.chargeColor) {
                 VStack(spacing: 14) {
-                    // The signature liquid gauge: a filling vessel tinted to the forecast Charge, with the
-                    // 0–100 estimate counting up over it and the ± band + state word beneath (Sleep's
-                    // restHero idiom). Live so the fill actually flows on the hero surface.
+                    // The ring gauge: a filling arc tinted to the forecast Charge, with the 0 to 100
+                    // estimate counting up over it and the plus/minus band + state word beneath (Sleep's
+                    // restHero idiom). Animated so the fill actually draws in on the hero surface.
                     ZStack {
-                        LiquidVessel(value: frac, tint: StrandPalette.recoveryColor(f.charge), animated: true)
+                        RingDial(value: frac, display: "", label: "",
+                                 tint: StrandPalette.recoveryColor(f.charge), size: .mini)
+                            .scaleEffect(184 / 44.0)
                             .frame(width: 184, height: 184)
                         VStack(spacing: 0) {
                             CountUpText(
@@ -161,7 +163,7 @@ struct IntelligenceView: View {
                                 .font(StrandFont.captionNumber)
                                 .foregroundStyle(StrandPalette.textSecondary)
                         }
-                        .allowsHitTesting(false)   // taps fall through to the vessel → splash
+                        .allowsHitTesting(false)   // decorative overlay, non-interactive
                     }
                     .padding(.top, 4)
                     .padding(.bottom, 6)
@@ -244,12 +246,14 @@ struct IntelligenceView: View {
         NoopCard(padding: 18, tint: StrandPalette.chargeColor) {
             VStack(alignment: .leading, spacing: NoopMetrics.cardInnerSpacing) {
                 HStack {
-                    // A small liquid vessel filled to the day's Charge (a real 0–100 metric, so it earns a
-                    // gauge) leads the row — the same leading-gauge idiom Today + Insights use. Static
+                    // A small ring dial filled to the day's Charge (a real 0 to 100 metric, so it earns a
+                    // gauge) leads the row: the same leading-gauge idiom Today + Insights use. Static
                     // (posed) so each day row costs a single cached frame, not a live canvas. Only shown
                     // once the night has a Charge to fill it; a calibrating night leads with the date alone.
                     if let r = d.recovery {
-                        LiquidVessel(value: min(1, max(0, r / 100)), tint: StrandPalette.recoveryColor(r), animated: false)
+                        RingDial(value: min(1, max(0, r / 100)), display: "", label: "",
+                                 tint: StrandPalette.recoveryColor(r), size: .mini)
+                            .scaleEffect(24 / 44.0)
                             .frame(width: 24, height: 24)
                             .accessibilityHidden(true)
                     }

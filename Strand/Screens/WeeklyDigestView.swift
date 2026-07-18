@@ -145,7 +145,7 @@ struct WeeklyDigestContent: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: NoopMetrics.gap) {
-            // Headline over a subtle scenic backdrop (Charge-tinted starfield).
+            // Headline over a subtle scenic backdrop (Charge-tinted radial gradient).
             header
 
             // The three headline scores as frosted, domain-tinted summary cards — each a

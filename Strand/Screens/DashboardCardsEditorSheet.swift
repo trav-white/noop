@@ -6,7 +6,7 @@ import StrandDesign
 // A Today-local sheet (no new nav destination) for choosing WHICH "Your cards" dashboard cards show and in
 // what order. Display-only: it edits the persisted `today.dashboardCards` selection string, never any
 // stored metric. Enabled cards render in the list's order; a toggle hides/shows a card and a drag handle
-// (List .onMove under EditMode) reorders it — the WHOOP "My Dashboard" customise flow.
+// (List .onMove under EditMode) reorders it, the WHOOP "My Dashboard" customise flow.
 //
 // The enabled cards come first in their saved order, then the disabled remainder in canonical order, so
 // toggling one on drops it at the end of the visible set and the editor always lists every card exactly
@@ -81,18 +81,18 @@ struct DashboardCardsEditorSheet: View {
                     Button("Done") { commit(); dismiss() }
                         .fontWeight(.semibold)
                         .foregroundStyle(StrandPalette.accent)
-                        // At least one card must stay visible — an empty dashboard reads as a bug.
+                        // At least one card must stay visible: an empty dashboard reads as a bug.
                         .disabled(!items.contains { $0.enabled })
                         .accessibilityLabel("Done customising dashboard")
                 }
             }
-            // Persist on EVERY change (toggle / reorder / reset), not only on Done — so closing the sheet by
+            // Persist on EVERY change (toggle / reorder / reset), not only on Done, so closing the sheet by
             // swipe still keeps the edit, mirroring WHOOP's live "My Dashboard" customise. Done just dismisses.
             .onChange(of: items) { _ in commit() }
         }
         .tint(StrandPalette.accent)
         #if os(macOS)
-        // macOS sheets don't auto-size to content the way iOS does — give it a usable frame.
+        // macOS sheets don't auto-size to content the way iOS does, give it a usable frame.
         .frame(width: 420, height: 540)
         #endif
     }
@@ -104,7 +104,7 @@ struct DashboardCardsEditorSheet: View {
         let card = item.wrappedValue.card
         let enabled = item.wrappedValue.enabled
         HStack(spacing: 12) {
-            // The card's own thin-line icon, flat WHOOP styling — accent when on, grey when off.
+            // The card's own thin-line icon, flat WHOOP styling: accent when on, grey when off.
             RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .fill((enabled ? StrandPalette.accent : StrandPalette.textTertiary).opacity(0.14))
                 .frame(width: 30, height: 30)

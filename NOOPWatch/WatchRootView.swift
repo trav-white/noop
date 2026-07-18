@@ -1,7 +1,7 @@
 import SwiftUI
 import StrandDesign
 
-// MARK: - WatchRootView — the swipeable page deck
+// MARK: - WatchRootView , the swipeable page deck
 //
 // The watch app is a deck of full-screen pages you swipe (or turn the Digital Crown) between, each sized to
 // exactly ONE screen so nothing ever needs scrolling: the glance (today's synced scores) first, then the

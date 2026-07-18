@@ -78,7 +78,7 @@ import kotlinx.coroutines.launch
 
 // MARK: - Liquid hero tokens (the liquid Devices restyle)
 //
-// The ACTIVE device card is the screen's hero: it floats over the day-of-sky as a translucent near-black
+// The ACTIVE device card is the screen's hero: it floats over the WHOOP slate backdrop as a translucent near-black
 // frosted card so the strap name + the live battery tube stay crisp on it. Same tokens as the liquid Today
 // hero (heroFill = rgba(13,14,20,.80), radius 26, white@0.11 hairline). Those Today constants are private to
 // TodayScreen, so the identical values are declared here. Mirrors the iOS liquid heroCard.
@@ -131,11 +131,11 @@ fun DevicesScreen(
     LazyScreenScaffold(
         title = "Devices",
         subtitle = "Pair and manage the bands NOOP reads from.",
-        // LIQUID SKY BACKDROP (the pilot pattern — LiquidScreenSky.kt): the time-of-day liquid sky settles
-        // into the flat canvas behind the top of the screen so the frosted device cards float over it. The
-        // static sky (LiquidSkyStatic inside the helper) carries no per-frame cost on this scrolling list.
-        // Gated on the same "Day-cycle background" setting as Today; off passes null for the plain canvas.
-        topBackground = if (showDayCycleBackground) { { LiquidScreenSky() } } else null,
+        // WHOOP SLATE BACKDROP: the flat WHOOP canvas gradient (WhoopScreenSky) settles into the flat canvas
+        // behind the top of the screen so the frosted device cards float over it. Static, no per-frame cost
+        // on this scrolling list. Gated on the same "Day-cycle background" setting as Today; off passes null
+        // for the plain canvas.
+        topBackground = if (showDayCycleBackground) { { WhoopScreenSky() } } else null,
     ) {
         if (devices == null) {
             // The registry resolves a beat after launch. Show a calm pending note in that brief window.
@@ -322,7 +322,7 @@ private fun DeviceCard(
         ) { menuOpen = true }
 
     // The ACTIVE device is the hero: the liquid translucent-black frosted card (rgba(13,14,20,.80), radius
-    // 26, white@0.11 hairline) so it floats over the day-of-sky, matching the liquid Today hero. Every other
+    // 26, white@0.11 hairline) so it floats over the WHOOP slate backdrop, matching the liquid Today hero. Every other
     // card (paired / removed) keeps the crisp neutral NoopCard frosted surface.
     val body: @Composable () -> Unit = {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {

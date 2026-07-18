@@ -2,17 +2,17 @@ import Foundation
 
 /// Small, Codable glance snapshot shared between the iOS app and its widget/Live-Activity extension
 /// via an App Group. The app writes it; the widget reads it. Keeping it tiny avoids any cross-process
-/// database access — the widget never opens SQLite.
+/// database access , the widget never opens SQLite.
 public struct WidgetSnapshot: Codable, Equatable {
-    public var recovery: Int?    // Charge (0–100)
+    public var recovery: Int?    // Charge (0 to 100)
     public var bpm: Int?
     public var batteryPct: Int?
     public var bonded: Bool
     public var updated: Date
     // Richer glance fields (#446). All OPTIONAL with nil defaults so a snapshot written by an OLDER app
-    // build (which never encoded these keys) still decodes — Codable fills a missing optional with nil.
-    public var effort: Int?      // Effort / strain on NOOP's 0–100 axis
-    public var rest: Int?        // Rest (sleep_performance) score, 0–100
+    // build (which never encoded these keys) still decodes , Codable fills a missing optional with nil.
+    public var effort: Int?      // Effort / strain on NOOP's 0 to 100 axis
+    public var rest: Int?        // Rest (sleep_performance) score, 0 to 100
     public var hrv: Int?         // HRV (ms), whole-number for the glance
     public var restingHr: Int?   // Resting heart rate (bpm)
 
@@ -34,7 +34,7 @@ public struct WidgetSnapshot: Codable, Equatable {
     /// one place rather than being duplicated here. Must match the `com.apple.security.application-groups`
     /// entitlement on both targets (which also reads `$(APP_GROUP_ID)`). If the entitlement is missing on
     /// either side, `UserDefaults(suiteName:)` returns nil and every consumer (PendingIntents,
-    /// WidgetSnapshot.publish, Live Activity) silently no-ops — see `assertGroupProvisioned` for the
+    /// WidgetSnapshot.publish, Live Activity) silently no-ops , see `assertGroupProvisioned` for the
     /// debug-time canary. The fallback is the canonical upstream group and only applies if the Info.plist
     /// key is somehow absent (each process reads its OWN bundle, so the app and the widget extension
     /// each carry the key in their generated Info.plist).
@@ -46,10 +46,10 @@ public struct WidgetSnapshot: Codable, Equatable {
 
     /// Debug-only canary: trips on the first run after a misprovisioning so the silent no-op gets
     /// caught immediately rather than masquerading as "widget shows nothing yet." Release builds do
-    /// nothing — App Store apps can't crash on a missing entitlement.
+    /// nothing , App Store apps can't crash on a missing entitlement.
     public static func assertGroupProvisioned() {
         assert(UserDefaults(suiteName: suiteName) != nil,
-               "App Group '\(suiteName)' not provisioned on this target — check the entitlement.")
+               "App Group '\(suiteName)' not provisioned on this target , check the entitlement.")
     }
 
     public static var placeholder: WidgetSnapshot {

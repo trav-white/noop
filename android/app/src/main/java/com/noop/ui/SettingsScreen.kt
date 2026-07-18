@@ -553,12 +553,12 @@ fun SettingsScreen(vm: AppViewModel, onOpenTestCentre: () -> Unit = {}) {
     ScreenScaffold(
         title = "Settings",
         subtitle = "Your numbers, your strap, and how NOOP works. All on this phone.",
-        // LIQUID SKY BACKDROP (the pilot pattern — LiquidScreenSky.kt): the static time-of-day sky settles
-        // into the theme canvas behind the top of the list, exactly like the liquid Today. This is a long,
-        // scroll-heavy list with NO hero gauge, so the liquid finish here is just the sky + liquidPress on
-        // the tappable rows. Gated on the same day-cycle background pref Today reads, so turning that off
-        // returns Settings to the plain dark canvas too.
-        topBackground = if (showDayCycleBackground) { { LiquidScreenSky() } } else null,
+        // WHOOP SLATE BACKDROP: the flat WHOOP canvas gradient (WhoopScreenSky) settles into the theme
+        // canvas behind the top of the list, exactly like Today. This is a long, scroll-heavy list with NO
+        // hero gauge, so the finish here is just the slate backdrop plus liquidPress on the tappable rows.
+        // Gated on the same day-cycle background pref Today reads, so turning that off returns Settings to
+        // the plain dark canvas too.
+        topBackground = if (showDayCycleBackground) { { WhoopScreenSky() } } else null,
     ) {
         // Read the revision counter so every profile write recomposes this subtree
         // (SharedPreferences is not observable; `mutate` bumps `rev` after each write).

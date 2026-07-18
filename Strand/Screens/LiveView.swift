@@ -7,11 +7,11 @@ import StrandAnalytics
 import WhoopProtocol
 import WhoopStore
 
-/// Live — the connected strap in real time, in the liquid finish. Built on the shared design system
-/// (ScreenScaffold chrome + day-of-sky backdrop, StrandPalette, StrandFont) and the liquid vocabulary
-/// (LiquidVessel for the live BPM gauge, LiquidThread for the live HR trace, LiquidTube for the effort
-/// bars, frosted `card {}` surfaces, LiquidPressStyle on tappable rows) so it lines up with the Today
-/// screen instead of the old flat-card layout.
+/// Live, the connected strap in real time, in the WHOOP finish. Built on the shared design system
+/// (ScreenScaffold chrome + slate canvas backdrop, StrandPalette, StrandFont) with a RingDial for the
+/// live BPM gauge, a LiquidTube for the live HR trace and the effort bars, frosted `card {}` surfaces,
+/// and LiquidPressStyle on tappable rows, so it lines up with the Today screen instead of the old
+/// flat-card layout.
 ///
 /// LiveState (which publishes at ~1 Hz while a strap streams) is observed ONLY in leaf views
 /// (`LiveHeartReadout`, `LivePhysiology`, `LiveHeaderStats`, `LiveSignalTrustRail`, `ActiveWorkoutLive`,
@@ -230,9 +230,9 @@ struct LiveView: View {
         .overlay(Capsule().strokeBorder(StrandPalette.hairline, lineWidth: 1))
     }
 
-    // MARK: - Body console (live BPM vessel + live physiology)
+    // MARK: - Body console (live BPM ring dial + live physiology)
 
-    /// The console's centrepiece: a live BPM LiquidVessel beside a live-physiology stack (R-R tube,
+    /// The console's centrepiece: a live BPM RingDial beside a live-physiology stack (R-R tube,
     /// rolling RMSSD, last frame/event). Side-by-side on a wide window (Mac), stacked on a narrow one
     /// (iPhone) via ViewThatFits. Both halves are leaf views that own LiveState so the 1 Hz HR / R-R
     /// notifies re-render only them, not the whole console. The card carries the Effort tint world.
@@ -708,9 +708,9 @@ private struct LiveHeaderStats: View {
     private var lastSyncLabel: String { LiveSyncFormat.lastSyncLabel(live.lastSyncedAt) }
 }
 
-/// The console centrepiece's HR half: a live BPM LiquidVessel (fills to the HR-zone fraction) with the
+/// The console centrepiece's HR half: a live BPM RingDial (fills to the HR-zone fraction) with the
 /// count-up numeral over it, the zone label, and the trust caption. Owns LiveState so the ~1 Hz HR notify
-/// re-renders only this leaf. The vessel replaces the old flat pulse-ring, the count-up number replaces
+/// re-renders only this leaf. The ring replaces the old flat pulse-ring, the count-up number replaces
 /// the CountUpText numeral.
 private struct LiveHeartReadout: View {
     @EnvironmentObject private var model: AppModel
@@ -749,8 +749,9 @@ private struct LiveHeartReadout: View {
                 .tracking(StrandFont.overlineTracking)
                 .foregroundStyle(StrandPalette.textSecondary)
             ZStack {
-                // The live BPM gauge: a liquid vessel that fills to the HR-zone fraction and sloshes.
-                LiquidVessel(value: hrFrac, tint: tint, animated: displayHR != nil)
+                // The live BPM gauge: a ring dial that fills to the HR-zone fraction.
+                RingDial(value: hrFrac ?? 0, display: "", label: "", tint: tint, size: .mini)
+                    .scaleEffect(210 / 44.0)
                     .frame(width: 210, height: 210)
                 VStack(spacing: 0) {
                     // The big focal HR numeral counts up to the live value (the hero number); a crisp
@@ -775,7 +776,7 @@ private struct LiveHeartReadout: View {
                             .padding(.top, NoopMetrics.space1)
                     }
                 }
-                .allowsHitTesting(false)   // taps fall through to the vessel → splash
+                .allowsHitTesting(false)   // decorative overlay, non-interactive
             }
             .frame(width: 210, height: 210)
             .accessibilityElement(children: .ignore)
@@ -1145,7 +1146,7 @@ private enum LiveSyncFormat {
 
 // MARK: - Signal Trust tile
 
-/// One card in the Signal Trust rail: a small liquid vessel gauge + ALL-CAPS title, a coloured value,
+/// One card in the Signal Trust rail: a small ring dial gauge + ALL-CAPS title, a coloured value,
 /// and a one-line detail. The whole card is combined into a single accessibility element so VoiceOver
 /// reads "Heart rate: 62 bpm. Streaming now." rather than three disjoint fragments.
 private struct SignalTrustTile: View {
@@ -1155,7 +1156,7 @@ private struct SignalTrustTile: View {
         let detail: String
         let icon: String
         let tint: Color
-        /// 0...1 fill for the tile's liquid gauge (nil = empty / no reading).
+        /// 0...1 fill for the tile's ring gauge (nil = empty / no reading).
         let frac: Double?
         var id: String { title }
     }
@@ -1165,8 +1166,9 @@ private struct SignalTrustTile: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
-                // The signal's liquid gauge — a static-posed small vessel (no per-frame cost).
-                LiquidVessel(value: tile.frac, tint: tile.tint, animated: false)
+                // The signal's ring gauge: a static-posed small dial (no per-frame cost).
+                RingDial(value: tile.frac ?? 0, display: "", label: "", tint: tile.tint, size: .mini)
+                    .scaleEffect(22 / 44.0)
                     .frame(width: 22, height: 22)
                     .accessibilityHidden(true)
                 Text(tile.title.uppercased())

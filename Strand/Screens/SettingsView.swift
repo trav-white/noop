@@ -168,9 +168,9 @@ struct SettingsView: View {
     var body: some View {
         ScreenScaffold(title: "Settings",
                        subtitle: "Your numbers, your strap, and how NOOP works. All on \(Platform.deviceNounPhrase).",
-                       // The day-of-sky liquid backdrop, matching Today / Health / Sleep / Trends / Devices:
-                       // a fixed, full-bleed time-of-day sky behind the scroll content (it does not scroll).
-                       // Settings' own frosted cards sit on the dark canvas below the sky band, unchanged.
+                       // The WHOOP slate canvas backdrop, matching Today / Health / Sleep / Trends / Devices:
+                       // a fixed, full-bleed dark gradient behind the scroll content (it does not scroll).
+                       // Settings' own frosted cards sit on the dark canvas below, unchanged.
                        topBackground: AnyView(CanvasBackground())) {
             VStack(alignment: .leading, spacing: NoopMetrics.sectionSpacing) {
                 // Everyday sections stay expanded (S3): the ones a first-run user actually needs.
@@ -1045,7 +1045,7 @@ struct SettingsView: View {
         SettingsSection(
             icon: "drop.fill",
             title: "Experimental · Liquid Today",
-            blurb: "A redesigned Today screen in the new liquid language: the scores as living liquid, a time-of-day sky, and a calmer layout. Same numbers, new look."
+            blurb: "A redesigned Today screen in the new liquid language: the scores as living liquid, and a calmer layout. Same numbers, new look."
         ) {
             VStack(alignment: .leading, spacing: NoopMetrics.rowSpacing) {
                 Toggle(isOn: $liquidTodayEnabled) {

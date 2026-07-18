@@ -4,7 +4,7 @@ import WatchConnectivity
 import WidgetKit
 import StrandDesign
 
-// MARK: - WatchScoreStore — the watch side of the phone->watch bridge
+// MARK: - WatchScoreStore , the watch side of the phone->watch bridge
 //
 // Activates WCSession on the watch, receives the latest score snapshot the phone pushed via
 // `updateApplicationContext` (latest-state semantics, no queue buildup), persists it into the shared

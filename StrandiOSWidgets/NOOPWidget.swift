@@ -25,7 +25,7 @@ struct NOOPProvider: TimelineProvider {
     }
 }
 
-/// The glanceable widget — the iOS analogue of the macOS menu-bar extra. Recovery, live/last HR,
+/// The glanceable widget, the iOS analogue of the macOS menu-bar extra. Recovery, live/last HR,
 /// and strap battery.
 struct NOOPWidgetView: View {
     @Environment(\.widgetFamily) private var family
@@ -53,8 +53,8 @@ struct NOOPWidgetView: View {
         return r >= 67 ? StrandPalette.statusPositive : r >= 34 ? StrandPalette.statusWarning : StrandPalette.statusCritical
     }
 
-    /// Effort is on the 0–100 axis (`StrainScorer.maxStrain == 100`), so the fraction is just the value
-    /// over 100 — the same input `effortTint` takes on the Today Effort tile.
+    /// Effort is on the 0 to 100 axis (`StrainScorer.maxStrain == 100`), so the fraction is just the value
+    /// over 100: the same input `effortTint` takes on the Today Effort tile.
     private var effortColor: Color {
         guard let e = snap.effort else { return StrandPalette.textTertiary }
         return StrandPalette.effortTint(fraction: Double(e) / 100)
@@ -98,7 +98,7 @@ struct NOOPWidgetView: View {
     private var home: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("NOOP").font(.system(size: 13, weight: .bold))
+                Text("NOOP").font(StrandFont.text(13, weight: .bold))
                     .foregroundStyle(StrandPalette.textSecondary)
                 Spacer()
                 Circle().fill(snap.bonded ? StrandPalette.statusPositive : StrandPalette.statusCritical)
@@ -107,7 +107,7 @@ struct NOOPWidgetView: View {
             Spacer(minLength: 0)
             HStack(alignment: .firstTextBaseline, spacing: 4) {
                 Text(snap.recovery.map(String.init) ?? "–")
-                    .font(.system(size: 40, weight: .bold, design: .rounded))
+                    .font(StrandFont.number(40, weight: .bold))
                     .foregroundStyle(recoveryColor)
                 Text("%").font(.headline).foregroundStyle(StrandPalette.textTertiary)
             }
@@ -129,11 +129,11 @@ struct NOOPWidgetView: View {
     }
 
     /// The rich `systemLarge` layout (#446): the Charge headline plus a stat grid of Effort, Rest, HRV,
-    /// Resting HR, live HR and strap battery — the "show me more" the issue asked for.
+    /// Resting HR, live HR and strap battery: the "show me more" the issue asked for.
     private var large: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("NOOP").font(.system(size: 13, weight: .bold))
+                Text("NOOP").font(StrandFont.text(13, weight: .bold))
                     .foregroundStyle(StrandPalette.textSecondary)
                 Spacer()
                 Circle().fill(snap.bonded ? StrandPalette.statusPositive : StrandPalette.statusCritical)
@@ -141,7 +141,7 @@ struct NOOPWidgetView: View {
             }
             HStack(alignment: .firstTextBaseline, spacing: 4) {
                 Text(snap.recovery.map(String.init) ?? "–")
-                    .font(.system(size: 48, weight: .bold, design: .rounded))
+                    .font(StrandFont.number(48, weight: .bold))
                     .foregroundStyle(recoveryColor)
                 Text("%").font(.title3).foregroundStyle(StrandPalette.textTertiary)
                 Text("Charge").font(.subheadline).foregroundStyle(StrandPalette.textTertiary)
@@ -165,13 +165,13 @@ struct NOOPWidgetView: View {
         .padding(16)
     }
 
-    /// One labelled stat in the large grid — value over a caption, equal-width so the three columns align.
+    /// One labelled stat in the large grid: value over a caption, equal-width so the three columns align.
     private func statCell(_ label: String, value: String?, unit: String? = nil,
                           tint: Color = StrandPalette.textPrimary) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text(value ?? "–")
-                    .font(.system(size: 20, weight: .semibold, design: .rounded))
+                    .font(StrandFont.number(20, weight: .semibold))
                     .foregroundStyle(value == nil ? StrandPalette.textTertiary : tint)
                 if let unit, value != nil {
                     Text(unit).font(.caption2).foregroundStyle(StrandPalette.textTertiary)

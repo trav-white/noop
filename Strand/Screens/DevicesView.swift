@@ -10,13 +10,13 @@ import OuraProtocol
 // device; generic heart-rate straps (Polar / Wahoo / Coospo / Garmin HRM …) are an early, in-development
 // addition. The screen is a thin UI over `DeviceRegistry` (the Phase 1A/1B data layer): every mutation
 // goes through a registry op, and the `SourceCoordinator` (already wired in AppModel) reacts to the
-// active-device change — so this view never touches BLEManager or the WHOOP path directly.
+// active-device change, so this view never touches BLEManager or the WHOOP path directly.
 struct DevicesView: View {
     @EnvironmentObject var model: AppModel
     // PERF: this OUTER view does NOT observe `LiveState`. It only branches on `model.deviceRegistry`
     // becoming non-nil and hands off to `DevicesContent`, which owns its own `@EnvironmentObject live`
     // (the live battery / "Active · Live" badge live there). Observing `live` here would re-render the
-    // whole screen on every ~1 Hz strap tick for no visible change — `live` is still in the environment
+    // whole screen on every ~1 Hz strap tick for no visible change; `live` is still in the environment
     // for `DevicesContent` and the Add-device wizard, so nothing downstream loses its live readout.
 
     var body: some View {
@@ -42,7 +42,7 @@ struct DevicesView: View {
 // MARK: - Content (registry resolved)
 
 /// The screen body once `DeviceRegistry` exists. Split out so it can observe the registry's
-/// `@Published devices` / `activeDeviceId` directly — the parent only observes `model.deviceRegistry`
+/// `@Published devices` / `activeDeviceId` directly; the parent only observes `model.deviceRegistry`
 /// becoming non-nil.
 private struct DevicesContent: View {
     @ObservedObject var registry: DeviceRegistry
@@ -113,7 +113,7 @@ private struct DevicesContent: View {
 
             whoopFirstFooter
         }
-        // Add a device — guided, branching wizard (asks the device TYPE first, then runs the right
+        // Add a device: guided, branching wizard (asks the device TYPE first, then runs the right
         // scan/register path: WHOOP present-scan for WHOOP families, StandardHRSource for HR straps).
         .sheet(isPresented: $showAddWizard) {
             AddDeviceWizard(live: live) { showAddWizard = false }
@@ -246,12 +246,12 @@ private struct DevicesContent: View {
         registry.devices.first(where: { $0.status == .active })?.displayName ?? String(localized: "Your current strap")
     }
 
-    /// Archive the device, then — if it was the active one and other non-archived devices remain —
+    /// Archive the device, then (if it was the active one and other non-archived devices remain)
     /// prompt for a new active device. The active row is demoted to `.paired` by the registry's reload,
     /// so the dialog's choices come from the still-paired devices.
     private func confirmRemove(_ device: PairedDevice) {
         let wasActive = device.status == .active
-        // #78: actually RELEASE the BLE link, not just archive the registry row — otherwise NOOP keeps
+        // #78: actually RELEASE the BLE link, not just archive the registry row, otherwise NOOP keeps
         // re-grabbing the strap (reconnect timer + targeted-connect pin + iOS state restoration), holding
         // it connected so it can never enter pairing mode to be re-paired.
         model.ble.forgetDevice(device.peripheralId)
@@ -274,7 +274,7 @@ private struct DeviceCard: View {
     let device: PairedDevice
     let isActive: Bool
     let isLiveConnected: Bool
-    /// The active+connected device's live battery percent (0–100), surfaced on the card the same way
+    /// The active+connected device's live battery percent (0-100), surfaced on the card the same way
     /// for WHOOP, a generic strap, or an FTMS machine. nil when not the active/connected device or
     /// the source hasn't reported a battery (e.g. a strap/machine without the 0x180F service).
     var liveBatteryPct: Int? = nil
@@ -332,11 +332,11 @@ private struct DeviceCard: View {
                     ouraLocalStateNote
                 }
 
-                // What this device CAPTURES — honest, per-model (not the generic stored set, which would
+                // What this device CAPTURES, honest, per-model (not the generic stored set, which would
                 // mislabel e.g. a "Blood oxygen" chip when no SpO₂ % ever comes off the strap).
                 capabilityRow(symbol: "waveform.path.ecg", text: profile.captures,
                               tint: StrandPalette.textSecondary)
-                // What NOOP USES it for — the scores/screens this device drives.
+                // What NOOP USES it for, the scores/screens this device drives.
                 capabilityRow(symbol: "bolt.fill", text: profile.powers,
                               tint: StrandPalette.textSecondary)
                 // Honest footnote: the "*" estimates + the SpO₂/steps caveats.
@@ -348,7 +348,7 @@ private struct DeviceCard: View {
                 }
 
                 // Live battery for the active+connected device, shown as a liquid tube that fills to the
-                // charge — same surface for WHOOP / strap / FTMS. The tube reads the charge band's colour.
+                // charge, same surface for WHOOP / strap / FTMS. The tube reads the charge band's colour.
                 if let pct = liveBatteryPct {
                     batteryTube(pct)
                 }
@@ -439,7 +439,7 @@ private struct DeviceCard: View {
     }
 
     /// The live battery as a liquid tube (fills to the charge, coloured by band) with a trailing percent.
-    /// Static-posed so it costs nothing per frame — one of many small liquid elements on the screen.
+    /// Static-posed so it costs nothing per frame, one of many small liquid elements on the screen.
     private func batteryTube(_ pct: Int) -> some View {
         HStack(spacing: 10) {
             Image(systemName: batterySymbol(pct))
@@ -574,12 +574,12 @@ private struct DeviceCard: View {
 
 // MARK: - Capability profile
 
-/// Honest, per-model summary of what a device captures and what NOOP uses it for — shown on its card.
+/// Honest, per-model summary of what a device captures and what NOOP uses it for, shown on its card.
 ///
 /// Derived from brand/model/sourceKind, NOT from the stored capability `Set`. The stored set is generic
 /// across WHOOP models (it would render an identical "Heart rate · HRV · Blood oxygen · Skin temp · …"
 /// line for a 4.0 and a 5/MG alike) and it mislabels: no SpO₂ **percentage** ever comes off any WHOOP
-/// strap (raw red/IR only — a real % exists only from a WHOOP CSV / Apple Health import), skin temp is a
+/// strap (raw red/IR only; a real % exists only from a WHOOP CSV / Apple Health import), skin temp is a
 /// nightly ±°C sleep deviation rather than a live reading, steps are 5/MG-only and a raw motion count,
 /// and Charge/Effort/Rest are NOOP-derived scores. Verdicts are source-verified against the decode +
 /// scoring paths (the device-capability audit). `*` in a label = an on-device estimate, not a raw sensor.
@@ -591,7 +591,7 @@ struct DeviceCapabilityProfile {
 
     static func make(for d: PairedDevice) -> DeviceCapabilityProfile {
         // FTMS gym machine: a live machine + (when reported) HR session, recorded via the existing
-        // live-workout path. Honest — we surface the machine's metrics + HR live; the session is
+        // live-workout path. Honest: we surface the machine's metrics + HR live; the session is
         // Effort-scored only when the machine actually reports heart rate.
         if d.sourceKind == .ftms {
             return DeviceCapabilityProfile(
@@ -659,7 +659,7 @@ struct DeviceCapabilityProfile {
         }
         let whoopPowers = String(localized: "Powers Charge, Effort, Rest, Sleep + Health Monitor")
         let model = d.model.lowercased()
-        // WHOOP 5.0 / MG — adds a (raw) step count the 4.0 can't read over BLE.
+        // WHOOP 5.0 / MG: adds a (raw) step count the 4.0 can't read over BLE.
         if model.contains("5") || model.contains("mg") {
             return DeviceCapabilityProfile(
                 displayModel: "WHOOP 5.0 / MG",
@@ -667,7 +667,7 @@ struct DeviceCapabilityProfile {
                 powers: whoopPowers,
                 footnote: String(localized: "* on-device estimate: skin temp is a nightly ±°C deviation, steps are a raw motion count (#78). No SpO₂ % off the strap; import a WHOOP CSV for a real %."))
         }
-        // WHOOP 4.0 — NOOP's primary band; no steps over BLE.
+        // WHOOP 4.0: NOOP's primary band; no steps over BLE.
         if model.contains("4") {
             return DeviceCapabilityProfile(
                 displayModel: "WHOOP 4.0",
@@ -675,7 +675,7 @@ struct DeviceCapabilityProfile {
                 powers: whoopPowers,
                 footnote: String(localized: "* on-device estimate: skin temp is a nightly ±°C deviation (firmware-dependent); no steps over BLE on a 4.0. No SpO₂ % off the strap; import a WHOOP CSV for a real %."))
         }
-        // Legacy / unknown WHOOP (the seeded device, model just "WHOOP") — show only the common-to-all set.
+        // Legacy / unknown WHOOP (the seeded device, model just "WHOOP"), show only the common-to-all set.
         return DeviceCapabilityProfile(
             displayModel: "WHOOP",
             captures: String(localized: "Heart rate · HRV · Skin temp* · Resp rate* · Sleep · Strain · Battery"),
@@ -687,7 +687,7 @@ struct DeviceCapabilityProfile {
 // MARK: - Signal indicator
 
 /// A four-bar Wi-Fi-style signal indicator derived from RSSI. RSSI is negative dBm: closer to 0 is
-/// stronger. Buckets are coarse on purpose — a precise dBm readout would be noise to the user.
+/// stronger. Buckets are coarse on purpose: a precise dBm readout would be noise to the user.
 /// Internal (not private) so the Add-a-device wizard reuses the same indicator.
 struct SignalBars: View {
     let rssi: Int

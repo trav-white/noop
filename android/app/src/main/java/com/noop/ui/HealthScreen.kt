@@ -132,18 +132,18 @@ fun HealthScreen(
     val bpm by vm.bpm.collectAsStateWithLifecycle()
     val hasLiveHr by remember { derivedStateOf { displayHr(bpm, live) != null } }
 
-    // LIQUID SKY BACKDROP (the pilot pattern — LiquidScreenSky.kt): the time-of-day liquid sky settles into
-    // the theme canvas behind this screen's top region, full-bleed up behind the status bar via the
-    // scaffold's topBackground plumbing, replacing the classic scene backdrop. Static (LiquidSkyStatic,
-    // inside the helper) — never an animated sky behind a scrolling list. Gated on the shared "Day-cycle
-    // background" pref (default ON) exactly like Today; OFF passes null so the scaffold paints the flat
+    // WHOOP SLATE BACKDROP: the flat WHOOP canvas gradient (WhoopScreenSky) settles into the theme canvas
+    // behind this screen's top region, full-bleed up behind the status bar via the scaffold's topBackground
+    // plumbing, replacing the classic scene backdrop. Static, no per-frame cost behind a scrolling list.
+    // Gated on the shared "Day-cycle background" pref (default ON) exactly like Today; OFF passes null so
+    // the scaffold paints the flat
     // surface canvas instead.
     val showDayCycleBackground = remember { NoopPrefs.showDayCycleBackground(context) }
 
     LazyScreenScaffold(
         title = "Health Monitor",
         subtitle = "Live vitals, streamed from the strap.",
-        topBackground = if (showDayCycleBackground) { { LiquidScreenSky() } } else null,
+        topBackground = if (showDayCycleBackground) { { WhoopScreenSky() } } else null,
     ) {
         if (today == null && !hasLiveHr) {
             // Even with no history yet, a freshly-connected strap can be told to sync now (#364) — the
@@ -740,8 +740,8 @@ private fun VitalityHero(
 // MARK: - Liquid hero-card wrapper + hero vessel (the pilot idiom)
 //
 // The frosted translucent-black hero-card wrapper (mock rgba(13,14,20,.80), radius 26, white@0.11
-// hairline) that floats the hero over the day-of-sky so the vessel + white count-up stay crisp — the
-// card does the contrast work, not a muted sky. Byte-matched to the Today pilot's LIQUID_HERO_* values.
+// hairline) that floats the hero over the WHOOP slate backdrop so the vessel + white count-up stay crisp:
+// the card does the contrast work, not a muted sky. Byte-matched to the Today pilot's LIQUID_HERO_* values.
 private val HEALTH_HERO_FILL: Color =
     Color(red = 13f / 255f, green = 14f / 255f, blue = 20f / 255f, alpha = 0.80f)
 private val HEALTH_HERO_RADIUS: Dp = 26.dp

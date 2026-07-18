@@ -130,8 +130,8 @@ struct WorkoutsView: View {
                        // VStack built every section + the whole table up-front; the LazyVStack path (which
                        // is byte-identical layout) builds the off-screen sections/rows on demand instead.
                        lazy: true,
-                       // The day-of-sky liquid backdrop, matching Today / Health / Sleep / Trends: a fixed,
-                       // full-bleed time-of-day sky behind the scroll content (it does not scroll).
+                       // The WHOOP slate canvas backdrop, matching Today / Health / Sleep / Trends: a fixed,
+                       // full-bleed dark gradient behind the scroll content (it does not scroll).
                        topBackground: AnyView(CanvasBackground())) {
             if allRows.isEmpty {
                 VStack(alignment: .leading, spacing: NoopMetrics.space4) {
@@ -613,10 +613,8 @@ struct WorkoutsView: View {
 
     @ViewBuilder
     private func effortHeroGauge(avgStrain: Double, hasData: Bool) -> some View {
-        // The signature liquid gauge: a filling `LiquidVessel` tinted Effort with the typical effort
-        // counting up over it — the SAME hero language Today's score cells, the Sleep Rest hero and the
-        // Trends headline use. The vessel fills to value/max on the user's selected Effort scale; the big
-        // number is the same `effortDisplay` read-out the old ring showed.
+        // The WHOOP RingDial: fills to the typical effort value on the user's selected Effort scale;
+        // the same `effortDisplay` read-out the old ring showed.
         let diameter: CGFloat = 168
         let scaleMax: Double = effortScale == .whoop ? 21 : 100
         let displayValue = UnitFormatter.effortValue(avgStrain, scale: effortScale)
@@ -626,30 +624,14 @@ struct WorkoutsView: View {
                 .font(StrandFont.overline).tracking(StrandFont.overlineTracking)
                 .foregroundStyle(StrandPalette.effortColor)
             if hasData {
-                ZStack {
-                    // Hero vessel → animated (this is one of the page's live gauges, like the Sleep Rest
-                    // hero and the Today score cells). Reduce-Motion falls back to the static frame inside
-                    // LiquidVessel itself.
-                    LiquidVessel(value: fraction, tint: StrandPalette.effortColor, animated: true)
-                        .frame(width: diameter, height: diameter)
-                    VStack(spacing: 0) {
-                        // `displayValue` is already on the selected scale (0–100 or 0–21), so the count-up
-                        // interpolates it straight to one decimal — no re-scaling in the format closure.
-                        CountUpText(
-                            value: displayValue,
-                            format: { String(format: "%.1f", $0) },
-                            font: StrandFont.rounded(46),
-                            color: StrandPalette.textPrimary
-                        )
-                        .shadow(color: .black.opacity(0.5), radius: 6, y: 1)
-                        Text(effortScale == .whoop ? "of 21" : "of 100")
-                            .font(StrandFont.caption)
-                            .foregroundStyle(StrandPalette.textSecondary)
-                    }
-                    .allowsHitTesting(false)   // taps fall through to the vessel → splash
-                }
+                RingDial(
+                    value: fraction,
+                    display: String(format: "%.1f", displayValue),
+                    label: effortScale == .whoop ? "of 21" : "of 100",
+                    tint: StrandPalette.effortColor,
+                    size: .trio
+                )
                 .frame(maxWidth: .infinity)
-                .accessibilityElement(children: .ignore)
                 .accessibilityLabel(String(localized: "Typical effort \(UnitFormatter.effortDisplay(avgStrain, scale: effortScale))"))
             } else {
                 // No strain data in the window — an empty vessel (posed, no fill) with a centred "No data",

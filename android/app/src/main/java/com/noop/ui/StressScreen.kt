@@ -89,8 +89,8 @@ import kotlin.math.sqrt
 fun StressScreen(vm: AppViewModel, onBreathe: () -> Unit = {}) {
     val days by vm.recentDays.collectAsStateWithLifecycle()
 
-    // #698: the liquid day-of-sky backdrop is gated on the same "Day-cycle background" setting as Today,
-    // so turning it off falls back to the flat theme canvas on every liquid screen alike.
+    // #698: the WHOOP slate backdrop is gated on the same "Day-cycle background" setting as Today, so
+    // turning it off falls back to the flat theme canvas on every liquid screen alike.
     val context = LocalContext.current
     val showDayCycleBackground = remember { NoopPrefs.showDayCycleBackground(context) }
 
@@ -132,12 +132,11 @@ fun StressScreen(vm: AppViewModel, onBreathe: () -> Unit = {}) {
     LazyScreenScaffold(
         title = "Stress",
         subtitle = "Autonomic load from HRV and resting heart rate",
-        // LIQUID SKY BACKDROP (the pilot pattern — LiquidScreenSky.kt): the time-of-day liquid sky settles
-        // into the theme canvas behind the header + hero vessel, full-bleed (full-width, up behind the
-        // status bar via the scaffold's topBackground plumbing), and the cards float OVER it on the flat
-        // surface below. The Android equivalent of the iOS `ScreenScaffold(topBackground: liquidScaffoldSky())`.
+        // WHOOP SLATE BACKDROP: the flat WHOOP canvas gradient (WhoopScreenSky) settles into the theme
+        // canvas behind the header and hero vessel, full-bleed (full-width, up behind the status bar via
+        // the scaffold's topBackground plumbing), and the cards float OVER it on the flat surface below.
         // Gated on the "Day-cycle background" setting like Today; off passes null (the flat-canvas path).
-        topBackground = if (showDayCycleBackground) { { LiquidScreenSky() } } else null,
+        topBackground = if (showDayCycleBackground) { { WhoopScreenSky() } } else null,
     ) {
         when {
             model != null -> StressContent(model, daytime, stressIndex, freqHrv, onBreathe)
@@ -238,7 +237,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.StressContent(
 // MARK: - Liquid hero tokens (the liquid restyle)
 //
 // The hero card the stress vessel floats on, ported from the iOS liquid heroCard. `LIQUID_HERO_FILL` is a
-// translucent near-black (mock rgba(13,14,20,.80)) so it floats over the day-of-sky; the vessel + white
+// translucent near-black (mock rgba(13,14,20,.80)) so it floats over the WHOOP slate backdrop; the vessel + white
 // count-up number read crisp on it. Radius 26 + a white@0.11 hairline give the frosted-glass edge. Same
 // numbers as the Today pilot's hero card.
 private val LIQUID_HERO_FILL: Color = Color(red = 13f / 255f, green = 14f / 255f, blue = 20f / 255f, alpha = 0.80f)
@@ -251,7 +250,7 @@ private val LIQUID_HERO_RADIUS = 26.dp
 // band word + StatePill + the one plain-English line ride beside / under it. The score, band, tints
 // (StressRamp: calm blue → steady green → tense amber) and the explanation are UNCHANGED — only the
 // presentation moved from the flat PipBar to the sloshing vessel. The card wrapper is the liquid frosted
-// translucent-black hero surface so the vessel + white number stay crisp over the day-of-sky.
+// translucent-black hero surface so the vessel + white number stay crisp over the WHOOP slate backdrop.
 
 @Composable
 private fun StressHeroCard(model: StressModel, modifier: Modifier = Modifier) {

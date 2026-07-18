@@ -51,9 +51,9 @@ extension WidgetSnapshot {
             batteryPct: model.live.batteryPct.map { Int($0.rounded()) },
             bonded: model.live.bonded,
             updated: Date(),
-            // Effort is stored on NOOP's 0–100 axis (the same value the Today Effort tile reads), so it
-            // publishes as a whole number without the WHOOP-0–21 toggle the main app applies — the widget
-            // extension can't reach UnitFormatter/UnitPrefs, and 0–100 is the default scale.
+            // Effort is stored on NOOP's 0 to 100 axis (the same value the Today Effort tile reads), so it
+            // publishes as a whole number without the WHOOP-0 to 21 toggle the main app applies , the widget
+            // extension can't reach UnitFormatter/UnitPrefs, and 0 to 100 is the default scale.
             effort: day?.strain.map { Int($0.rounded()) },
             rest: restScore.map { Int($0.rounded()) },
             hrv: day?.avgHrv.map { Int($0.rounded()) },

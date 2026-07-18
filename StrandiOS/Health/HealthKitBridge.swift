@@ -38,7 +38,7 @@ final class HealthKitBridge: ObservableObject {
     /// NOOP's own strap-derived source id, read back when writing into Health.
     private let noopDeviceId: String
     /// NOOP's on-device COMPUTED daily scores (recovery/HRV/RHR/SpO₂/resp) live under the sibling
-    /// `deviceId + "-noop"` id — mirrors `Repository.computedDeviceId` / `IntelligenceEngine.computedId`.
+    /// `deviceId + "-noop"` id , mirrors `Repository.computedDeviceId` / `IntelligenceEngine.computedId`.
     /// `writeBack` must read this, not the raw import id: a Bluetooth-only WHOOP user has no imported
     /// `noopDeviceId` daily row, so those metrics exist ONLY here.
     private var computedDeviceId: String { noopDeviceId + "-noop" }
@@ -82,7 +82,7 @@ final class HealthKitBridge: ObservableObject {
         .heartRate, .restingHeartRate, .heartRateVariabilitySDNN, .oxygenSaturation,
         .respiratoryRate, .bodyTemperature, .stepCount, .activeEnergyBurned,
         .basalEnergyBurned, .vo2Max,
-        // Body composition — READ-ONLY (#20). Imported under the apple-health source like the file
+        // Body composition , READ-ONLY (#20). Imported under the apple-health source like the file
         // importer already ingests; deliberately NOT in quantityWriteIds (we never write these back).
         .bodyMass, .bodyFatPercentage, .leanBodyMass, .bodyMassIndex
     ]
@@ -99,7 +99,7 @@ final class HealthKitBridge: ObservableObject {
         // A free-signed build (no `com.apple.developer.healthkit` entitlement) can NEVER reach Health:
         // `requestAuthorization` either throws "Missing application-identifier"/"missing entitlement"
         // or returns without ever presenting the sheet and leaves every type `.notDetermined`. Either
-        // way the honest answer is "this build can't use Apple Health directly", NOT "you denied it" —
+        // way the honest answer is "this build can't use Apple Health directly", NOT "you denied it":
         // so never fall through to `.denied` (which tells the user to fix it in Settings, where the app
         // can never appear). Detect via the embedded provisioning profile up front (#348).
         guard HealthKitBridge.hasHealthKitEntitlement else { auth = .entitlementMissing; return }
@@ -110,13 +110,13 @@ final class HealthKitBridge: ObservableObject {
             // NOT reclassify to `.entitlementMissing` off the post-request `.notDetermined` heuristic
             // here: on a genuinely-entitled build the user could grant only reads (writes stay
             // `.notDetermined`) or dismiss the share sheet, and that must stay `.authorized` with the
-            // normal Settings guidance — never the file-import reroute. The provisioning-profile check is
+            // normal Settings guidance , never the file-import reroute. The provisioning-profile check is
             // the authoritative signal; the `.notDetermined` fallback only matters when that check can't
             // run, which on iOS means an App Store build that by definition has the entitlement.
             auth = .authorized
         } catch {
             // A thrown error here is on a build that carries the entitlement (guarded above), so it's a
-            // genuine denial / request failure — keep the normal `.denied` "enable in Settings" path,
+            // genuine denial / request failure , keep the normal `.denied` "enable in Settings" path,
             // never the entitlement-missing reroute.
             auth = .denied
         }
@@ -130,7 +130,7 @@ final class HealthKitBridge: ObservableObject {
     /// Resume a prior grant on launch without re-prompting. `auth` is a fresh `.unknown` every
     /// process (the bridge isn't persisted), so a user who already enabled Apple Health would
     /// otherwise have to re-tap "Enable" each session before the scenePhase sync runs. HealthKit
-    /// never reveals *read* status, but *write*/share status is observable — if the user already
+    /// never reveals *read* status, but *write*/share status is observable , if the user already
     /// authorized all of our write types, treat the bridge as `.authorized`. This only reads
     /// status, so no system permission sheet is shown.
     func refreshAuthIfPreviouslyGranted() {
@@ -150,7 +150,7 @@ final class HealthKitBridge: ObservableObject {
     /// The scored read types we want a live observer + hourly background delivery on. This is the
     /// subset of `quantityReadIds` (plus sleep) that actually feeds Charge/Rest/Effort/Fitness Age, so
     /// a watch-only user's numbers refresh on their own rather than only when the app is foregrounded.
-    /// We deliberately do NOT observe the body-composition reads (weight/BMI/etc.) — those don't move a
+    /// We deliberately do NOT observe the body-composition reads (weight/BMI/etc.) , those don't move a
     /// score and a manual weigh-in shouldn't wake the app every hour.
     private static let liveQuantityIds: [HKQuantityTypeIdentifier] = [
         .heartRateVariabilitySDNN, .restingHeartRate, .activeEnergyBurned, .heartRate, .vo2Max
@@ -162,7 +162,7 @@ final class HealthKitBridge: ObservableObject {
 
     /// Register one `HKObserverQuery` per scored read type and turn on hourly background delivery, so
     /// new Apple Watch data is ingested continuously. Each observer's update handler runs an anchored
-    /// delta sync of just the affected window and then calls HealthKit's completion handler (required —
+    /// delta sync of just the affected window and then calls HealthKit's completion handler (required:
     /// HealthKit stops delivering to an observer that never acknowledges). Idempotent and guarded behind
     /// `auth == .authorized`; safe to call from several entry points.
     func enableLiveDelivery() {
@@ -188,7 +188,7 @@ final class HealthKitBridge: ObservableObject {
                 // @MainActor and `sync` mutates published state), run the incremental catch-up, then
                 // ALWAYS call completion so HealthKit keeps delivering. We don't tie completion to sync
                 // success: a transient store error shouldn't make HealthKit think we never handled the
-                // update and back off — the next foreground catch-up will reconcile.
+                // update and back off , the next foreground catch-up will reconcile.
                 guard let self else { completion(); return }
                 Task { @MainActor in
                     await self.syncFromObserver(type: type)
@@ -207,7 +207,7 @@ final class HealthKitBridge: ObservableObject {
     /// Foreground catch-up. Call on app-active so anything background delivery missed (the system can
     /// throttle or skip wakes) is backfilled. A short window is enough because live delivery keeps the
     /// recent days current; 7 covers a weekend of missed wakes. Exposed for the existing scenePhase
-    /// hook in `StrandiOSApp` to call — no other file is edited.
+    /// hook in `StrandiOSApp` to call , no other file is edited.
     func foregroundCatchUp() async {
         await sync(days: 7)
     }
@@ -216,7 +216,7 @@ final class HealthKitBridge: ObservableObject {
     /// learn the span of days touched since we last looked (persisting the anchor so the same samples
     /// aren't walked twice and nothing between wakes is missed), then re-aggregate just that day window
     /// via the existing `sync(days:)` path. Re-aggregating the window (rather than the deltas alone)
-    /// keeps every per-day average correct and idempotent — `sync` upserts are keyed by day.
+    /// keeps every per-day average correct and idempotent , `sync` upserts are keyed by day.
     private func syncFromObserver(type: HKSampleType) async {
         guard auth == .authorized else { return }
         let touched = await fetchTouchedDayWindow(type: type)
@@ -232,8 +232,8 @@ final class HealthKitBridge: ObservableObject {
 
     /// Advance this type's stored anchor over any new samples and return the OLDEST sample date seen,
     /// or nil when there were no new samples. Anchors are persisted in UserDefaults per type so live
-    /// deltas are neither re-ingested nor missed across launches. We don't consume the samples here —
-    /// `sync(days:)` re-reads the aggregate for the affected window — the anchor's only job is to tell
+    /// deltas are neither re-ingested nor missed across launches. We don't consume the samples here:
+    /// `sync(days:)` re-reads the aggregate for the affected window , the anchor's only job is to tell
     /// us how far back the change reached.
     private func fetchTouchedDayWindow(type: HKSampleType) async -> Date? {
         let key = HealthKitBridge.anchorDefaultsKey(for: type)
@@ -316,7 +316,7 @@ final class HealthKitBridge: ObservableObject {
             var a = agg(day); a.vo2max = v; byDay[day] = a
         }
 
-        // Body composition — READ-ONLY import under the apple-health source (#20). Weight, lean mass
+        // Body composition , READ-ONLY import under the apple-health source (#20). Weight, lean mass
         // and BMI are point-in-time readings, so take the latest-of-day; body-fat reads fine as a
         // daily average. Body-fat HealthKit gives a 0…1 fraction, scaled to percent like spo2 above.
         await collect(.bodyMass, unit: .gramUnit(with: .kilo), start: start, end: end, op: .discreteMostRecent) { day, v in
@@ -354,12 +354,12 @@ final class HealthKitBridge: ObservableObject {
                         spo2Pct: a.spo2, skinTempDevC: nil, respRateBpm: a.respRate)
         }
         // Flatten to the generic metricSeries the shared Apple Health screen, the Today apple-health
-        // sparklines, and the Metric Explorer read from — repo.series(key:source:"apple-health")
+        // sparklines, and the Metric Explorer read from , repo.series(key:source:"apple-health")
         // queries ONLY metricSeries, so without this every tile/chart renders "—" after a successful
         // sync. Reuse the importer's canonical key mapping so the keys match the macOS path exactly.
         // Body composition (weight/body_fat/lean_mass/bmi) now reads live on iOS (#20) and flows
         // through the same metricPoints keys as the file importer. iOS still doesn't collect
-        // awake/in-bed minutes, so those stay nil and emit no points — correct.
+        // awake/in-bed minutes, so those stay nil and emit no points , correct.
         let aggregates = byDay.map { (day, a) in
             AppleDailyAggregate(
                 day: day,
@@ -395,7 +395,7 @@ final class HealthKitBridge: ObservableObject {
         // Persist all the apple-health rows AND write back, advancing lastSync only when the WHOLE
         // round-trip succeeds. The three read-side upserts used to be swallowed by `try?`, so a failed
         // import (e.g. a disk-full GRDB write) dropped rows yet still cleared lastError and advanced
-        // lastSync — a false "success", and the next delta sync skipped the window. (Reimplemented
+        // lastSync , a false "success", and the next delta sync skipped the window. (Reimplemented
         // from @vulnix0x4's PR #375.)
         do {
             try await store.upsertAppleDaily(appleRows, deviceId: appleDeviceId)
@@ -474,7 +474,7 @@ final class HealthKitBridge: ObservableObject {
         // Delete any of OUR prior samples that carry the same metadata keys, then write the fresh
         // batch. Scoped to HKSource.default() so we never touch a sample written by another app
         // that happens to use the same external UUID. Delete failures are non-fatal (e.g., nothing
-        // to delete on first run) — only the save throws.
+        // to delete on first run) , only the save throws.
         let bySource = HKQuery.predicateForObjects(from: HKSource.default())
         let grouped = Dictionary(grouping: candidates, by: { $0.type })
         for (type, items) in grouped {
@@ -496,7 +496,7 @@ final class HealthKitBridge: ObservableObject {
     }
 
     /// Excludes NOOP's own write-back samples from reads, so the two-way sync never reads its own
-    /// output back in as "apple-health" data — which would make the strap and "Apple Health" plot the
+    /// output back in as "apple-health" data , which would make the strap and "Apple Health" plot the
     /// same line for a strap-only user, and bias the apple-health average for someone who also has a
     /// watch. `HKSource.default()` is this app's own source. (Reimplemented from @vulnix0x4's PR #375.)
     private static var notNoopAuthored: NSPredicate {
@@ -660,7 +660,7 @@ final class HealthKitBridge: ObservableObject {
 
     // MARK: - Entitlement detection (#348)
 
-    /// True when this running build actually carries the `com.apple.developer.healthkit` entitlement —
+    /// True when this running build actually carries the `com.apple.developer.healthkit` entitlement:
     /// i.e. it can genuinely reach Apple Health. False for a free-Apple-ID / AltStore / Sideloadly
     /// re-sign, which strips the HealthKit capability: the framework links and `isHealthDataAvailable()`
     /// is still true, but `requestAuthorization` is a dead-end and the app can never appear under
@@ -685,7 +685,7 @@ final class HealthKitBridge: ObservableObject {
         }
         guard let xmlStart = data.range(of: Data("<?xml".utf8)),
               let xmlEnd = data.range(of: Data("</plist>".utf8)) else {
-            // Profile present but unparseable — don't claim a missing entitlement off a parse failure;
+            // Profile present but unparseable , don't claim a missing entitlement off a parse failure;
             // assume present so we never wrongly down-route a real build.
             return true
         }
@@ -700,7 +700,7 @@ final class HealthKitBridge: ObservableObject {
 
     // MARK: - Date helpers
 
-    // LOCAL civil day: the rest of the store keys days by the device-local civil day —
+    // LOCAL civil day: the rest of the store keys days by the device-local civil day:
     // AppleHealthAggregator.localDay shifts each sample into its own offset, and
     // Repository.dayFormatter leaves timeZone at the default (local) zone. The
     // HKStatisticsCollectionQuery here already buckets in Calendar.current (anchor =
@@ -708,8 +708,8 @@ final class HealthKitBridge: ObservableObject {
     // matching local formatter is strictly 1:1; using UTC instead mislabelled a full local day
     // under the previous UTC date for users east of UTC, so apple-health rows never merged with
     // the strap-computed/imported rows for the same civil day.
-    // `nonisolated` so the HealthKit query completion handlers — which HealthKit invokes on a private
-    // background queue (a nonisolated context) — can label day buckets without a main-actor-isolation
+    // `nonisolated` so the HealthKit query completion handlers , which HealthKit invokes on a private
+    // background queue (a nonisolated context) , can label day buckets without a main-actor-isolation
     // warning. They only read a thread-safe DateFormatter, so this is safe off the main actor.
     nonisolated private static let dayFormatter: DateFormatter = {
         let f = DateFormatter(); f.locale = Locale(identifier: "en_US_POSIX")

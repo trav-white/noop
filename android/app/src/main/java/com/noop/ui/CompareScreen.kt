@@ -326,8 +326,8 @@ private object CorrelationEngine {
 fun CompareScreen(vm: AppViewModel) {
     val days by vm.recentDays.collectAsStateWithLifecycle()
 
-    // Liquid finish (pilot pattern): the time-of-day sky settles behind the top of the screen, gated on the
-    // same day-cycle-background preference the liquid Today honours. Off = the flat dark canvas path.
+    // WHOOP slate finish: the flat WHOOP canvas gradient settles behind the top of the screen, gated on the
+    // same day-cycle-background preference Today honours. Off, the flat dark canvas path.
     val context = LocalContext.current
     val showDayCycleBackground = remember { NoopPrefs.showDayCycleBackground(context) }
 
@@ -411,9 +411,9 @@ fun CompareScreen(vm: AppViewModel) {
     LazyScreenScaffold(
         title = "Compare",
         subtitle = "Overlay signals, draw conclusions.",
-        // Liquid sky backdrop (LiquidScreenSky.kt) in the scaffold's topBackground slot, gated on the
-        // day-cycle preference — the same pilot plumbing the liquid Today uses.
-        topBackground = if (showDayCycleBackground) { { LiquidScreenSky() } } else null,
+        // WHOOP slate backdrop (WhoopScreenSky) in the scaffold's topBackground slot, gated on the
+        // day-cycle preference, the same plumbing Today uses.
+        topBackground = if (showDayCycleBackground) { { WhoopScreenSky() } } else null,
     ) {
 
         // ── Metric picker section (chips + range control)

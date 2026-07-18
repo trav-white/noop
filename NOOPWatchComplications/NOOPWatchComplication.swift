@@ -208,7 +208,7 @@ struct NOOPChargeView: View {
         return StrandPalette.textTertiary
     }
 
-    // MARK: accessoryCircular — a ring + the Charge number
+    // MARK: accessoryCircular , a ring + the Charge number
     //
     // The clean NOOP ring, scaled to the watch face. WidgetKit tints accessory complications with the
     // face's vibrant colour by default; we use a Gauge so the system renders a crisp circular ring,
@@ -248,7 +248,7 @@ struct NOOPChargeView: View {
         return String(localized: "Charge · \(fresh)")
     }
 
-    // MARK: accessoryCorner — number hugging the corner, "Charge" curved along the bezel
+    // MARK: accessoryCorner , number hugging the corner, "Charge" curved along the bezel
 
     private var corner: some View {
         Text(charge.numberText)
@@ -283,7 +283,7 @@ struct NOOPChargeView: View {
         }
     }
 
-    // MARK: accessoryInline — a single line of text along the top of the face
+    // MARK: accessoryInline , a single line of text along the top of the face
 
     private var inlineText: String {
         if noSnapshot { return String(localized: "NOOP · open on iPhone") }
@@ -312,7 +312,7 @@ struct NOOPChargeView: View {
         return " · \(fresh)"
     }
 
-    // MARK: accessoryRectangular — a compact card showing all three scores
+    // MARK: accessoryRectangular , a compact card showing all three scores
     //
     // The richest family: a small NOOP header line plus the Charge / Effort / Rest triplet, each a
     // number (or a dash + cal marker) over its label. This is the only place all three scores live, so

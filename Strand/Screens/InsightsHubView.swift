@@ -4,6 +4,19 @@ import StrandDesign
 import StrandAnalytics
 import WhoopStore
 
+// Display mapping for renamed pillars. The analytics engine keeps its stable outcome KEYS
+// ("Charge", "Rest", "Effort", "HRV", "Resting HR") that the dose-response priors and the
+// outcomeKey round-trip depend on; this maps those keys to the user-facing pillar names only
+// at render time. Charge shows as Recovery, Rest as Sleep, Effort as Strain; others unchanged.
+private func outcomeDisplayName(_ engineName: String) -> String {
+    switch engineName {
+    case "Charge": return String(localized: "Recovery")
+    case "Rest":   return String(localized: "Sleep")
+    case "Effort": return String(localized: "Strain")
+    default:       return engineName
+    }
+}
+
 // MARK: - Insights Hub (v5)
 //
 // The headline n-of-1 "what actually moves YOUR recovery" surface. Two halves, both
@@ -64,7 +77,7 @@ struct InsightsHubView: View {
         VStack(alignment: .leading, spacing: NoopMetrics.gap) {
             // Header and the 4-segment outcome control each get their own row — one HStack
             // crushed the pill control on narrow widths and truncated the segment labels.
-            SectionHeader("What moves your \(outcome.outcomeName.lowercased())",
+            SectionHeader("What moves your \(outcomeDisplayName(outcome.outcomeName).lowercased())",
                           overline: "Ranked · your data")
             SegmentedPillControl(InsightsHubViewModel.Outcome.allCases, selection: $outcome) { $0.label }
                 .accessibilityLabel("Outcome metric")
@@ -72,7 +85,7 @@ struct InsightsHubView: View {
 
             if model.ranked.isEmpty {
                 NoopCard {
-                    Text(String(localized: "Not enough overlap between your journal answers and \(outcome.outcomeName.lowercased()) yet. Keep logging. Each behaviour needs days both with and without it before NOOP can read its effect."))
+                    Text(String(localized: "Not enough overlap between your journal answers and \(outcomeDisplayName(outcome.outcomeName).lowercased()) yet. Keep logging. Each behaviour needs days both with and without it before NOOP can read its effect."))
                         .font(StrandFont.subhead)
                         .foregroundStyle(StrandPalette.textTertiary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -283,7 +296,7 @@ private struct DoseResponseCardView: View {
                     honestyBanner(String(localized: "Based mostly on typical patterns, not yet yours. Log a few more \(card.unitLabel.lowercased()) days and this becomes yours."),
                         tone: .neutral)
                 } else if r.contradictsPrior {
-                    honestyBanner(String(localized: "In your data so far, this doesn\u{2019}t move your \(card.outcomeName) the way it typically does."), tone: .positive)
+                    honestyBanner(String(localized: "In your data so far, this doesn\u{2019}t move your \(outcomeDisplayName(card.outcomeName)) the way it typically does."), tone: .positive)
                 }
 
                 if card.timingProxy {
@@ -349,7 +362,7 @@ private struct DoseResponseCardView: View {
                          value: signed(r.perUnit, suffix: card.outcomeSuffix),
                          caption: r.priorDominated ? String(localized: "typical") : String(localized: "your data"),
                          accent: r.perUnit < 0 ? StrandPalette.statusCritical : StrandPalette.statusPositive)
-                StatTile(label: "Tomorrow\u{2019}s \(card.outcomeName)",
+                StatTile(label: "Tomorrow\u{2019}s \(outcomeDisplayName(card.outcomeName))",
                          value: projected.map { "\(Int($0.rounded()))\(card.outcomeSuffix)" } ?? "—",
                          caption: projected != nil ? String(localized: "projected · \(stepLabel)") : String(localized: "needs a recent day"),
                          accent: domain.color)
@@ -361,18 +374,18 @@ private struct DoseResponseCardView: View {
     /// lower/higher or basis fragments.
     private func forecastSentence(delta: Double, projected: Double?, stepLabel: String) -> String {
         if previewDose <= 1 {
-            return String(localized: "No extra tonight. Your \(card.outcomeName.lowercased()) forecast stays where it is.")
+            return String(localized: "No extra tonight. Your \(outcomeDisplayName(card.outcomeName).lowercased()) forecast stays where it is.")
         }
         let magText = "\(Int(abs(delta).rounded()))\(card.outcomeSuffix)"
         let lower = delta <= 0
         if card.response.priorDominated {
             return lower
-                ? String(localized: "A \(stepLabel) tonight tends to line up with about \(magText) lower on tomorrow\u{2019}s \(card.outcomeName.lowercased()) for you, based on typical patterns.")
-                : String(localized: "A \(stepLabel) tonight tends to line up with about \(magText) higher on tomorrow\u{2019}s \(card.outcomeName.lowercased()) for you, based on typical patterns.")
+                ? String(localized: "A \(stepLabel) tonight tends to line up with about \(magText) lower on tomorrow\u{2019}s \(outcomeDisplayName(card.outcomeName).lowercased()) for you, based on typical patterns.")
+                : String(localized: "A \(stepLabel) tonight tends to line up with about \(magText) higher on tomorrow\u{2019}s \(outcomeDisplayName(card.outcomeName).lowercased()) for you, based on typical patterns.")
         }
         return lower
-            ? String(localized: "A \(stepLabel) tonight tends to line up with about \(magText) lower on tomorrow\u{2019}s \(card.outcomeName.lowercased()) for you, based on \(card.response.nUser) of your \(card.unitLabel.lowercased()) days.")
-            : String(localized: "A \(stepLabel) tonight tends to line up with about \(magText) higher on tomorrow\u{2019}s \(card.outcomeName.lowercased()) for you, based on \(card.response.nUser) of your \(card.unitLabel.lowercased()) days.")
+            ? String(localized: "A \(stepLabel) tonight tends to line up with about \(magText) lower on tomorrow\u{2019}s \(outcomeDisplayName(card.outcomeName).lowercased()) for you, based on \(card.response.nUser) of your \(card.unitLabel.lowercased()) days.")
+            : String(localized: "A \(stepLabel) tonight tends to line up with about \(magText) higher on tomorrow\u{2019}s \(outcomeDisplayName(card.outcomeName).lowercased()) for you, based on \(card.response.nUser) of your \(card.unitLabel.lowercased()) days.")
     }
 
     // MARK: Bits
@@ -404,8 +417,8 @@ private struct DoseResponseCardView: View {
     /// Whole-string key per variant (never a concatenated localized tail on an a11y label).
     private func curveAccessibilityLabel(_ r: DoseResponse) -> String {
         r.priorDominated
-            ? String(localized: "Dose-response curve. Each extra \(card.unitNoun) lines up with about \(signed(r.perUnit, suffix: card.outcomeSuffix)) on \(card.outcomeName), typical patterns.")
-            : String(localized: "Dose-response curve. Each extra \(card.unitNoun) lines up with about \(signed(r.perUnit, suffix: card.outcomeSuffix)) on \(card.outcomeName), your own data.")
+            ? String(localized: "Dose-response curve. Each extra \(card.unitNoun) lines up with about \(signed(r.perUnit, suffix: card.outcomeSuffix)) on \(outcomeDisplayName(card.outcomeName)), typical patterns.")
+            : String(localized: "Dose-response curve. Each extra \(card.unitNoun) lines up with about \(signed(r.perUnit, suffix: card.outcomeSuffix)) on \(outcomeDisplayName(card.outcomeName)), your own data.")
     }
 }
 
@@ -496,9 +509,9 @@ final class InsightsHubViewModel: ObservableObject {
         var id: String { rawValue }
         var label: String {
             switch self {
-            case .recovery: return String(localized: "Charge")
+            case .recovery: return String(localized: "Recovery")
             case .hrv:      return "HRV"
-            case .sleep:    return String(localized: "Rest")
+            case .sleep:    return String(localized: "Sleep")
             case .rhr:      return "RHR"
             }
         }

@@ -672,7 +672,7 @@ private fun EffortHero(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 Text(
-                    "Effort this ${effectiveRange.heroWord}",
+                    "Strain this ${effectiveRange.heroWord}",
                     style = NoopType.headline,
                     color = Palette.textPrimary,
                 )
@@ -1329,7 +1329,7 @@ private fun WorkoutDetailSheet(vm: AppViewModel, row: WorkoutRow, onDismiss: () 
                 val captured = row.strain != null || !row.zonesJSON.isNullOrEmpty()
                 if (captured && row.avgHr != null && kotlin.math.abs(row.avgHr - traceMean) > 3.0) {
                     Text(
-                        "The average above was edited. The graph, zones and Effort stay from the recorded session.",
+                        "The average above was edited. The graph, zones and Strain stay from the recorded session.",
                         style = NoopType.footnote,
                         color = Palette.textTertiary,
                     )
@@ -1380,7 +1380,7 @@ private fun WorkoutDetailSheet(vm: AppViewModel, row: WorkoutRow, onDismiss: () 
 private fun SessionEffortCard(strain: Double, effortScale: EffortScale) {
     val shown = UnitFormatter.effortValue(strain, effortScale)
     Column(verticalArrangement = Arrangement.spacedBy(Metrics.space8)) {
-        SectionHeader("Effort", overline = "This session")
+        SectionHeader("Strain", overline = "This session")
         NoopCard(tint = Palette.effortColor) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -1390,8 +1390,8 @@ private fun SessionEffortCard(strain: Double, effortScale: EffortScale) {
                     verticalArrangement = Arrangement.spacedBy(Metrics.space2),
                     modifier = Modifier.semantics {
                         contentDescription =
-                            "This session's Effort, ${oneDecimal(shown)} on the " +
-                                (if (effortScale == EffortScale.WHOOP) "0 to 21 strain" else "0 to 100 Effort") +
+                            "This session's Strain, ${oneDecimal(shown)} on the " +
+                                (if (effortScale == EffortScale.WHOOP) "0 to 21 strain" else "0 to 100 Strain") +
                                 " scale."
                     },
                 ) {
@@ -1402,13 +1402,13 @@ private fun SessionEffortCard(strain: Double, effortScale: EffortScale) {
                         color = Palette.effortBright,
                     )
                     Text(
-                        if (effortScale == EffortScale.WHOOP) "strain (0-21)" else "Effort (0-100)",
+                        if (effortScale == EffortScale.WHOOP) "strain (0-21)" else "Strain (0-100)",
                         style = NoopType.footnote,
                         color = Palette.textTertiary,
                     )
                 }
                 Text(
-                    "This session's contribution to the day's Effort, as captured during the workout.",
+                    "This session's contribution to the day's Strain, as captured during the workout.",
                     style = NoopType.subhead,
                     color = Palette.textSecondary,
                     modifier = Modifier.weight(1f),
@@ -1617,7 +1617,7 @@ private fun ManualWorkoutDialog(
                 // We do NOT re-score from one number. Parity with macOS ManualWorkoutSheet.avgHrEditedNote.
                 if (built != null && WorkoutEditing.avgHrEdited(built, editing)) {
                     Text(
-                        "Avg HR is shown as typed. The HR graph, zones and Effort stay from the recorded session.",
+                        "Avg HR is shown as typed. The HR graph, zones and Strain stay from the recorded session.",
                         style = NoopType.footnote, color = Palette.statusWarning,
                     )
                 }

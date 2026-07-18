@@ -246,7 +246,6 @@ private fun OnboardingTopBar(page: Int, total: Int, progress: Float) {
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Overline("NOOP", color = Palette.accent)
             Spacer(Modifier.weight(1f))
             Text("$page / $total", style = NoopType.captionNumber, color = Palette.textTertiary)
         }
@@ -358,8 +357,8 @@ private fun WelcomeStep() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            // The NOOP mark centred on a flat brushed-titanium hero tile (the metallic titanium ramp, a
-            // reset token — no gold). Clean and flat: a hairline rim, no bloom.
+            // A flat brushed-titanium hero tile (the metallic titanium ramp, a reset token, no gold).
+            // Clean and flat: a hairline rim, no bloom.
             Box(contentAlignment = Alignment.Center, modifier = Modifier.size(150.dp)) {
                 Box(
                     modifier = Modifier
@@ -368,7 +367,6 @@ private fun WelcomeStep() {
                         .background(Brush.linearGradient(*Palette.titaniumGradient.toTypedArray()))
                         .border(1.dp, Palette.hairline, CircleShape),
                 )
-                BrandMark(size = 104.dp)
             }
             Spacer(Modifier.height(18.dp))
             Text(

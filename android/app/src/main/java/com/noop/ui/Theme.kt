@@ -347,8 +347,16 @@ enum class DomainTheme {
             else -> Palette.recoveryStops
         }
 
-    /** A short upper-case label for the world (CHARGE / EFFORT / REST / STRESS). */
-    val label: String get() = name
+    /** A short display label for the world (Recovery / Strain / Sleep / Stress). The enum case
+     *  names stay Charge/Effort/Rest as stable code identifiers; only this user-facing label maps
+     *  to the current pillar wording. */
+    val label: String
+        get() = when (this) {
+            Charge -> "Recovery"
+            Effort -> "Strain"
+            Rest -> "Sleep"
+            Stress -> "Stress"
+        }
 }
 
 // MARK: - Motion (ported from StrandDesign/Motion.swift §9.6)

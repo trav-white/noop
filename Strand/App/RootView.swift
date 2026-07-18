@@ -399,12 +399,6 @@ struct RootView: View {
 
     private var brand: some View {
         HStack(spacing: 8) {
-            // In-app logo: the open recovery-ring mark so the wordmark reads as a true lockup
-            // (README logo system — mark + "NOOP"). Flat gold gradient, low glow per the v3 restraint.
-            BrandMark(size: 22)
-            Text("NOOP")
-                .font(StrandFont.rounded(20, weight: .bold))
-                .foregroundStyle(StrandPalette.textPrimary)
             Spacer()
             // WHOOP quick-add: a circular white "+" opening the workout entry points. On macOS the shell
             // has no quick-action sheet, so the menu routes straight to the existing Live / Workouts

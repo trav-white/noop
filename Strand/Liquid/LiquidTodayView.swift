@@ -355,10 +355,7 @@ struct LiquidTodayView: View {
                     LiquidBatteryButton()
                 }
             }
-            // NOOP wordmark, centred on the slate canvas, with a tap easter egg.
-            LiquidWordmark()
-                .padding(.top, 24)
-            heroCard.padding(.top, 18)
+            heroCard.padding(.top, 24)
             if liveSessionsBeta {
                 liveSessionStartRow.padding(.top, 10)
             }
@@ -397,7 +394,7 @@ struct LiquidTodayView: View {
             )
         }
         .buttonStyle(LiquidPressStyle())
-        .accessibilityLabel("Start a live session. Beta. Silent strap coaching against today's Charge.")
+        .accessibilityLabel("Start a live session. Beta. Silent strap coaching against today's Recovery.")
     }
 
     /// The WHOOP home dial trio: Rest / Charge / Effort (the reference app's Sleep / Recovery / Strain
@@ -407,12 +404,12 @@ struct LiquidTodayView: View {
     /// the previous hero cells opened, so no navigation destination changes.
     private var heroCard: some View {
         HStack(alignment: .top, spacing: 4) {
-            ringCell(label: "Rest", section: .rest, value: restScore,
+            ringCell(label: "Sleep", section: .rest, value: restScore,
                      display: pctDisplay(restScore), tint: StrandPalette.restColor)
-            ringCell(label: "Charge", section: .charge, value: displayDay?.recovery,
+            ringCell(label: "Recovery", section: .charge, value: displayDay?.recovery,
                      display: pctDisplay(displayDay?.recovery),
                      tint: StrandPalette.recoveryBand(displayDay?.recovery ?? 0))
-            ringCell(label: "Effort", section: .effort, value: displayDay?.strain,
+            ringCell(label: "Strain", section: .effort, value: displayDay?.strain,
                      display: displayDay?.strain.map { effortText($0) } ?? "-",
                      tint: StrandPalette.strainColor(displayDay?.strain ?? 0))
         }
@@ -827,7 +824,7 @@ struct LiquidTodayView: View {
                     }
                     Spacer()
                     (Text(effortText(w.strain)).font(StrandFont.number(15))
-                        + Text(" EFFORT").font(StrandFont.overlineScaled(9)))
+                        + Text(" STRAIN").font(StrandFont.overlineScaled(9)))
                         .foregroundStyle(StrandPalette.textPrimary)
                 }
                 LiquidTube(frac: (w.strain ?? 0) / 100, tint: StrandPalette.effortColor, height: 12, animated: false)
@@ -1062,67 +1059,6 @@ private struct PullOffsetKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
 }
-
-// MARK: - NOOP wordmark (centred, with a tap easter egg)
-
-/// The subtle NOOP wordmark. Built as a row of letters (not `Text(...).tracking()`, which adds a
-/// trailing gap after the last glyph and pushes the word off-centre), so it sits DEAD centre. Tap it
-/// for a little easter egg: it plays one of several random one-shot animations — wiggle, shake, flip,
-/// spin, bounce, or a jelly squash — with a light haptic.
-private struct LiquidWordmark: View {
-    @State private var rot = 0.0      // z-rotation (wiggle / spin)
-    @State private var scaleX = 1.0   // horizontal scale (jelly squash)
-    @State private var scaleY = 1.0   // vertical scale (bounce / jelly)
-    @State private var dx = 0.0       // horizontal offset (shake)
-    @State private var flip = 0.0     // y-axis 3D flip
-    @State private var token = 0      // drives the tap haptic
-
-    var body: some View {
-        HStack(spacing: 14) {
-            ForEach(Array("NOOP".enumerated()), id: \.offset) { _, ch in
-                Text(String(ch))
-                    .font(StrandFont.rounded(16, weight: .bold))
-                    .foregroundStyle(.white.opacity(0.5))
-            }
-        }
-        .shadow(color: .black.opacity(0.25), radius: 6, y: 1)
-        .rotationEffect(.degrees(rot))
-        .scaleEffect(x: scaleX, y: scaleY)
-        .offset(x: dx)
-        .rotation3DEffect(.degrees(flip), axis: (x: 0, y: 1, z: 0), perspective: 0.5)
-        .contentShape(Rectangle())
-        .onTapGesture { playRandomEgg() }
-        .liquidTapHaptic(trigger: token)
-        .frame(maxWidth: .infinity)
-        .accessibilityHidden(true)
-    }
-
-    /// The easter egg: one of several one-shot animations at random. The oscillating ones (wiggle/shake/
-    /// squash) kick the value to an extreme then let an under-damped spring settle it back through zero,
-    /// which reads as a natural wobble without hand-authored keyframes.
-    private func playRandomEgg() {
-        token &+= 1
-        switch Int.random(in: 0..<6) {
-        case 0: // wiggle
-            rot = -14
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.28)) { rot = 0 }
-        case 1: // shake
-            dx = -12
-            withAnimation(.spring(response: 0.45, dampingFraction: 0.26)) { dx = 0 }
-        case 2: // flip
-            withAnimation(.easeInOut(duration: 0.6)) { flip += 360 }
-        case 3: // spin
-            withAnimation(.easeInOut(duration: 0.55)) { rot += 360 }
-        case 4: // bounce
-            scaleX = 1.28; scaleY = 1.28
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.42)) { scaleX = 1; scaleY = 1 }
-        default: // jelly (squash + stretch)
-            scaleX = 1.35; scaleY = 0.7
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.3)) { scaleX = 1; scaleY = 1 }
-        }
-    }
-}
-
 
 // MARK: - Scene controls (LiveState-isolated leaves)
 

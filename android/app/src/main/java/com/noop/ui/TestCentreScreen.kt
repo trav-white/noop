@@ -318,7 +318,7 @@ private fun DiagnosticToolsCard(vm: AppViewModel) {
     SettingsSectionTC(
         icon = Icons.Filled.Info,
         title = "Diagnostic tools",
-        blurb = "Your strap log, a Charge recalibrate, and the device environment. Nothing leaves the phone unless you share it.",
+        blurb = "Your strap log, a Recovery recalibrate, and the device environment. Nothing leaves the phone unless you share it.",
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             // Strap log, the same exportLogText share the Settings Diagnostics button uses.
@@ -331,7 +331,7 @@ private fun DiagnosticToolsCard(vm: AppViewModel) {
             )
             // Recalibrate Charge baseline, the same Baselines.recalibrateRecoveryBaselines call.
             NoopButton(
-                text = "Recalibrate Charge baseline",
+                text = "Recalibrate Recovery baseline",
                 leadingIcon = Icons.Filled.Autorenew,
                 kind = NoopButtonKind.Secondary,
                 fullWidth = true,
@@ -351,10 +351,10 @@ private fun DiagnosticToolsCard(vm: AppViewModel) {
         AlertDialog(
             onDismissRequest = { showRecalibrate = false },
             containerColor = Palette.surfaceOverlay,
-            title = { Text("Recalibrate your Charge baseline?", style = NoopType.title2, color = Palette.textPrimary) },
+            title = { Text("Recalibrate your Recovery baseline?", style = NoopType.title2, color = Palette.textPrimary) },
             text = {
                 Text(
-                    "This restarts the roughly 4-night build-up for Charge and your HRV baseline. Your history stays.",
+                    "This restarts the roughly 4-night build-up for Recovery and your HRV baseline. Your history stays.",
                     style = NoopType.subhead, color = Palette.textSecondary,
                 )
             },

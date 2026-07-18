@@ -241,11 +241,11 @@ struct NOOPChargeView: View {
     /// The circular family's curved widgetLabel. Appends the freshness once a snapshot starts aging so
     /// the number above it is never read as live; stays "Charge" while it is fresh.
     private var circularLabel: String {
-        guard let fresh = freshness else { return String(localized: "Charge") }
-        if isStale { return String(localized: "Charge · \(fresh)") }
+        guard let fresh = freshness else { return String(localized: "Recovery") }
+        if isStale { return String(localized: "Recovery · \(fresh)") }
         // A current snapshot's label adds no information next to a live-looking ring, so keep it clean.
-        if isFreshToday { return String(localized: "Charge") }
-        return String(localized: "Charge · \(fresh)")
+        if isFreshToday { return String(localized: "Recovery") }
+        return String(localized: "Recovery · \(fresh)")
     }
 
     // MARK: accessoryCorner , number hugging the corner, "Charge" curved along the bezel
@@ -268,18 +268,18 @@ struct NOOPChargeView: View {
         case .value:
             // Real number: ride the bezel with the recency so an aging score stays honest. A current
             // snapshot keeps the plain label (semantic flag, not a display-text comparison).
-            guard let fresh = freshness, !isFreshToday else { return String(localized: "Charge") }
-            return String(localized: "Charge · \(fresh)")
+            guard let fresh = freshness, !isFreshToday else { return String(localized: "Recovery") }
+            return String(localized: "Recovery · \(fresh)")
         case .calibrating:
             // When the dash is here because the whole snapshot went stale, say so plainly rather than
             // "cal" (which means "needs more data", a different thing).
             if isStale {
                 let fresh = freshness ?? String(localized: "stale")
-                return String(localized: "Charge · \(fresh)")
+                return String(localized: "Recovery · \(fresh)")
             }
-            return String(localized: "Charge · cal")
+            return String(localized: "Recovery · cal")
         case .missing:
-            return noSnapshot ? String(localized: "Open NOOP") : String(localized: "Charge")
+            return noSnapshot ? String(localized: "Open NOOP") : String(localized: "Recovery")
         }
     }
 
@@ -290,18 +290,18 @@ struct NOOPChargeView: View {
         // When the snapshot has aged out we never print the old number; we say it is stale and how old.
         if isStale {
             let fresh = freshness ?? String(localized: "old")
-            return String(localized: "Charge stale · \(fresh)")
+            return String(localized: "Recovery stale · \(fresh)")
         }
         switch charge {
         case .value(let v):
             // A fresh number reads as live, so append the recency once it starts to age.
             let suffix = inlineFreshnessSuffix
-            if let hr = entry.snapshot?.hr { return String(localized: "Charge \(v) · \(hr) bpm\(suffix)") }
-            return String(localized: "Charge \(v)\(suffix)")
+            if let hr = entry.snapshot?.hr { return String(localized: "Recovery \(v) · \(hr) bpm\(suffix)") }
+            return String(localized: "Recovery \(v)\(suffix)")
         case .calibrating:
-            return String(localized: "Charge calibrating")
+            return String(localized: "Recovery calibrating")
         case .missing:
-            return String(localized: "Charge –")
+            return String(localized: "Recovery –")
         }
     }
 
@@ -320,12 +320,8 @@ struct NOOPChargeView: View {
 
     private var rectangular: some View {
         VStack(alignment: .leading, spacing: 3) {
-            // Header: the wordmark + the snapshot age (or a sync hint when empty).
+            // Header: the snapshot age (or a sync hint when empty).
             HStack(spacing: 4) {
-                Text("NOOP")
-                    .font(StrandFont.rounded(11, weight: .bold))
-                    .tracking(0.5)
-                    .foregroundStyle(StrandPalette.textSecondary)
                 Spacer(minLength: 0)
                 Text(headerTrailing)
                     .font(.system(size: 10))
@@ -333,9 +329,9 @@ struct NOOPChargeView: View {
             }
             // The three scores, equal-width.
             HStack(alignment: .top, spacing: 0) {
-                scoreCell(String(localized: "Charge"), readout: charge, tint: chargeTint)
-                scoreCell(String(localized: "Effort"), readout: effort, tint: effortTint)
-                scoreCell(String(localized: "Rest"), readout: rest, tint: restTint)
+                scoreCell(String(localized: "Recovery"), readout: charge, tint: chargeTint)
+                scoreCell(String(localized: "Strain"), readout: effort, tint: effortTint)
+                scoreCell(String(localized: "Sleep"), readout: rest, tint: restTint)
             }
         }
         .widgetAccentable()
@@ -411,13 +407,13 @@ struct NOOPChargeView: View {
         // is a dash plainly so it is never mistaken for "still calibrating".
         if isStale {
             let fresh = freshness ?? String(localized: "a while ago")
-            return String(localized: "Charge out of date, last synced \(fresh). Open NOOP on iPhone.")
+            return String(localized: "Recovery out of date, last synced \(fresh). Open NOOP on iPhone.")
         }
         switch charge {
-        case .value(let v):    return String(localized: "Charge \(v) out of 100")
-        case .calibrating:     return String(localized: "Charge calibrating, needs more data")
+        case .value(let v):    return String(localized: "Recovery \(v) out of 100")
+        case .calibrating:     return String(localized: "Recovery calibrating, needs more data")
         case .missing:         return noSnapshot ? String(localized: "No data, open NOOP on iPhone")
-                                                 : String(localized: "Charge unavailable")
+                                                 : String(localized: "Recovery unavailable")
         }
     }
 
@@ -434,9 +430,9 @@ struct NOOPChargeView: View {
             case .missing:       return String(localized: "\(label) unavailable")
             }
         }
-        let chargePhrase = phrase(String(localized: "Charge"), charge)
-        let effortPhrase = phrase(String(localized: "Effort"), effort)
-        let restPhrase = phrase(String(localized: "Rest"), rest)
+        let chargePhrase = phrase(String(localized: "Recovery"), charge)
+        let effortPhrase = phrase(String(localized: "Strain"), effort)
+        let restPhrase = phrase(String(localized: "Sleep"), rest)
         return String(localized: "NOOP. \(chargePhrase), \(effortPhrase), \(restPhrase).")
     }
 
@@ -455,8 +451,8 @@ struct NOOPChargeComplication: Widget {
             NOOPChargeView(entry: entry)
                 .containerBackground(StrandPalette.surfaceBase, for: .widget)
         }
-        .configurationDisplayName("NOOP Charge")
-        .description("Your Charge (recovery) on the watch face, with Effort and Rest in the rectangular card.")
+        .configurationDisplayName("NOOP Recovery")
+        .description("Your Recovery on the watch face, with Strain and Sleep in the rectangular card.")
         .supportedFamilies([
             .accessoryCircular,
             .accessoryCorner,

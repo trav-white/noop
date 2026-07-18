@@ -1000,15 +1000,6 @@ fun TodayScreen(
         }
         }
 
-        // WORDMARK, a subtle centred "N O O P" on the sky between the header and the hero (iOS LiquidWordmark
-        // parity). White @ ~50% opacity, letter-spaced, perfectly centred; a tap plays a small random wiggle
-        // easter egg. The old Android Today had NO wordmark; this adds it. Staggered in just after the header.
-        item {
-            Box(modifier = Modifier.fillMaxWidth().staggeredAppear(0)) {
-                LiquidWordmark()
-            }
-        }
-
         // A "workout in progress" indicator whenever a manual workout is active (iOS parity: the Today
         // ActiveWorkoutIndicator). A tap routes to Live and re-opens the in-exercise overlay. Gated purely on
         // `activeWorkout`, so it auto-appears/clears with no extra lifecycle wiring. Its per-second clock
@@ -1073,7 +1064,7 @@ fun TodayScreen(
                                 dismissTodayCard(
                                     CARD_CALIBRATING,
                                     "Building your baseline",
-                                    "Charge, Effort and Rest become personal after a few nights of wear.",
+                                    "Recovery, Strain and Sleep become personal after a few nights of wear.",
                                 )
                             },
                         )
@@ -1097,7 +1088,7 @@ fun TodayScreen(
                                 dismissTodayCard(
                                     CARD_SCORES_BUILDING,
                                     "Live now. Your scores are building.",
-                                    "Charge, Effort and Rest build over your next few nights of wear.",
+                                    "Recovery, Strain and Sleep build over your next few nights of wear.",
                                 )
                             },
                         )
@@ -1319,7 +1310,7 @@ fun TodayScreen(
                     modifier = Modifier.size(Metrics.iconSmall),
                 )
                 Text(
-                    "No cardio load yet. Effort builds once your heart rate climbs into your effort " +
+                    "No cardio load yet. Strain builds once your heart rate climbs into your effort " +
                         "zone (around 50% of your heart-rate reserve). A calm day honestly reads near zero.",
                     style = NoopType.footnote,
                     color = Palette.textTertiary,
@@ -1805,7 +1796,7 @@ private fun ScoringGuideIntroCard(onOpen: () -> Unit, onDismiss: () -> Unit) {
                 }
             }
             Text(
-                "See how Charge, Effort and Rest are calculated, and how they differ from WHOOP.",
+                "See how Recovery, Strain and Sleep are calculated, and how they differ from WHOOP.",
                 style = NoopType.subhead,
                 color = Palette.textSecondary,
             )
@@ -2095,73 +2086,6 @@ private fun LiquidBatteryRing(batteryPct: Double?, onClick: () -> Unit) {
                 contentDescription = null,
                 tint = Color.White.copy(alpha = 0.5f),
                 modifier = Modifier.size(15.dp),
-            )
-        }
-    }
-}
-
-// MARK: - NOOP wordmark (iOS LiquidWordmark parity — centred, with a tap easter egg)
-//
-// The subtle "N O O P" wordmark that sits on the sky between the header and the hero. Built as a row of
-// letters (not one tracked string, which adds a trailing gap after the last glyph and pushes the word
-// off-centre), so it sits DEAD centre, white @ ~50% opacity. A tap plays one of several random one-shot
-// animations — wiggle / shake / flip / spin / bounce / jelly squash. Mirrors iOS LiquidWordmark.
-
-@Composable
-private fun LiquidWordmark() {
-    val reduced = rememberReduceMotion()
-    var rot by remember { mutableStateOf(0f) }        // z-rotation (wiggle / spin)
-    var scaleX by remember { mutableStateOf(1f) }     // horizontal scale (jelly squash)
-    var scaleY by remember { mutableStateOf(1f) }     // vertical scale (bounce / jelly)
-    var dx by remember { mutableStateOf(0f) }         // horizontal offset (shake)
-    var egg by remember { mutableIntStateOf(0) }      // which egg to play (drives the LaunchedEffect)
-
-    val view = LocalView.current
-    val animRot by animateFloatAsState(rot, tween(durationMillis = if (reduced) 0 else 520), label = "wordmark-rot")
-    val animScaleX by animateFloatAsState(scaleX, tween(durationMillis = if (reduced) 0 else 380), label = "wordmark-sx")
-    val animScaleY by animateFloatAsState(scaleY, tween(durationMillis = if (reduced) 0 else 380), label = "wordmark-sy")
-    val animDx by animateFloatAsState(dx, tween(durationMillis = if (reduced) 0 else 420), label = "wordmark-dx")
-
-    // On each tap, kick a value to an extreme then settle it back so the animateFloatAsState eases through
-    // to rest — a natural wobble without hand-authored keyframes. Six variants, chosen at random per tap.
-    LaunchedEffect(egg) {
-        if (egg == 0) return@LaunchedEffect
-        when ((0..5).random()) {
-            0 -> { rot = -12f; kotlinx.coroutines.delay(90); rot = 0f }            // wiggle
-            1 -> { dx = -12f; kotlinx.coroutines.delay(90); dx = 0f }              // shake
-            2 -> { rot += 360f }                                                    // spin
-            3 -> { scaleX = 1.28f; scaleY = 1.28f; kotlinx.coroutines.delay(90); scaleX = 1f; scaleY = 1f } // bounce
-            4 -> { scaleX = 1.35f; scaleY = 0.7f; kotlinx.coroutines.delay(90); scaleX = 1f; scaleY = 1f }  // jelly
-            else -> { rot += 360f }                                                 // flip (spin twin)
-        }
-    }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-            ) {
-                egg += 1
-                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            }
-            .graphicsLayer {
-                rotationZ = animRot
-                this.scaleX = animScaleX
-                this.scaleY = animScaleY
-                translationX = animDx
-            }
-            .clearAndSetSemantics {}, // decorative wordmark — invisible to TalkBack
-        horizontalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterHorizontally),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        "NOOP".forEach { ch ->
-            Text(
-                ch.toString(),
-                style = NoopType.number(16f, weight = FontWeight.Bold)
-                    .copy(shadow = Shadow(color = Color.Black.copy(alpha = 0.25f), offset = Offset(0f, 1f), blurRadius = 6f)),
-                color = Color.White.copy(alpha = 0.5f),
             )
         }
     }
@@ -3404,7 +3328,7 @@ internal fun ChargeBreakdownSheet(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    "What shaped your Charge",
+                    "What shaped your Recovery",
                     style = NoopType.headline,
                     color = Palette.textPrimary,
                     modifier = Modifier.weight(1f),
@@ -3460,13 +3384,13 @@ internal fun ChargeBreakdownSheet(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(14.dp))
                         .clickable(
-                            onClickLabel = "How Charge is calculated",
+                            onClickLabel = "How Recovery is calculated",
                             onClick = onHowCalculated,
                         )
                         .background(Palette.surfaceInset)
                         .padding(14.dp)
                         .semantics {
-                            contentDescription = "How Charge is calculated. The method behind the score."
+                            contentDescription = "How Recovery is calculated. The method behind the score."
                         },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -3482,7 +3406,7 @@ internal fun ChargeBreakdownSheet(
                         verticalArrangement = Arrangement.spacedBy(1.dp),
                     ) {
                         Text(
-                            "How Charge is calculated",
+                            "How Recovery is calculated",
                             style = NoopType.subhead,
                             color = Palette.textPrimary,
                         )
@@ -3527,7 +3451,7 @@ private fun RecoveryDriversSection(
     if (drivers.isEmpty()) return
 
     val tier = remember(days, readDay) { chargeConfidenceTier(days, readDay) }
-    val overline = carriedDay?.let { "Charge · ${carriedCaption(it.day)}" } ?: "Charge"
+    val overline = carriedDay?.let { "Recovery · ${carriedCaption(it.day)}" } ?: "Recovery"
 
     Column(verticalArrangement = Arrangement.spacedBy(Metrics.gap)) {
         // Header row: section title + the SURFACED confidence pill (dot + tier tag) on the right.
@@ -3541,7 +3465,7 @@ private fun RecoveryDriversSection(
             Column(verticalArrangement = Arrangement.spacedBy(Metrics.space16)) {
                 drivers.forEach { DriverRow(it) }
                 Text(
-                    "Each line is how many points that signal moved Charge versus sitting at your " +
+                    "Each line is how many points that signal moved Recovery versus sitting at your " +
                         "on-device baseline. Approximate, not medical advice.",
                     style = NoopType.footnote,
                     color = Palette.textTertiary,
@@ -3636,7 +3560,7 @@ private fun RecoveryContributorsSection(day: DailyMetric?, carriedDay: DailyMetr
     if (hrv == null && rhr == null && sleepMin == null && resp == null) return
 
     val overline = carriedDay?.let { "Recovery · ${carriedCaption(it.day)}" } ?: "Recovery"
-    SectionHeader("Contributors", overline = overline, trailing = "What drove Charge")
+    SectionHeader("Contributors", overline = overline, trailing = "What drove Recovery")
     NoopCard {
         Column(verticalArrangement = Arrangement.spacedBy(Metrics.space16)) {
             // HRV, higher is better; map a typical 20–120 ms span. Teal (its biometric hue; iOS metricCyan).
@@ -4240,7 +4164,7 @@ private fun MetricGrid(
             frac = d?.strain?.let { (it / 100.0).coerceIn(0.0, 1.0) },
         ),
         KeyMetric.REST to KeyTileData(
-            label = "Rest",
+            label = "Sleep",
             value = restScore?.let { "${it.roundToInt()}" } ?: NO_DATA,
             unit = if (restScore != null) "%" else "",
             tint = restScore?.let { Palette.recoveryColor(it) } ?: Palette.restColor,
@@ -4945,8 +4869,8 @@ private fun OverviewHRChart(
         buildList {
             add("24-hour heart rate")
             if (sleep != null) add("sleep band ${hrHoursMinutes((sleep.endTs - sleep.effectiveStartTs).toInt())}")
-            if (recovery != null) add("${recovery.roundToInt()} percent Charge at wake")
-            if (strain != null) add("${UnitFormatter.effortDisplay(strain, effortScale)} Effort now")
+            if (recovery != null) add("${recovery.roundToInt()} percent Recovery at wake")
+            if (strain != null) add("${UnitFormatter.effortDisplay(strain, effortScale)} Strain now")
             if (workouts.isNotEmpty()) add("${workouts.size} workout${if (workouts.size == 1) "" else "s"} marked")
         }.joinToString(", ")
     }
@@ -5053,14 +4977,14 @@ private fun OverviewHRChart(
             }
             if (chargeX != null && recovery != null) {
                 ChartMarkerPill(
-                    text = "${recovery.roundToInt()}% Charge",
+                    text = "${recovery.roundToInt()}% Recovery",
                     color = Palette.recoveryColor(recovery),
                     modifier = Modifier.markerOffset(chargeX, density, topPadDp),
                 )
             }
             if (effortX != null && strain != null) {
                 ChartMarkerPill(
-                    text = "${UnitFormatter.effortDisplay(strain, effortScale)} Effort",
+                    text = "${UnitFormatter.effortDisplay(strain, effortScale)} Strain",
                     color = Palette.effortTint(strain / StrainScorer.maxStrain),
                     modifier = Modifier.markerOffset(plotW, density, topPadDp, alignEnd = true),
                 )
@@ -5705,9 +5629,9 @@ private fun synthesisDetail(d: DailyMetric?): String {
     val rec = d?.recovery
         ?: return "No metrics yet. Import your WHOOP export or wear the strap to begin."
     val recPart = when {
-        rec < 50 -> "Charge is low"
-        rec < 70 -> "Charge is steady"
-        else -> "Charge is strong"
+        rec < 50 -> "Recovery is low"
+        rec < 70 -> "Recovery is steady"
+        else -> "Recovery is strong"
     }
     val sleepPart = d.totalSleepMin?.let { mins ->
         if (mins / 60.0 >= 7) " and sleep was consistent" else " but sleep ran short"

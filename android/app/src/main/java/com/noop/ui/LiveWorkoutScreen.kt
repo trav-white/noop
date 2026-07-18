@@ -146,7 +146,7 @@ fun LiveWorkoutScreen(vm: AppViewModel, onClose: () -> Unit) {
                     accent = if (w.avgHr > 0) Palette.metricRose else Palette.textPrimary)
                 StatTile(modifier = Modifier.weight(1f), label = "Peak", value = if (w.peakHr > 0) "${w.peakHr}" else "—",
                     accent = if (w.peakHr > 0) Palette.metricRose else Palette.textPrimary)
-                StatTile(modifier = Modifier.weight(1f), label = "Effort", value = UnitFormatter.effortDisplay(w.liveStrain, effortScale),
+                StatTile(modifier = Modifier.weight(1f), label = "Strain", value = UnitFormatter.effortDisplay(w.liveStrain, effortScale),
                     accent = Palette.strainColor(w.liveStrain))
             }
 
@@ -209,7 +209,7 @@ private fun EffortGauge(liveStrain: Double, effortScale: EffortScale) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Overline("Effort building", color = Palette.effortColor)
+            Overline("Strain building", color = Palette.effortColor)
             StrainGauge(
                 strain = UnitFormatter.effortValue(liveStrain, effortScale),
                 outOf = if (effortScale == EffortScale.WHOOP) 21.0 else 100.0,

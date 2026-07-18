@@ -383,7 +383,7 @@ struct ChargeBreakdownDemoHost: View {
                 .padding(NoopMetrics.screenPadding)
             }
             .background(StrandPalette.surfaceBase)
-            .navigationTitle("What shaped your Charge")
+            .navigationTitle("What shaped your Recovery")
         }
         .preferredColorScheme(.dark)
     }

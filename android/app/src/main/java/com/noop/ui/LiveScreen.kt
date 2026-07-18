@@ -378,7 +378,7 @@ fun LiveScreen(viewModel: AppViewModel, onManageDevices: () -> Unit = {}) {
                             accent = if (bpm == null) Palette.textPrimary else Palette.metricRose)
                         StatTile(modifier = Modifier.weight(1f), label = "Avg", value = if (w.avgHr > 0) "${w.avgHr}" else "—")
                         StatTile(modifier = Modifier.weight(1f), label = "Peak", value = if (w.peakHr > 0) "${w.peakHr}" else "—")
-                        StatTile(modifier = Modifier.weight(1f), label = "Effort", value = UnitFormatter.effortDisplay(w.liveStrain, effortScale),
+                        StatTile(modifier = Modifier.weight(1f), label = "Strain", value = UnitFormatter.effortDisplay(w.liveStrain, effortScale),
                             accent = Palette.strainColor(w.liveStrain))
                     }
                     if (w.gpsEnabled) {

@@ -138,29 +138,29 @@ private data class MetricSpec(
 /** The built-in DailyMetric-backed metrics, in the macOS ordering (Charge first). */
 private val builtInMetrics: List<MetricSpec> = listOf(
     MetricSpec(
-        key = "recovery", title = "Charge", unit = "%", category = "Charge",
+        key = "recovery", title = "Recovery", unit = "%", category = "Recovery",
         accent = Palette.accent, higherIsBetter = true, decimals = 0,
         dailyPick = { it.recovery },
         description = "How recovered you are , led by HRV versus your personal baseline.",
     ),
     MetricSpec(
-        key = "strain", title = "Effort", unit = "/100", category = "Effort",
+        key = "strain", title = "Strain", unit = "/100", category = "Strain",
         accent = Palette.strain066, higherIsBetter = null, decimals = 1,
         dailyPick = { it.strain },
         description = "Cardiovascular load for the day, on a 0-100 scale (was 0-21).",
     ),
     MetricSpec(
-        key = "hrv", title = "HRV", unit = "ms", category = "Charge",
+        key = "hrv", title = "HRV", unit = "ms", category = "Recovery",
         accent = Palette.metricPurple, higherIsBetter = true, decimals = 0,
         dailyPick = { it.avgHrv },
     ),
     MetricSpec(
-        key = "rhr", title = "Resting HR", unit = "bpm", category = "Charge",
+        key = "rhr", title = "Resting HR", unit = "bpm", category = "Recovery",
         accent = Palette.metricRose, higherIsBetter = false, decimals = 0,
         dailyPick = { it.restingHr?.toDouble() },
     ),
     MetricSpec(
-        key = "sleep", title = "Sleep", unit = "h", category = "Rest",
+        key = "sleep", title = "Sleep", unit = "h", category = "Sleep",
         // Rest-score accent rides the reset accent token (iOS metricAccent maps every Rest metric ,
         // sleep_performance / sleep_total_min , to StrandPalette.accent), not a stray metric hue.
         accent = Palette.accent, higherIsBetter = true, decimals = 1,
@@ -168,7 +168,7 @@ private val builtInMetrics: List<MetricSpec> = listOf(
         description = "How restorative your sleep was , duration, efficiency, deep+REM, timing.",
     ),
     MetricSpec(
-        key = "efficiency", title = "Sleep Efficiency", unit = "%", category = "Rest",
+        key = "efficiency", title = "Sleep Efficiency", unit = "%", category = "Sleep",
         accent = Palette.accent, higherIsBetter = true, decimals = 0,
         dailyPick = { it.efficiency },
     ),
@@ -724,9 +724,9 @@ private fun ChartFootItem(label: String, value: String) {
 
 /** The metric category's domain colour world for the card wash; brand green for neutral categories. */
 private fun domainTint(category: String): Color = when (category) {
-    "Charge" -> Palette.chargeColor
-    "Effort" -> Palette.effortColor
-    "Rest" -> Palette.restColor
+    "Recovery" -> Palette.chargeColor
+    "Strain" -> Palette.effortColor
+    "Sleep" -> Palette.restColor
     else -> Palette.accent
 }
 

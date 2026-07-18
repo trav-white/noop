@@ -130,7 +130,7 @@ data class CompareMetric(
  * [DailyMetric] so a my-whoop metric can be derived from the daily cache as a fallback.
  */
 private object CompareCatalog {
-    val categories = listOf("Heart", "Charge", "Rest", "Effort", "Health", "Nutrition", "Mind")
+    val categories = listOf("Heart", "Recovery", "Sleep", "Strain", "Health", "Nutrition", "Mind")
 
     val all: List<CompareMetric> = listOf(
         // Heart
@@ -143,27 +143,27 @@ private object CompareCatalog {
         CompareMetric("vitality", "Vitality", "Heart", "", "my-whoop", 0),
         CompareMetric("body_age", "Body Age", "Heart", "yrs", "my-whoop", 0),
         // Charge (was Recovery)
-        CompareMetric("recovery", "Charge", "Charge", "%", "my-whoop", 0),
-        CompareMetric("hrv", "Heart Rate Variability", "Charge", "ms", "my-whoop", 0),
-        CompareMetric("rhr", "Resting Heart Rate", "Charge", "bpm", "my-whoop", 0),
-        CompareMetric("resp_rate", "Respiratory Rate", "Charge", "rpm", "my-whoop", 1),
-        CompareMetric("spo2", "Blood Oxygen", "Charge", "%", "my-whoop", 0),
-        CompareMetric("skin_temp", "Skin Temperature", "Charge", "°C", "my-whoop", 1),
+        CompareMetric("recovery", "Recovery", "Recovery", "%", "my-whoop", 0),
+        CompareMetric("hrv", "Heart Rate Variability", "Recovery", "ms", "my-whoop", 0),
+        CompareMetric("rhr", "Resting Heart Rate", "Recovery", "bpm", "my-whoop", 0),
+        CompareMetric("resp_rate", "Respiratory Rate", "Recovery", "rpm", "my-whoop", 1),
+        CompareMetric("spo2", "Blood Oxygen", "Recovery", "%", "my-whoop", 0),
+        CompareMetric("skin_temp", "Skin Temperature", "Recovery", "°C", "my-whoop", 1),
         // Rest (was Sleep)
-        CompareMetric("sleep_performance", "Rest", "Rest", "%", "my-whoop", 0),
-        CompareMetric("sleep_total_min", "Asleep Time", "Rest", "min", "my-whoop", 0),
-        CompareMetric("sleep_efficiency", "Sleep Efficiency", "Rest", "%", "my-whoop", 0),
-        CompareMetric("sleep_deep_min", "Deep (SWS) Sleep", "Rest", "min", "my-whoop", 0),
-        CompareMetric("sleep_rem_min", "REM Sleep", "Rest", "min", "my-whoop", 0),
-        CompareMetric("sleep_light_min", "Light Sleep", "Rest", "min", "my-whoop", 0),
+        CompareMetric("sleep_performance", "Sleep", "Sleep", "%", "my-whoop", 0),
+        CompareMetric("sleep_total_min", "Asleep Time", "Sleep", "min", "my-whoop", 0),
+        CompareMetric("sleep_efficiency", "Sleep Efficiency", "Sleep", "%", "my-whoop", 0),
+        CompareMetric("sleep_deep_min", "Deep (SWS) Sleep", "Sleep", "min", "my-whoop", 0),
+        CompareMetric("sleep_rem_min", "REM Sleep", "Sleep", "min", "my-whoop", 0),
+        CompareMetric("sleep_light_min", "Light Sleep", "Sleep", "min", "my-whoop", 0),
         // Effort (was Strain)
-        CompareMetric("strain", "Effort", "Effort", "/100", "my-whoop", 1),
-        CompareMetric("steps", "Steps", "Effort", "", "apple-health", 0),
+        CompareMetric("strain", "Strain", "Strain", "/100", "my-whoop", 1),
+        CompareMetric("steps", "Steps", "Strain", "", "apple-health", 0),
         // On-device steps ESTIMATE for a WHOOP 4.0 (no real step count over BLE): the strap's daily
         // motion volume scaled by a personal calibration, stored under the computed "-noop" source.
         // Distinct from the real "steps" above — labelled "(estimated)" so it never reads as measured.
-        CompareMetric("steps_est", "Steps (estimated)", "Effort", "steps", "my-whoop", 0),
-        CompareMetric("active_kcal", "Active Energy", "Effort", "kcal", "apple-health", 0),
+        CompareMetric("steps_est", "Steps (estimated)", "Strain", "steps", "my-whoop", 0),
+        CompareMetric("active_kcal", "Active Energy", "Strain", "kcal", "apple-health", 0),
         // Health / Body
         CompareMetric("weight", "Weight", "Health", "kg", "apple-health", 1),
         CompareMetric("body_fat", "Body Fat", "Health", "%", "apple-health", 1),

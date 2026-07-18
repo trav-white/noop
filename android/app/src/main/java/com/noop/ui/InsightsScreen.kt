@@ -100,7 +100,7 @@ private enum class Outcome(
     val format: (Double) -> String,
 ) {
     Recovery(
-        label = "Charge", outcomeName = "Charge", higherIsBetter = true, domain = DomainTheme.Charge,
+        label = "Recovery", outcomeName = "Charge", higherIsBetter = true, domain = DomainTheme.Charge,
         pick = { it.recovery }, format = { "${it.roundToInt()}%" },
     ),
     Hrv(
@@ -108,7 +108,7 @@ private enum class Outcome(
         pick = { it.avgHrv }, format = { "${it.roundToInt()} ms" },
     ),
     Sleep(
-        label = "Rest", outcomeName = "Rest", higherIsBetter = true, domain = DomainTheme.Rest,
+        label = "Sleep", outcomeName = "Rest", higherIsBetter = true, domain = DomainTheme.Rest,
         pick = { it.efficiency }, format = { "${it.roundToInt()}%" },
     ),
     Rhr(
@@ -557,7 +557,7 @@ private fun WhatMovesYouLink(onOpen: () -> Unit) {
                 // glyph (mirrors the iOS "WHAT MOVES YOU ›" overline). The descriptive line sits beneath.
                 Overline("What moves you ›", color = Palette.textPrimary)
                 Text(
-                    "Ranked, lag-aware: which of your habits actually move your Charge, plus your " +
+                    "Ranked, lag-aware: which of your habits actually move your Recovery, plus your " +
                         "personal alcohol/caffeine dose-response.",
                     style = NoopType.footnote,
                     color = Palette.textTertiary,
@@ -681,12 +681,12 @@ private fun ActivityCostCard(cost: com.noop.analytics.ActivityCost) {
                     modifier = Modifier.weight(1f),
                     label = "Next morning",
                     value = "${cost.meanNextMorning.roundToInt()}",
-                    caption = "Charge · $pointsLabel pts",
+                    caption = "Recovery · $pointsLabel pts",
                     accent = accent,
                 )
                 StatTile(
                     modifier = Modifier.weight(1f),
-                    label = "Rest baseline",
+                    label = "Sleep baseline",
                     value = "${cost.baselineMean.roundToInt()}",
                     caption = "untouched days",
                     accent = Palette.textPrimary,
@@ -1615,32 +1615,32 @@ private fun computeRelationships(model: InsightModel): List<Relationship> {
     pearsonAligned(series(Outcome.Hrv), series(Outcome.Recovery))?.let { (r, n) ->
         out.add(
             Relationship(
-                "hrv-rec", "HRV ↔ Charge",
-                "Heart-rate variability as the engine behind your charge score.", r, n,
+                "hrv-rec", "HRV ↔ Recovery",
+                "Heart-rate variability as the engine behind your recovery score.", r, n,
             ),
         )
     }
     pearsonAligned(series(Outcome.Sleep), series(Outcome.Recovery))?.let { (r, n) ->
         out.add(
             Relationship(
-                "sleep-rec", "Rest ↔ Charge",
-                "How closely a good night tracks next-morning charge.", r, n,
+                "sleep-rec", "Sleep ↔ Recovery",
+                "How closely a good night tracks next-morning recovery.", r, n,
             ),
         )
     }
     pearsonAligned(series(Outcome.Rhr), series(Outcome.Recovery))?.let { (r, n) ->
         out.add(
             Relationship(
-                "rhr-rec", "Resting HR ↔ Charge",
-                "A lower resting heart rate usually means a higher charge.", r, n,
+                "rhr-rec", "Resting HR ↔ Recovery",
+                "A lower resting heart rate usually means a higher recovery.", r, n,
             ),
         )
     }
     pearsonLagged(series(Outcome.Recovery), lagDays = 1)?.let { (r, n) ->
         out.add(
             Relationship(
-                "rec-lag", "Charge → Next-day charge",
-                "How much one day's charge carries into the next.", r, n,
+                "rec-lag", "Recovery → Next-day recovery",
+                "How much one day's recovery carries into the next.", r, n,
             ),
         )
     }

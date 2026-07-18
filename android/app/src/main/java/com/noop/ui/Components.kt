@@ -984,11 +984,10 @@ fun RecoveryRing(
         lineWidth = lineWidth,
         showsLabel = showsLabel,
         // Brand-glyph geometry: open ~80% ring (288° of 360°), 12-o'clock start, clockwise,
-        // plus the solid gold core dot + micro NOOP wordmark that mark the recovery hero.
+        // plus the solid gold core dot that marks the recovery hero.
         startDeg = -90f,
         spanDeg = 288f,
         coreDot = Palette.gold,
-        wordmark = "NOOP",
         modifier = modifier,
     )
 }

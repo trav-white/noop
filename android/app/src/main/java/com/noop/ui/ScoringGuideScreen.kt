@@ -91,9 +91,9 @@ enum class ScoreSection {
 
     val label: String
         get() = when (this) {
-            CHARGE -> "Charge"
-            EFFORT -> "Effort"
-            REST -> "Rest"
+            CHARGE -> "Recovery"
+            EFFORT -> "Strain"
+            REST -> "Sleep"
         }
 
     /** A representative sample fraction (0–1) for the section's illustrative gauge — a
@@ -186,11 +186,11 @@ fun ScoringGuideScreen(
                 IntroCard()
                 ScoreCard(
                     section = ScoreSection.CHARGE,
-                    headline = "Charge: how recovered are you?",
+                    headline = "Recovery: how recovered are you?",
                     body = "Led by your heart-rate variability (HRV) measured against your own " +
-                        "personal baseline, plus resting heart rate, last night's Rest, breathing " +
+                        "personal baseline, plus resting heart rate, last night's Sleep, breathing " +
                         "rate, and a skin-temperature signal (an early illness or overreach flag). " +
-                        "Higher HRV versus your baseline means more Charge. NOOP needs a few nights " +
+                        "Higher HRV versus your baseline means more Recovery. NOOP needs a few nights " +
                         "to learn your baseline first. Until then you'll see “Calibrating”.",
                     vsWhoop = "Same core idea as WHOOP's Recovery % (HRV-led recovery), but our " +
                         "weighting and baseline maths are our own, and openly documented.",
@@ -199,7 +199,7 @@ fun ScoringGuideScreen(
                 )
                 ScoreCard(
                     section = ScoreSection.EFFORT,
-                    headline = "Effort: how hard did your heart work?",
+                    headline = "Strain: how hard did your heart work?",
                     body = "Your cardiovascular load. NOOP turns every second of heart rate into a " +
                         "training-impulse using heart-rate-reserve zones (Karvonen), weights time in " +
                         "harder zones more heavily (Edwards / Banister), and places it on a " +
@@ -214,7 +214,7 @@ fun ScoringGuideScreen(
                 )
                 ScoreCard(
                     section = ScoreSection.REST,
-                    headline = "Rest: how restorative was your sleep?",
+                    headline = "Sleep: how restorative was your sleep?",
                     body = "A blend of how long you slept versus your personal need (the biggest " +
                         "factor), how efficiently (asleep versus in bed), how much was restorative " +
                         "(deep + REM sleep), and how consistent your sleep and wake timing is.",
@@ -250,7 +250,7 @@ private fun Header(onClose: () -> Unit) {
             Overline("Your daily scores", color = Palette.textTertiary)
             Text("How your scores work", style = NoopType.display(26f), color = Palette.textPrimary)
             Text(
-                "Charge · Effort · Rest",
+                "Recovery · Strain · Sleep",
                 style = NoopType.caption,
                 color = Palette.textSecondary,
             )
@@ -274,7 +274,7 @@ private fun IntroCard() {
         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Overline("The three scores")
             Text(
-                "NOOP gives you three daily scores (Charge, Effort and Rest), each on a 0-100 " +
+                "NOOP gives you three daily scores (Recovery, Strain and Sleep), each on a 0-100 " +
                     "scale. They're built from your strap's raw signals using published, " +
                     "peer-reviewed sport science, and computed entirely on your device. They are " +
                     "NOT WHOOP's scores: we don't have WHOOP's private algorithms and don't pretend " +

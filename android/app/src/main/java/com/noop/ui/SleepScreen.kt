@@ -665,7 +665,7 @@ private val LIQUID_HERO_RADIUS: Dp = 26.dp
 @Composable
 private fun RestHero(score: Double?, asleepMin: Double?, source: String) {
     Column(verticalArrangement = Arrangement.spacedBy(Metrics.gap)) {
-        SectionHeader("Sleep performance", overline = "Last night", trailing = "Rest")
+        SectionHeader("Sleep performance", overline = "Last night", trailing = "Sleep")
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1914,7 +1914,7 @@ private fun MetricGrid(m: SleepModel, onMetricClick: (String) -> Unit = {}) {
     val tiles = listOf<@Composable (Modifier) -> Unit>(
         { mod ->
             SparkTile(
-                mod, "Rest",
+                mod, "Sleep",
                 value = pctValue(m.performance.latest),
                 caption = vsTypical(m.performance.latest, m.performance.typical, "%"),
                 accent = m.performance.latest?.let { Palette.recoveryColor(it) } ?: Palette.textPrimary,
@@ -3460,7 +3460,7 @@ private data class SleepMetricSpec(
 )
 
 private fun sleepMetricSpec(key: String): SleepMetricSpec = when (key) {
-    "performance"     -> SleepMetricSpec("Rest", "%", Palette.restColor) { "${it.roundToInt()}" }
+    "performance"     -> SleepMetricSpec("Sleep", "%", Palette.restColor) { "${it.roundToInt()}" }
     "efficiency"      -> SleepMetricSpec("Sleep Efficiency", "%", Palette.statusPositive) { "${it.roundToInt()}" }
     "consistency"     -> SleepMetricSpec("Consistency", "%", Palette.metricCyan) { "${it.roundToInt()}" }
     "hours_vs_needed" -> SleepMetricSpec("Hours vs Needed", "%", Palette.restColor) { "${it.roundToInt()}" }

@@ -338,7 +338,7 @@ struct SleepView: View {
     private func restHero(_ model: SleepModel) -> some View {
         let score = model.performance.latest
         VStack(alignment: .leading, spacing: NoopMetrics.gap) {
-            SectionHeader("Sleep performance", overline: "Last night", trailing: String(localized: "Rest"))
+            SectionHeader("Sleep performance", overline: "Last night", trailing: String(localized: "Sleep"))
             // A subtle night atmosphere sits behind the sleep hero ONLY (the Rest world's whisper:
             // faint indigo wash + crescent moon over the near-black canvas, no glow), clipped to the
             // card. Replaces the now-flat ScenicHeroBackground here.
@@ -996,7 +996,7 @@ struct SleepView: View {
             LazyVGrid(columns: tileColumns, alignment: .leading, spacing: NoopMetrics.gap) {
 
                 StatTile(
-                    label: "Rest",
+                    label: "Sleep",
                     value: pctValue(perf.latest),
                     caption: vsTypical(perf.latest, perf.typical, suffix: "%"),
                     accent: perf.latest.map { StrandPalette.recoveryColor($0) } ?? StrandPalette.textPrimary,

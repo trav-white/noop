@@ -217,7 +217,7 @@ fun TrendsScreen(vm: AppViewModel) {
         item {
             ChartCard(
                 modifier = Modifier.staggeredAppear(index = 3),
-                title = "Charge",
+                title = "Recovery",
                 // The range bar above already prints the authoritative reading-count caption;
                 // the hero only names its window so the count isn't doubled in one card height.
                 subtitle = range.subtitle,
@@ -276,7 +276,7 @@ fun TrendsScreen(vm: AppViewModel) {
                 MetricTrendCard(
                     // Plotted values stay on the stored 0–100 scale (line shape unchanged); only the displayed
                     // numbers + unit follow the Effort-scale toggle, converted inside `fmt`. (#268)
-                    title = "Effort", unit = "/ ${UnitFormatter.effortScaleMax(effortScale)}",
+                    title = "Strain", unit = "/ ${UnitFormatter.effortScaleMax(effortScale)}",
                     // WHOOP: Effort/Strain is always BLUE , a deep→bright blue line, not the amber ramp.
                     color = Palette.effortColor,
                     tint = Palette.effortColor,
@@ -445,10 +445,10 @@ private fun WeekInReviewCard(
 
     NoopCard(modifier = modifier, tint = Palette.chargeColor) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            SectionHeader("Week in review", overline = "Charge · Effort · Rest")
+            SectionHeader("Week in review", overline = "Recovery · Strain · Sleep")
             if (chargeAvg != null) {
                 PipScoreRow(
-                    label = "Charge", value = chargeAvg, range = 0f..100f,
+                    label = "Recovery", value = chargeAvg, range = 0f..100f,
                     tint = Palette.chargeColor, format = { "${it.roundToInt()}" },
                 )
             }
@@ -460,14 +460,14 @@ private fun WeekInReviewCard(
                 val maxV = UnitFormatter.effortValue(100.0, effortScale)
                 val oneDecimal = effortScale == EffortScale.WHOOP
                 PipScoreRow(
-                    label = "Effort", value = display, range = 0f..maxV.toFloat(),
+                    label = "Strain", value = display, range = 0f..maxV.toFloat(),
                     tint = Palette.effortColor,
                     format = { if (oneDecimal) String.format(Locale.US, "%.1f", it) else "${it.roundToInt()}" },
                 )
             }
             if (restAvg != null) {
                 PipScoreRow(
-                    label = "Rest", value = restAvg, range = 0f..100f,
+                    label = "Sleep", value = restAvg, range = 0f..100f,
                     tint = Palette.restColor, format = { "${it.roundToInt()}" },
                 )
             }
@@ -912,9 +912,9 @@ private fun RecoveryHistoryCard(days: List<DailyMetric>, range: TrendsRange) {
         days.takeLast(span).mapNotNull { it.recovery }
     }
     val title = if (range == TrendsRange.All && days.size > 365) {
-        "Charge , all history"
+        "Recovery , all history"
     } else {
-        "Charge , past year"
+        "Recovery , past year"
     }
 
     NoopCard(tint = Palette.chargeColor) {
@@ -931,7 +931,7 @@ private fun RecoveryHistoryCard(days: List<DailyMetric>, range: TrendsRange) {
             }
             HorizontalDivider(color = Palette.hairline)
             Text(
-                "Each bar is one day's Charge score, low to high. The 53-week calendar " +
+                "Each bar is one day's Recovery score, low to high. The 53-week calendar " +
                     "heat-grid is part of the desktop app.",
                 style = NoopType.footnote,
                 color = Palette.textTertiary,

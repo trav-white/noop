@@ -18,7 +18,7 @@ widgets, in a single full-app pass.
 | Scope | Full app pass, every screen |
 | Approach | Token sweep first, then component swap, then screen restyles |
 | Fonts | D-DIN (numbers) + Montserrat (words), free licences, committed to repo |
-| Naming | NOOP naming and wordmark stay (Charge/Effort/Rest); design only |
+| Naming | Pillar labels use WHOOP terms Sleep/Recovery/Strain (Trav, mid-build); NOOP wordmark removed from app chrome; app icon and Settings/About name stay; WHOOP name/logo never added as branding |
 
 Risk accepted knowingly: this is a public repo that WHOOP is aware of; cloning their
 trade dress invites a takedown. Trav has chosen this deliberately.

@@ -50,3 +50,5 @@ jobs:
 
       - name: Run unit tests
         run: ./gradlew testFullDebugUnitTest
+
+# CI re-registration touch (fork enablement)

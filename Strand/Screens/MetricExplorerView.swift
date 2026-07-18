@@ -185,7 +185,7 @@ struct MetricExplorerView: View {
         // so the layout is byte-identical to the eager VStack.
         ScreenScaffold(title: "Explore", subtitle: "Every signal, one tap deep.",
                        onRefresh: { await repo.refresh() }, lazy: true,
-                       topBackground: liquidScaffoldSky()) {
+                       topBackground: AnyView(CanvasBackground())) {
             // A quiet, non-blocking hint while the empty-dot probe runs its first pass. The rows below
             // render in full immediately regardless — this only reassures during the scan, and never
             // leaves the screen reading as a bare/empty list before the probe lands (#199).

@@ -44,7 +44,7 @@ struct HydrationView: View {
                        onRefresh: { await reload() },
                        // Liquid finish: the same full-bleed day-of-sky backdrop Today + the other liquid
                        // tabs carry, so Hydration sits in one atmosphere.
-                       topBackground: liquidScaffoldSky()) {
+                       topBackground: AnyView(CanvasBackground())) {
             VStack(alignment: .leading, spacing: NoopMetrics.sectionGap) {
                 ringSection
                 logSection

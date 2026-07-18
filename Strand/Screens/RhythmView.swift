@@ -310,7 +310,7 @@ struct RhythmView: View {
             lazy: true,
             // Liquid finish: the day-of-sky backdrop, so the visualization sits in the same liquid
             // atmosphere as Today. The calm Rest-blue world of the cards stays unchanged over it.
-            topBackground: liquidScaffoldSky(),
+            topBackground: AnyView(CanvasBackground()),
             trailing: { closeButton }
         ) {
             SourceBadge("Experimental", tint: StrandPalette.restColor)

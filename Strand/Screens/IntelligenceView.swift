@@ -28,7 +28,7 @@ struct IntelligenceView: View {
                        // Liquid finish: the same full-bleed day-of-sky backdrop Today + the other liquid
                        // tabs carry, so Intelligence sits in one atmosphere. Static + non-interactive; the
                        // frosted cards below sit on the opaque canvas and stay legible.
-                       topBackground: liquidScaffoldSky()) {
+                       topBackground: AnyView(CanvasBackground())) {
             if let f = forecast { forecastCard(f) }
             explainerCard
             if intelligence.computing {

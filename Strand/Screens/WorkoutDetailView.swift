@@ -64,7 +64,7 @@ struct WorkoutDetailView: View {
                        // and every other liquid screen. Fixed and full-bleed; it does not scroll. This
                        // screen is presented in a sheet wrapped in a NavigationStack by WorkoutsView, so it
                        // needs no extra macOS NavigationStack of its own.
-                       topBackground: liquidScaffoldSky()) {
+                       topBackground: AnyView(CanvasBackground())) {
             headerCard
             statStrip
             routeCard

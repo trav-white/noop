@@ -76,7 +76,7 @@ public enum StrandPalette {
     public static let hairlineStrong = Color(light: "#C7BCA4", dark: "#3A464E") // hover / emphasis border (slate)
 
     // MARK: Canvas (NEW), the WHOOP slate vertical gradient.
-    // Replaces BOTH the flat navy background and the animated LiquidSky sunset header,
+    // Replaces BOTH the flat navy background and the old animated sky sunset header,
     // everywhere. A lighter slate at the top falls to a near-black slate at the bottom.
     /// Top of the canvas gradient (lighter slate).
     public static let canvasTop    = Color(hex: "#283339")
@@ -146,11 +146,11 @@ public enum StrandPalette {
     static let cZone3 = Color(light: "#CFA528", dark: "#FFDE00")
     static let cZone4 = Color(light: "#D87328", dark: "#FF8A00")
     static let cZone5 = Color(light: "#CB3A2F", dark: "#FF0026")
-    // Stress: calm green → amber → red.
+    // Stress: WHOOP calm green -> mid yellow -> high red (dark aligned to the WHOOP band hexes).
     static let cStressStops: [Gradient.Stop] = [
-        .init(color: Color(light: "#2E9E4F", dark: "#46B45A"), location: 0.0),
-        .init(color: Color(light: "#CFA528", dark: "#F2C53D"), location: 0.5),
-        .init(color: Color(light: "#CB3A2F", dark: "#E5483B"), location: 1.0),
+        .init(color: Color(light: "#2E9E4F", dark: "#16EC06"), location: 0.0),
+        .init(color: Color(light: "#CFA528", dark: "#FFDE00"), location: 0.5),
+        .init(color: Color(light: "#CB3A2F", dark: "#FF0026"), location: 1.0),
     ]
 
     // MARK: Recovery / Charge gradient, the gold "Charge" colour world.
@@ -225,14 +225,14 @@ public enum StrandPalette {
 
     // MARK: Status, Titanium gold/amber/orange, or the Classic green/amber/red.
     public static var statusPositive: Color { isClassic ? Color(light: "#2E9E4F", dark: "#46B45A") : Color(light: "#1F8A5B", dark: "#03E095") }
-    public static var statusWarning:  Color { isClassic ? Color(light: "#CFA528", dark: "#F2C53D") : Color(light: "#C2792E", dark: "#F0A020") }
-    public static var statusCritical: Color { isClassic ? Color(light: "#CB3A2F", dark: "#E5483B") : Color(light: "#C84E1E", dark: "#E0662F") }
+    public static var statusWarning:  Color { isClassic ? Color(light: "#CFA528", dark: "#FFDE00") : Color(light: "#C2792E", dark: "#FFDE00") }
+    public static var statusCritical: Color { isClassic ? Color(light: "#CB3A2F", dark: "#FF0026") : Color(light: "#C84E1E", dark: "#FF0026") }
 
     // MARK: Per-metric accents, HRV / SpO₂ / energy / risk. Classic leans the traditional hues (purple HRV, red risk).
     public static var metricCyan:   Color { isClassic ? Color(light: "#2E92B4", dark: "#3FA9C9") : Color(light: "#2E92B4", dark: "#3FA9C9") }
     public static var metricPurple: Color { isClassic ? Color(light: "#6A4FC0", dark: "#8E6FD6") : Color(light: "#3A80D6", dark: "#4A90E2") }
-    public static var metricAmber:  Color { isClassic ? Color(light: "#CFA528", dark: "#F2C53D") : Color(light: "#C2792E", dark: "#D98A3D") }
-    public static var metricRose:   Color { isClassic ? Color(light: "#CB3A2F", dark: "#E5483B") : Color(light: "#C84E1E", dark: "#E0662F") }
+    public static var metricAmber:  Color { isClassic ? Color(light: "#CFA528", dark: "#FFDE00") : Color(light: "#C2792E", dark: "#FFDE00") }
+    public static var metricRose:   Color { isClassic ? Color(light: "#CB3A2F", dark: "#FF0026") : Color(light: "#C84E1E", dark: "#FF0026") }
 
     // MARK: - Titanium & Gold domain "colour worlds" (NEW)
     //
@@ -267,11 +267,11 @@ public enum StrandPalette {
     public static var restGlow: Color      { isClassic ? Color(light: "#3A80D6", dark: "#6FA8E8") : Color(light: "#3A80D6", dark: "#4A90E2") }
     public static var restGradient: Gradient { Gradient(colors: [restDeep, restBright]) }
 
-    /// Stress, blue→gold→orange world / Classic green→amber→red.
-    public static var stressColor: Color   { isClassic ? Color(light: "#CFA528", dark: "#F2C53D") : Color(light: "#C7891A", dark: "#F0A020") }
-    public static var stressDeep: Color    { isClassic ? Color(light: "#2E9E4F", dark: "#46B45A") : Color(light: "#3A80D6", dark: "#4A90E2") }
-    public static var stressBright: Color  { isClassic ? Color(light: "#CB3A2F", dark: "#E5483B") : Color(light: "#C84E1E", dark: "#E0662F") }
-    public static var stressGlow: Color    { isClassic ? Color(light: "#CFA528", dark: "#F2C53D") : Color(light: "#C7891A", dark: "#F0A020") }
+    /// Stress, WHOOP calm green -> mid yellow -> high red (both chart styles resolve to WHOOP on dark).
+    public static var stressColor: Color   { isClassic ? Color(light: "#CFA528", dark: "#FFDE00") : Color(light: "#C7891A", dark: "#FFDE00") }
+    public static var stressDeep: Color    { isClassic ? Color(light: "#2E9E4F", dark: "#16EC06") : Color(light: "#3A80D6", dark: "#16EC06") }
+    public static var stressBright: Color  { isClassic ? Color(light: "#CB3A2F", dark: "#FF0026") : Color(light: "#C84E1E", dark: "#FF0026") }
+    public static var stressGlow: Color    { isClassic ? Color(light: "#CFA528", dark: "#FFDE00") : Color(light: "#C7891A", dark: "#FFDE00") }
     /// 3-stop gauge ramp: calm → balanced → high.
     public static var stressGradient: Gradient { Gradient(colors: [stressDeep, stressColor, stressBright]) }
 

@@ -251,7 +251,7 @@ final class LiquidSim {
     /// A non-animating sim posed at its fill line, surface flat and still — for the small
     /// gauges/tubes that render ONCE (no TimelineView → CoreAnimation caches the layer, zero
     /// per-frame cost). The home screen has ~10 of these; only the hero vessels + HR thread
-    /// need to actually slosh. Same static-raster principle as LiquidSkyStatic.
+    /// need to actually slosh. Same static-raster principle used for posed backgrounds.
     static func posed(_ target: Double) -> LiquidSim {
         let s = LiquidSim(target: target, reduceMotion: true)
         let t = max(0, min(1, target))

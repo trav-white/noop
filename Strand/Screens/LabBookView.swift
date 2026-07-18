@@ -61,7 +61,7 @@ struct LabBookView: View {
             lazy: true,
             // Liquid finish: the day-of-sky backdrop, so Lab Book sits in the same liquid atmosphere as
             // Today and the other analysis screens.
-            topBackground: liquidScaffoldSky()
+            topBackground: AnyView(CanvasBackground())
         ) {
             VStack(alignment: .leading, spacing: NoopMetrics.sectionGap) {
                 headerCard

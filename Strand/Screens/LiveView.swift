@@ -69,7 +69,7 @@ struct LiveView: View {
     var body: some View {
         ScreenScaffold(title: "Live Body Console",
                        subtitle: "Current physiology, strap trust, and session controls in one working view.",
-                       topBackground: liquidScaffoldSky()) {
+                       topBackground: AnyView(CanvasBackground())) {
             VStack(alignment: .leading, spacing: NoopMetrics.sectionGap) {
                 consoleHeader
                 // Can't-connect-at-all guidance: the strap wiped its bond (firmware update / WHOOP app

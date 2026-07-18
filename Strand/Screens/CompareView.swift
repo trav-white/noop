@@ -163,7 +163,7 @@ struct CompareView: View {
                        lazy: true,
                        // Liquid finish: the day-of-sky backdrop carries the liquid atmosphere across the
                        // analysis tabs, exactly like Today and the batch-1 screens.
-                       topBackground: liquidScaffoldSky()) {
+                       topBackground: AnyView(CanvasBackground())) {
             VStack(alignment: .leading, spacing: NoopMetrics.sectionGap) {
                 metricSection
 

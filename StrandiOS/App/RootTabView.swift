@@ -280,7 +280,7 @@ struct RootTabView: View {
         NavigationStack {
             ScreenScaffold(title: "More", subtitle: "Everything else, one tap away",
                            onRefresh: { await repo.refresh() },
-                           topBackground: liquidScaffoldSky()) {
+                           topBackground: AnyView(CanvasBackground())) {
                 moreSection("Insights") {
                     MoreRow("What Moves You", "wand.and.sparkles") { InsightsHubView() }
                     MoreRow("Intelligence", "brain.head.profile") { IntelligenceView() }

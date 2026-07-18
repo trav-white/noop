@@ -210,21 +210,11 @@ struct LiquidTodayView: View {
         // The sky is a FIXED full-bleed backdrop drawn behind the scroll content, edge-to-edge under the
         // status bar. A ScrollView background does not scroll with the content, so pulling down never
         // moves the sky (the exact behaviour the scaffold uses on the classic Today).
-        .background(alignment: .top) {
-            ZStack(alignment: .top) {
-                StrandPalette.surfaceBase
-                // Reduce-motion (and low-power) users get the same sky posed still — no twinkle/breath.
-                // Also static until the first data load settles, so launch isn't fighting a live sky too.
-                Group {
-                    if reduceMotion || !dataLoaded { LiquidSkyStatic(hour: liveHour) }
-                    else { LiquidSky(hour: liveHour) }
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 340, alignment: .top)
-                .allowsHitTesting(false)
-                .accessibilityHidden(true)
-            }
-            .ignoresSafeArea()
+        // The WHOOP slate canvas: a fixed full-bleed gradient drawn behind the scroll content,
+        // edge-to-edge under the status bar. Replaces the old time-of-day sky header, so
+        // the charts and cards below sit on the flat WHOOP canvas.
+        .background {
+            CanvasBackground()
         }
         // Swipe left/right to change DAYS (WHOOP-style). Tab-swipe is disabled on Today in RootTabView so
         // this owns the horizontal gesture here.

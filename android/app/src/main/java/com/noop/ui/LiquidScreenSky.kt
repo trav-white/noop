@@ -63,3 +63,25 @@ fun LiquidScreenSky(height: Dp = 340.dp) {
         )
     }
 }
+
+// MARK: - WhoopScreenSky, the WHOOP slate backdrop that replaces LiquidScreenSky in the reskin
+//
+// The WHOOP-faithful `topBackground` slot: the flat WHOOP canvas gradient (#283339 slate at the top to
+// #101518 near-black, from Palette.canvasGradient()) filling a [height] band that settles into the
+// scaffold's surfaceBase below, so the header, rings and cards float on the canonical flat WHOOP canvas.
+// It replaces the animated day-of-sky (LiquidScreenSky) everywhere the reskin touches, with no per-frame
+// cost (a static brush). Non-interactive decoration, so it is hidden from TalkBack. Drop it into a
+// scaffold's `topBackground` slot exactly like LiquidScreenSky.
+
+/** The WHOOP slate backdrop for a reskinned screen's top region. Drop into a scaffold's `topBackground`
+ *  slot. [height] is the slate band; the gradient settles into the theme canvas below it. */
+@Composable
+fun WhoopScreenSky(height: Dp = 340.dp) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(height)
+            .background(Palette.canvasGradient())
+            .clearAndSetSemantics {}, // decorative, invisible to TalkBack
+    )
+}

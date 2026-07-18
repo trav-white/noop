@@ -177,15 +177,11 @@ private const val CARD_CARRIED_SLEEP = "carriedSleep"
  *  and so already re-inits to 0 on every fresh launch, reaching the same offset through the same helper. */
 private var todayDidSnapToTodayThisLaunch = false
 
-// MARK: - Liquid hero tokens (the liquid Today restyle)
-//
-// The hero card the score vessels float on, ported from the iOS LiquidTodayView. `heroFill` is a
-// translucent near-black (mock rgba(13,14,20,.80)) so it floats over the day-of-sky; the vessels + white
-// count-up numbers read crisp on it. Radius 26 + a white@0.11 hairline give the frosted-glass edge.
-private val LIQUID_HERO_FILL: Color = Color(red = 13f / 255f, green = 14f / 255f, blue = 20f / 255f, alpha = 0.80f)
-private val LIQUID_HERO_RADIUS: Dp = 26.dp
+// WHOOP reskin: the old "liquid hero" card tokens (LIQUID_HERO_FILL / LIQUID_HERO_RADIUS) are gone from
+// Today. The ring trio now floats directly on the WHOOP slate canvas (see ScoreHeroRow), so there is no
+// frosted hero card to tint here.
 
-// The Vitality vessel purple (#9b7bff) — no exact Palette token in this theme, so a fixed brand literal
+// The Vitality vessel purple (#9b7bff), no exact Palette token in this theme, so a fixed brand literal
 // matching the iOS liquid Today's `liquidPurple` (Color(.sRGB, red:0x9b, green:0x7b, blue:0xff)). Used by
 // the mini "Your cards" vessel so Vitality reads the same purple as iOS.
 private val LIQUID_PURPLE: Color = Color(red = 0x9b / 255f, green = 0x7b / 255f, blue = 0xff / 255f, alpha = 1f)
@@ -958,9 +954,11 @@ fun TodayScreen(
         // the classic day-cycle SceneScreenBackground with the liquid day-of-sky (LiquidSkyStatic — no
         // per-frame cost on this scroll-heavy screen). The other liquid screens drop in the SAME
         // LiquidScreenSky() slot verbatim.
-        // #698, gated on the "Day-cycle background" setting (default ON). Off passes null, so the scaffold
-        // paints the plain dark surface canvas instead, mirroring iOS's `showDayCycleBackground ? ... : nil`.
-        topBackground = if (showDayCycleBackground) { { LiquidScreenSky() } } else null,
+        // WHOOP reskin: the animated LiquidScreenSky sunset is gone; the top region now carries the flat
+        // WHOOP slate gradient (#283339 → #101518) that settles into surfaceBase below, so the rings + cards
+        // float on the canonical WHOOP canvas. Still gated on the "Day-cycle background" setting (default
+        // ON): OFF passes null so the scaffold paints the plain near-black surface instead.
+        topBackground = if (showDayCycleBackground) { { WhoopScreenSky() } } else null,
     ) {
         item {
         // LIQUID Today header (iOS LiquidTodayView.scene parity), a full structural rebuild to mirror the
@@ -1126,16 +1124,12 @@ fun TodayScreen(
         // in-card scene here, and no rounded clip (a flat hero on the screen-level backdrop). The Charge
         // ring value reads WHITE (GlowRing's centre label) with a charge-green arc, matching the iOS source.
         item {
-        // The liquid hero CARD: a translucent near-black that floats over the day-of-sky so the vessels +
-        // white count-up numbers stay crisp — the card does the contrast work, not a muted sky. A rounded
-        // 26 corner + a faint white hairline give it the frosted-glass edge of the iOS liquid heroCard
-        // (heroFill = rgba(13,14,20,.80), stroke white@0.11). Mirrors the iOS LiquidTodayView heroCard.
+        // WHOOP reskin: the rings float DIRECTLY on the slate canvas (no frosted hero card), exactly like the
+        // WHOOP home frame. The old translucent near-black heroCard is dropped so the trio reads as three ring
+        // dials on the page, not inside a panel. Still staggered in as the rings hero (index 1).
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(LIQUID_HERO_RADIUS))
-                .background(LIQUID_HERO_FILL)
-                .border(1.dp, Color.White.copy(alpha = 0.11f), RoundedCornerShape(LIQUID_HERO_RADIUS))
                 .staggeredAppear(1),
         ) {
             ScoreHeroRow(
@@ -1249,6 +1243,49 @@ fun TodayScreen(
                 onToggleSynthesis = { synthesisExpanded = !synthesisExpanded },
                 onOpenReadiness = { showChargeBreakdown = true },
             )
+        }
+        }
+
+        // HEALTH MONITOR / STRESS MONITOR, the WHOOP two-up monitor tiles (reference home frame), sitting
+        // under the insight card. Wired to EXISTING data: the health tile summarises today's recovery vitals
+        // (HRV / Resting HR / Respiratory, the same fields HeroMetricRows reads) as an in-range count and taps
+        // through to the Health tab; the stress tile shows today's stress score + level word (the same
+        // stressToday the Your-cards Stress reads) and taps through to Stress. Presentation only, no new loads.
+        item {
+        Box(modifier = Modifier.fillMaxWidth().staggeredAppear(2)) {
+            val vitalsPresent = listOfNotNull(
+                displayMetric?.avgHrv, displayMetric?.restingHr, displayMetric?.respRateBpm,
+            ).size
+            val stress = stressToday
+            val stressWord = when {
+                stress == null -> "Calibrating"
+                stress < 0.5 -> "Calm"
+                stress < 1.5 -> "Low"
+                stress < 2.5 -> "Medium"
+                else -> "High"
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(Metrics.gap)) {
+                com.noop.ui.components.MonitorTile(
+                    title = "Health Monitor",
+                    value = "$vitalsPresent/3",
+                    caption = if (vitalsPresent > 0) "Within range" else "Awaiting data",
+                    tint = Palette.accent,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(Metrics.cardRadius))
+                        .clickable(onClick = onOpenHealth),
+                )
+                com.noop.ui.components.MonitorTile(
+                    title = "Stress Monitor",
+                    value = if (stress != null) String.format(Locale.US, "%.1f", stress) else NO_DATA,
+                    caption = stressWord,
+                    tint = Palette.stressColor,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(Metrics.cardRadius))
+                        .clickable(onClick = onOpenStress),
+                )
+            }
         }
         }
 
@@ -2241,8 +2278,8 @@ private fun ScoreHeroRow(
                 .fillMaxWidth()
                 .padding(horizontal = Metrics.gap, vertical = Metrics.space18),
         ) {
-            // iOS parity (TodayView.scoreHeroRow): three EQUAL rings in CHARGE · EFFORT · REST order, no
-            // enlarged centre, filling the width as one balanced row. Ring stroke 0.10 (WHOOP weight).
+            // WHOOP order (Sleep / Recovery / Strain): three EQUAL ring dials in REST · CHARGE · EFFORT
+            // order, no enlarged centre, filling the width as one balanced row. Ring stroke 0.10 (WHOOP weight).
             val ringGap = 14.dp
             val ring = ((maxWidth - ringGap * 2) / 3.1f).coerceIn(90.dp, 112.dp)
             Row(
@@ -2250,8 +2287,39 @@ private fun ScoreHeroRow(
                 horizontalArrangement = Arrangement.spacedBy(ringGap, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.Top,
             ) {
-                // CHARGE, recovery 0–100, as a liquid VESSEL with the value counting up over it. Honest
-                // empty / calibrating overlay; badges its recovery winner.
+                // REST, sleep composite 0-100 (WHOOP's SLEEP ring, first in WHOOP order), reusing the
+                // recovery colour scale, as a WHOOP ring dial. Badges its real sleep_performance merge winner
+                // under the dial (gated upstream on restScore != null).
+                HeroRingColumn(
+                    domain = DomainTheme.Rest,
+                    onInfo = { onScoreInfo(ScoreSection.REST) },
+                    provenance = restProvenance,
+                    // iOS shows a static "WHOOP" pill under Rest too; fallback when no dynamic provenance
+                    // resolved and the ring shows a real Rest score.
+                    sourcePill = if (restScore != null) "WHOOP" else null,
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        HeroScoreVessel(
+                            fraction = (restScore ?: 0.0) / 100.0,
+                            value = restScore ?: 0.0,
+                            tint = Palette.recoveryColor(restScore ?: 0.0),
+                            diameter = ring,
+                            animated = animated,
+                            showsValue = restScore != null,
+                        )
+                        // #898: an aggregate-import user (a daily HRV/RHR import, no in-bed session) gets a
+                        // Charge from WatchRecovery but NO sleep_performance, so Rest used to read a bare
+                        // "No Data" next to a lit Charge, reading as broken. When a Charge IS present for the
+                        // day but Rest is absent, say WHY honestly ("Needs a tracked night") instead. We do
+                        // NOT fabricate a Rest number: an aggregate genuinely has no scored night. A day with
+                        // no Charge either (truly empty) keeps the plain "No Data". Mirrors iOS restRing.
+                        if (restScore == null) {
+                            if (recovery != null) RingNeedsTrackedNight() else RingNoData()
+                        }
+                    }
+                }
+                // CHARGE, recovery 0-100 (WHOOP's RECOVERY ring, centre in WHOOP order), as a WHOOP ring dial
+                // with the value in the centre. Honest empty / calibrating overlay; badges its recovery winner.
                 HeroRingColumn(
                     domain = DomainTheme.Charge,
                     onInfo = { onScoreInfo(ScoreSection.CHARGE) },
@@ -2264,10 +2332,10 @@ private fun ScoreHeroRow(
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         // #802: when today has no Charge yet but a prior night's value is carried, draw a
-                        // DIMMED (0.8 opacity) REAL vessel filled to the carried value, matching the Rest
-                        // vessel, rather than a bare number on an empty vessel (which read as broken). Same
-                        // diameter so the self-sizing hero row is untouched; the dim + the carried "Last
-                        // night · <date>" caption mark it as carried, not today's fresh score. Mirrors iOS.
+                        // DIMMED (0.8 opacity) REAL dial filled to the carried value, matching the Rest dial,
+                        // rather than a bare number on an empty dial (which read as broken). Same diameter so
+                        // the self-sizing hero row is untouched; the dim + the carried "Last night" caption
+                        // mark it as carried, not today's fresh score. Mirrors iOS.
                         val carried = if (recovery == null && recoveryCalibration == null) lastScoredCharge else null
                         if (carried != null) {
                             HeroScoreVessel(
@@ -2288,14 +2356,15 @@ private fun ScoreHeroRow(
                                 animated = animated,
                                 showsValue = recovery != null,
                             )
-                            // Empty vessel + calibrating / no-data overlay (the carried case is above).
+                            // Empty dial + calibrating / no-data overlay (the carried case is above).
                             if (recovery == null) RingEmptyOverlay(recoveryCalibration, diameter = ring)
                         }
-                        // No in-vessel tap cue: the single tap affordance is the CHARGE-label chevron below
-                        // the vessel (HeroRingColumn), matching iOS where the in-ring cue was removed.
+                        // No in-dial tap cue: the single tap affordance is the CHARGE-label chevron below
+                        // the dial (HeroRingColumn), matching iOS where the in-ring cue was removed.
                     }
                 }
-                // EFFORT, strain on the gauge, on the user's selected scale, as a liquid vessel.
+                // EFFORT, strain on the gauge (WHOOP's STRAIN ring, last in WHOOP order), on the user's
+                // selected scale, as a WHOOP ring dial.
                 HeroRingColumn(domain = DomainTheme.Effort, onInfo = { onScoreInfo(ScoreSection.EFFORT) }) {
                     Box(contentAlignment = Alignment.Center) {
                         HeroScoreVessel(
@@ -2308,36 +2377,6 @@ private fun ScoreHeroRow(
                             format = { if (effortScale == EffortScale.WHOOP) String.format(Locale.US, "%.1f", it) else it.toInt().toString() },
                         )
                         if (strain == null) RingNoData()
-                    }
-                }
-                // REST, sleep composite 0–100, reusing the recovery colour scale, as a liquid vessel. Badges
-                // its real sleep_performance merge winner under the vessel (gated upstream on restScore != null).
-                HeroRingColumn(
-                    domain = DomainTheme.Rest,
-                    onInfo = { onScoreInfo(ScoreSection.REST) },
-                    provenance = restProvenance,
-                    // iOS shows a static "WHOOP" pill under Rest too; fallback when no dynamic provenance
-                    // resolved and the ring shows a real Rest score.
-                    sourcePill = if (restScore != null) "WHOOP" else null,
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        HeroScoreVessel(
-                            fraction = (restScore ?: 0.0) / 100.0,
-                            value = restScore ?: 0.0,
-                            tint = Palette.recoveryColor(restScore ?: 0.0),
-                            diameter = ring,
-                            animated = animated,
-                            showsValue = restScore != null,
-                        )
-                        // #898: an aggregate-import user (a daily HRV/RHR import, no in-bed session) gets a
-                        // Charge from WatchRecovery but NO sleep_performance, so Rest used to read a bare
-                        // "No Data" next to a lit Charge , reading as broken. When a Charge IS present for the
-                        // day but Rest is absent, say WHY honestly ("Needs a tracked night") instead. We do
-                        // NOT fabricate a Rest number , an aggregate genuinely has no scored night. A day with
-                        // no Charge either (truly empty) keeps the plain "No Data". Mirrors iOS restRing.
-                        if (restScore == null) {
-                            if (recovery != null) RingNeedsTrackedNight() else RingNoData()
-                        }
                     }
                 }
             }
@@ -2460,18 +2499,16 @@ private fun HeroSourcePill(text: String) {
 }
 
 /**
- * One hero score as a liquid VESSEL with the value counting up over it — the signature liquid Today hero
- * element. A [LiquidVessel] (Compose primitive, LiquidPrimitives.kt) fills to [fraction] (0..1) in the
- * domain [tint], sized to [diameter]; over it a [CountUpText] rolls the number up to [value] (white,
- * tabular, a soft shadow so it reads on the vessel), matching the iOS `HeroScoreCell` (a count-up number
- * over a filling vessel). The number is hit-transparent (clearAndSetSemantics + no clickable) so a tap
- * falls THROUGH to the vessel — LiquidVessel owns its own tap→splash+haptic; the enclosing HeroRingColumn
- * adds the Charge breakdown tap. When [showsValue] is false (no score yet) the vessel draws empty and the
- * caller overlays the calibrating / No-Data text, so the number is simply omitted here.
+ * One hero score as a WHOOP RING DIAL (Phase 2 `com.noop.ui.components.RingDial`). The dial fills to
+ * [fraction] (0..1) in the domain [tint] on the dark WHOOP track, with the value shown as a centred D-DIN
+ * numeral. It animates its arc fill on appear (RingDial's own draw-in). The trio label (REST / CHARGE /
+ * EFFORT) is drawn BELOW the dial by the enclosing [HeroRingColumn], so the dial itself carries NO label
+ * (showsLabel = false), matching the WHOOP home frame (numeral inside, tracked-caps word beneath).
  *
- * The number size tracks the diameter (≈ 0.27×, capped) so the three equal vessels stay balanced; it
- * mirrors the iOS 96dp-vessel → 26pt-number ratio. Values/bindings are UNCHANGED from the GlowRing this
- * replaced — same fraction, same value, same value-sampled tint.
+ * When [showsValue] is false (no score yet) the dial draws empty (blank centre) and the caller overlays the
+ * calibrating / No-Data text. Values/bindings are UNCHANGED from the vessel this replaced: same fraction,
+ * same value, same value-sampled tint. [diameter] sizes the frame; the RingDial trio geometry sits centred
+ * inside it. [animated] is retained for call-site parity (RingDial owns its own appear animation).
  */
 @Composable
 private fun HeroScoreVessel(
@@ -2485,25 +2522,14 @@ private fun HeroScoreVessel(
     format: (Double) -> String = { it.roundToInt().toString() },
 ) {
     Box(modifier = modifier.size(diameter), contentAlignment = Alignment.Center) {
-        LiquidVessel(
+        com.noop.ui.components.RingDial(
             value = fraction.coerceIn(0.0, 1.0),
+            display = if (showsValue) format(value) else "",
+            label = "",
             tint = tint,
-            animated = animated,
-            modifier = Modifier.size(diameter),
+            size = com.noop.ui.components.RingDialSize.Trio,
+            showsLabel = false,
         )
-        if (showsValue) {
-            // Count-up number over the vessel — white, tabular, a soft shadow for legibility, hit-transparent
-            // so the tap reaches the vessel (splash). Size ≈ diameter × 0.27 (iOS 96→26 ratio), capped.
-            val numberSp = (diameter.value * 0.27f).coerceIn(20f, 30f)
-            CountUpText(
-                value = value,
-                format = format,
-                style = NoopType.number(numberSp, weight = FontWeight.Bold)
-                    .copy(shadow = Shadow(color = Color.Black.copy(alpha = 0.5f), offset = Offset(0f, 1f), blurRadius = 6f)),
-                color = Color.White,
-                modifier = Modifier.clearAndSetSemantics {},
-            )
-        }
     }
 }
 
@@ -3395,10 +3421,33 @@ internal fun ChargeBreakdownSheet(
                     .padding(bottom = Metrics.sectionGap),
                 verticalArrangement = Arrangement.spacedBy(Metrics.sectionGap),
             ) {
+                // WHOOP reskin (frame 03, "Understand your Recovery"): a hero RingDial for the day's
+                // Charge/Recovery score leads the sheet, on the WHOOP hard-band recovery colour, with the
+                // RECOVERY caps label inside the ring. The driver + contributor sections below are the frame's
+                // metric list; the TrendFooterPill under them is the "Today vs. prior 30 days" comparison
+                // strip. Shown only when a real score exists (today's own, else the carried night).
+                val chargeScore = displayDay?.recovery ?: carriedDay?.recovery
+                if (chargeScore != null) {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        com.noop.ui.components.RingDial(
+                            value = (chargeScore / 100.0).coerceIn(0.0, 1.0),
+                            display = chargeScore.roundToInt().toString(),
+                            label = "Recovery",
+                            tint = Palette.recoveryBand(chargeScore),
+                            size = com.noop.ui.components.RingDialSize.Hero,
+                        )
+                    }
+                }
                 // The breakdown self-gates: a calibrating night (empty drivers) renders nothing here, the
                 // Contributors + Readiness below still give an honest read, never a blank sheet.
                 RecoveryDriversSection(days = days, displayDay = displayDay, carriedDay = carriedDay)
                 RecoveryContributorsSection(day = displayDay, carriedDay = carriedDay)
+                // WHOOP reskin: the frame-03 comparison strip under the recovery metric list.
+                if (chargeScore != null) {
+                    com.noop.ui.components.TrendFooterPill(
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
                 // S4: the SEPARATE Readiness block now lives here behind the Charge-ring tap (today-only,
                 // matching the old inline gate). A one-word read (Push / Maintain / Rest) stays on the hero.
                 if (showReadiness) ReadinessSection(days, carriedDay = carriedDay)

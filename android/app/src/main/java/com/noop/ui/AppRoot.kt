@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +29,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -201,10 +204,12 @@ private data class DrawerGroup(
 private val drawerGroups: List<DrawerGroup> = listOf(
     DrawerGroup("Insights", R.string.more_group_insights, listOf(
         Destination.InsightsHub, Destination.Intelligence, Destination.Coach,
-        Destination.Insights, Destination.Explore, Destination.Compare,
+        // Trends left the bottom bar in the WHOOP reskin; it lives here now so it stays reachable.
+        Destination.Trends, Destination.Insights, Destination.Explore, Destination.Compare,
     ), defaultExpanded = true),
     DrawerGroup("Body", R.string.more_group_body, listOf(
-        Destination.Live, Destination.Workouts, Destination.Health, Destination.VitalSigns,
+        // Sleep left the bottom bar in the WHOOP reskin; it leads the Body group now so it stays reachable.
+        Destination.Sleep, Destination.Live, Destination.Workouts, Destination.Health, Destination.VitalSigns,
         Destination.LabBook, Destination.Stress, Destination.Breathe, Destination.Intervals,
         Destination.Rhythm,
     ), defaultExpanded = true),
@@ -288,6 +293,8 @@ fun AppRoot(viewModel: AppViewModel = viewModel()) {
                     onTabSelected = { dest ->
                         if (dest.route != currentRoute) nav.navigateTopLevel(dest.route)
                     },
+                    // The centre "+" disc opens the quick-action sheet (same sheet the Today header "+" uses).
+                    onQuickAdd = { showQuickActions = true },
                 )
             },
         ) { inner ->
@@ -679,21 +686,25 @@ private fun MoreRow(dest: Destination, onClick: () -> Unit) {
 /** A single bottom-bar nav slot: the destination it switches to, plus the bar-specific icon/label. */
 private data class BarTab(val dest: Destination, val icon: ImageVector, @StringRes val labelRes: Int)
 
-/** The nav slots in iOS order: Today · Trends · Sleep · More.
- *  More is special-cased (it opens the sheet rather than a route), so it is appended at the call site. */
+/** The nav slots in WHOOP order: Home · Health · (centre quick-add) · Coach · More.
+ *  The centre quick-add disc and More are special-cased at the call site (the disc opens the quick-action
+ *  sheet, More opens its own page), so only the flanking real-route tabs live in these lists. Every prior
+ *  destination is preserved: Trends and Sleep, which used to be bottom-bar tabs, now live in the More
+ *  page's grouped list (added to the Insights and Body groups below), and the Today screen is the Home tab. */
 private val barLeadingTabs = listOf(
-    BarTab(Destination.Today, Icons.Outlined.GridView, R.string.nav_today),
-    // chart.line.uptrend.xyaxis on iOS — the rising-trend glyph, not a flat bar chart.
-    BarTab(Destination.Trends, Icons.AutoMirrored.Filled.TrendingUp, R.string.nav_trends),
+    BarTab(Destination.Today, Icons.Filled.Home, R.string.nav_home),
+    BarTab(Destination.Health, Icons.Filled.MonitorHeart, R.string.nav_health),
 )
 private val barTrailingTabs = listOf(
-    BarTab(Destination.Sleep, Icons.Filled.Bedtime, R.string.nav_sleep),
+    // sparkles glyph = the WHOOP-style coach entry; opens the existing CoachScreen.
+    BarTab(Destination.Coach, Icons.Filled.AutoAwesome, R.string.nav_coach),
 )
 
 @Composable
 private fun GlassBottomBar(
     current: Destination,
     onTabSelected: (Destination) -> Unit,
+    onQuickAdd: () -> Unit,
 ) {
     val barShape = RoundedCornerShape(50)
     Box(
@@ -728,6 +739,7 @@ private fun GlassBottomBar(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(2.dp),
             ) {
+                // Leading real-route tabs: Home · Health.
                 barLeadingTabs.forEach { tab ->
                     BarSlot(
                         icon = tab.icon,
@@ -737,6 +749,10 @@ private fun GlassBottomBar(
                         onClick = { onTabSelected(tab.dest) },
                     )
                 }
+                // Centre WHITE circular quick-add disc (the WHOOP "+"), raised in the middle of the bar. It
+                // opens the same quick-action sheet the Today header "+" does (start workout, log, breathe).
+                QuickAddDisc(onClick = onQuickAdd, modifier = Modifier.weight(1f))
+                // Trailing real-route tabs: Coach.
                 barTrailingTabs.forEach { tab ->
                     BarSlot(
                         icon = tab.icon,
@@ -750,10 +766,10 @@ private fun GlassBottomBar(
                     icon = Icons.Filled.MoreHoriz,
                     label = stringResource(R.string.nav_more),
                     // Selected on the More page itself, and also kept lit whenever the current screen is
-                    // one reached THROUGH More (i.e. not one of the bar's own three tabs) — so drilling
+                    // one reached THROUGH More (i.e. not one of the bar's own real-route tabs), so drilling
                     // into any grouped destination still reads as "you're in More", never "nowhere".
-                    active = current != Destination.Today && current != Destination.Trends &&
-                        current != Destination.Sleep,
+                    active = current != Destination.Today && current != Destination.Health &&
+                        current != Destination.Coach,
                     modifier = Modifier.weight(1f),
                     onClick = { onTabSelected(Destination.More) },
                 )
@@ -795,6 +811,39 @@ private fun BarSlot(
             ),
             color = tint,
         )
+    }
+}
+
+/** The centre WHITE circular quick-add disc on the bar (the WHOOP "+"). A filled white circle with a dark
+ *  "+" glyph, no ripple, sized to sit level with the flanking tab icons. Tapping opens the quick-action
+ *  sheet. [modifier] carries the Row weight so it centres the bar. */
+@Composable
+private fun QuickAddDisc(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .padding(vertical = 3.dp)
+            .semantics { contentDescription = "Quick actions" },
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(38.dp)
+                .clip(CircleShape)
+                .background(Palette.textPrimary)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = onClick,
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                Icons.Filled.Add,
+                contentDescription = null,
+                tint = Palette.surfaceBase,
+                modifier = Modifier.size(22.dp),
+            )
+        }
     }
 }
 

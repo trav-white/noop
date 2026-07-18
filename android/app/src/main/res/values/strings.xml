@@ -8,6 +8,8 @@
          localized display labels for the Destination enum; the underlying route ids stay English and
          are never translated. -->
     <string name="nav_today">Today</string>
+    <!-- WHOOP bottom-bar label for the Today/Home tab (the Today screen is the Home destination). -->
+    <string name="nav_home">Home</string>
     <string name="nav_intelligence">Intelligence</string>
     <string name="nav_coupled_view">Coupled view</string>
     <string name="nav_live">Live</string>

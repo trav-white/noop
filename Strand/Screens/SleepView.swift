@@ -349,23 +349,13 @@ struct SleepView: View {
                     // animated `heroFraction` the screen already drives on appear / on score change, so
                     // the arc draw-in and the number roll-up land together (Today's HeroScoreCell idiom).
                     VStack(spacing: NoopMetrics.space3) {
-                        ZStack {
-                            LiquidVessel(value: heroFraction, tint: StrandPalette.restColor, animated: true)
-                                .frame(width: 184, height: 184)
-                            VStack(spacing: 0) {
-                                CountUpText(
-                                    value: score,
-                                    format: { "\(Int($0.rounded()))" },
-                                    font: StrandFont.rounded(52),
-                                    color: StrandPalette.textPrimary
-                                )
-                                .shadow(color: .black.opacity(0.5), radius: 6, y: 1)
-                                Text("of 100")
-                                    .font(StrandFont.caption)
-                                    .foregroundStyle(StrandPalette.textSecondary)
-                            }
-                            .allowsHitTesting(false)   // taps fall through to the vessel → splash
-                        }
+                        // The WHOOP sleep hero dial: a thick Rest-tinted arc filled to the night's
+                        // performance, the score centred in D-DIN with a caps label inside the ring.
+                        // Fills to the same animated `heroFraction` the screen already drives.
+                        RingDial(value: heroFraction,
+                                 display: "\(Int(score.rounded()))%",
+                                 label: "Performance",
+                                 tint: StrandPalette.restColor, size: .hero)
                         Text(sleepScoreWord(score))
                             .font(StrandFont.subhead.weight(.semibold))
                             .foregroundStyle(StrandPalette.restColor)

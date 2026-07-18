@@ -160,20 +160,23 @@ struct NavGroup: Identifiable {
     let id: String
     let items: [NavItem]
 
-    /// The 5 sidebar sections, in order, mirroring the iOS More-tab grouping idiom (Insights / Body /
-    /// Data & App) plus Today + Sleep as their own top sections. Devices/pairing sits at the TOP of the
-    /// Data & App group so the first thing a new user reaches for stays near the surface. Every one of the
-    /// 28 `NavItem` cases appears exactly once across these groups (asserted by the M5 routability test).
+    /// The WHOOP IA on macOS: Home (Today), Health, Coach and Sleep are their own top sections (the
+    /// primary tab-bar destinations of the reference app), and everything else falls under the "More"
+    /// groups (Body / Insights / Data & App). Devices/pairing sits at the TOP of the Data & App group so
+    /// the first thing a new user reaches for stays near the surface. Every one of the `NavItem` cases
+    /// appears exactly once across these groups (asserted by the M5 routability test).
     static let all: [NavGroup] = [
-        NavGroup(title: "Today", id: "today", items: [.today]),
+        NavGroup(title: "Home", id: "today", items: [.today]),
+        NavGroup(title: "Health", id: "health", items: [.health]),
+        NavGroup(title: "Coach", id: "coach", items: [.coach]),
         NavGroup(title: "Sleep", id: "sleep", items: [.sleep]),
         NavGroup(title: "Body", id: "body", items: [
-            .workouts, .live, .health, .stress, .intervals, .breathe,
+            .workouts, .live, .stress, .intervals, .breathe,
         ]),
         // S6: the overlapping insight surfaces (Intelligence / What Moves You / Insights / Insights Hub)
         // all collapse under this single Insights group rather than scattering across the flat list.
         NavGroup(title: "Insights", id: "insights", items: [
-            .intelligence, .insightsHub, .coach, .explore, .compare, .insights,
+            .intelligence, .insightsHub, .explore, .compare, .insights,
             .labBook, .rhythm, .trends,
         ]),
         NavGroup(title: "Data & App", id: "data_app", items: [
@@ -403,6 +406,43 @@ struct RootView: View {
                 .font(StrandFont.rounded(20, weight: .bold))
                 .foregroundStyle(StrandPalette.textPrimary)
             Spacer()
+            // WHOOP quick-add: a circular white "+" opening the workout entry points. On macOS the shell
+            // has no quick-action sheet, so the menu routes straight to the existing Live / Workouts
+            // destinations (start a live workout, or log one).
+            Menu {
+                Button {
+                    selection = .live
+                } label: {
+                    Label("Start live workout", systemImage: "waveform.path.ecg")
+                }
+                Button {
+                    selection = .workouts
+                } label: {
+                    Label("Log workout", systemImage: "figure.run")
+                }
+            } label: {
+                Image(systemName: "plus")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(StrandPalette.surfaceBase)
+                    .frame(width: 26, height: 26)
+                    .background(Circle().fill(Color.white))
+            }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .accessibilityLabel("Quick add workout")
+            // WHOOP coach button (opens the existing CoachView).
+            Button {
+                selection = .coach
+            } label: {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(StrandPalette.accent)
+                    .frame(width: 26, height: 26)
+                    .background(Circle().strokeBorder(StrandPalette.hairline, lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Coach")
         }
         // Top padding clears the traffic-light controls (the window hides its title bar, so they sit
         // over the sidebar's top edge); the lockup sits just below them.

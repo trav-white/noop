@@ -186,6 +186,8 @@ struct LiquidTodayView: View {
 
                 VStack(alignment: .leading, spacing: 12) {
                     scene
+                    whoopInsightCard
+                    monitorTilesSection
                     heartRateSection
                     yourCardsSection
                     synthesisSection
@@ -267,11 +269,9 @@ struct LiquidTodayView: View {
         let progress = min(1, max(0, pullY / pullThreshold))
         return ZStack {
             if refreshing {
-                LiquidVessel(value: 0.6, tint: liquidHeart, animated: true)
-                    .frame(width: 34, height: 34)
+                miniRing(0.6, tint: liquidHeart, size: 34)
             } else if pullY > 2 {
-                LiquidVessel(value: progress, tint: liquidHeart, animated: false)
-                    .frame(width: 30, height: 30)
+                miniRing(progress, tint: liquidHeart, size: 30)
                     .opacity(progress)
                     .scaleEffect(0.7 + 0.3 * progress)
             }
@@ -306,19 +306,35 @@ struct LiquidTodayView: View {
 
     private var scene: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .top) {
+            // WHOOP home chrome: avatar top-left (opens Settings), a centred day-pager pill (opens the
+            // day picker; horizontal swipe still moves between days), the quick-add "+" and the strap
+            // battery ring top-right.
+            HStack(alignment: .center) {
+                Button { showSettings = true } label: {
+                    ProfileAvatarView(imageData: profile.avatarImageData, size: 38)
+                        .frame(width: 38, height: 38)
+                }
+                .buttonStyle(LiquidPressStyle())
+                .accessibilityLabel("Profile and settings")
+
+                Spacer(minLength: 8)
+
                 Button { showDayPicker = true } label: {
-                    VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 11, weight: .bold)).opacity(0.5)
                         Text(dayTitle)
-                            .font(StrandFont.rounded(28))
-                            .foregroundStyle(.white)
-                            .shadow(color: .black.opacity(0.4), radius: 10, y: 1)
-                        Text(dateLine)
-                            .font(StrandFont.caption)
-                            .foregroundStyle(.white.opacity(0.78))
-                            .shadow(color: .black.opacity(0.35), radius: 8, y: 1)
+                            .font(StrandFont.text(15, weight: .semibold))
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 11, weight: .bold)).opacity(0.5)
                     }
-                    .contentShape(Rectangle())
+                    .foregroundStyle(StrandPalette.textPrimary)
+                    .padding(.horizontal, 14).padding(.vertical, 8)
+                    .background(
+                        Capsule().fill(StrandPalette.surfaceRaised)
+                            .overlay(Capsule().strokeBorder(StrandPalette.hairline, lineWidth: 1))
+                    )
+                    .contentShape(Capsule())
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("\(dayTitle). Tap to pick a day, swipe to change day.")
@@ -331,34 +347,18 @@ struct LiquidTodayView: View {
                         .frame(minWidth: 320, minHeight: 360)
                         .liquidPopoverAdaptation()
                 }
+
                 Spacer(minLength: 8)
+
                 HStack(spacing: 8) {
-                    // Support: a tap opens project info, attribution, and contact.
-                    Button { showSupport = true } label: {
-                        Image(systemName: "heart.fill")
-                            .font(.system(size: 19, weight: .semibold))
-                            .foregroundStyle(StrandPalette.chargeColor)
-                            .frame(width: 34, height: 34)
-                            .shadow(color: .black.opacity(0.3), radius: 6, y: 1)
-                    }
-                    .buttonStyle(LiquidPressStyle())
-                    .accessibilityLabel("Support NOOP: help and contact.")
-                    // Profile pic (the one set in Settings) → opens Settings, matching the classic Today.
-                    Button { showSettings = true } label: {
-                        ProfileAvatarView(imageData: profile.avatarImageData, size: 34)
-                            .frame(width: 34, height: 34)
-                    }
-                    .buttonStyle(LiquidPressStyle())
-                    .accessibilityLabel("Profile and settings")
                     LiquidAddButton()
                     LiquidBatteryButton()
                 }
             }
-            // Subtle NOOP wordmark in the sky between header and hero. Perfectly centred (a letter row has
-            // no trailing tracking gap the way `Text(...).tracking()` does), with a tap easter egg.
+            // NOOP wordmark, centred on the slate canvas, with a tap easter egg.
             LiquidWordmark()
-                .padding(.top, 30)
-            heroCard.padding(.top, 22)
+                .padding(.top, 24)
+            heroCard.padding(.top, 18)
             if liveSessionsBeta {
                 liveSessionStartRow.padding(.top, 10)
             }
@@ -400,24 +400,112 @@ struct LiquidTodayView: View {
         .accessibilityLabel("Start a live session. Beta. Silent strap coaching against today's Charge.")
     }
 
+    /// The WHOOP home dial trio: Rest / Charge / Effort (the reference app's Sleep / Recovery / Strain
+    /// order, mapped to NOOP's names). Each dial is a `RingDial` in the domain tint. Rest carries the
+    /// sleep colour, Charge the recovery traffic-light band for its score, Effort the strain ramp. The
+    /// dials sit directly on the slate canvas (no card), and each taps through to the same scoring guide
+    /// the previous hero cells opened, so no navigation destination changes.
     private var heroCard: some View {
         HStack(alignment: .top, spacing: 4) {
-            HeroScoreCell(label: "Charge", score: displayDay?.recovery, tint: StrandPalette.chargeColor,
-                          pill: "WHOOP", animated: dataLoaded, onGuide: { guideSection = .charge })
-            HeroScoreCell(label: "Effort", score: displayDay?.strain, tint: StrandPalette.effortColor,
-                          pill: nil, animated: dataLoaded, onGuide: { guideSection = .effort })
-            HeroScoreCell(label: "Rest", score: restScore, tint: StrandPalette.restColor,
-                          pill: "WHOOP", animated: dataLoaded, onGuide: { guideSection = .rest })
+            ringCell(label: "Rest", section: .rest, value: restScore,
+                     display: pctDisplay(restScore), tint: StrandPalette.restColor)
+            ringCell(label: "Charge", section: .charge, value: displayDay?.recovery,
+                     display: pctDisplay(displayDay?.recovery),
+                     tint: StrandPalette.recoveryBand(displayDay?.recovery ?? 0))
+            ringCell(label: "Effort", section: .effort, value: displayDay?.strain,
+                     display: displayDay?.strain.map { effortText($0) } ?? "-",
+                     tint: StrandPalette.strainColor(displayDay?.strain ?? 0))
         }
-        .padding(.vertical, 16)
-        .padding(.horizontal, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 26, style: .continuous)
-                .fill(heroFill)
-                .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous)
-                    .strokeBorder(.white.opacity(0.11), lineWidth: 1))
-                .shadow(color: .black.opacity(0.6), radius: 30, y: 16)
-        )
+        .padding(.vertical, 8)
+    }
+
+    /// One home dial: a `RingDial` (.trio) filled to the score, tapping through to the scoring guide.
+    private func ringCell(label: String, section: ScoreSection, value: Double?,
+                          display: String, tint: Color) -> some View {
+        Button { guideSection = section } label: {
+            RingDial(value: (value ?? 0) / 100,
+                     display: value != nil ? display : "-",
+                     label: label, tint: tint, size: .trio)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text("\(label), \(value.map { String(Int($0.rounded())) } ?? "no data yet"). See how it is scored."))
+    }
+
+    /// A "NN%" read-out for a 0...100 score, or a plain dash when there is no value yet.
+    private func pctDisplay(_ v: Double?) -> String { v.map { "\(Int($0.rounded()))%" } ?? "-" }
+
+    /// A small ring (mini RingDial scaled to `size`pt) used in the "Your cards" + vitals rows in place of
+    /// the retired liquid vessel. Numeral-free: just the tinted arc over the faint track.
+    private func miniRing(_ frac: Double?, tint: Color, size: CGFloat = 30) -> some View {
+        RingDial(value: frac ?? 0, display: "", label: "", tint: tint, size: .mini)
+            .scaleEffect(size / 44.0)
+            .frame(width: size, height: size)
+    }
+
+    // MARK: - Insight card + monitor tiles (WHOOP home)
+
+    /// The WHOOP insight card under the dials: the day's synthesis line with a caps link into the scoring
+    /// guide. Reuses the existing readiness-driven `synthLine` copy (the same status line the Synthesis
+    /// section shows), so no new data source is introduced.
+    private var whoopInsightCard: some View {
+        InsightCallout(message: synthLine, linkTitle: "How your day is scored",
+                       accent: StrandPalette.chargeColor) { guideSection = .charge }
+    }
+
+    /// The two-up HEALTH MONITOR / STRESS MONITOR tiles, wired to the vitals already loaded for the
+    /// selected day and the stress score. Each tile taps through to its existing detail screen.
+    private var monitorTilesSection: some View {
+        HStack(spacing: 12) {
+            NavigationLink { HealthView() } label: {
+                MonitorTile(title: "Health Monitor") { healthMonitorContent }
+            }
+            .buttonStyle(LiquidPressStyle())
+            NavigationLink { StressView() } label: {
+                MonitorTile(title: "Stress Monitor") { stressMonitorContent }
+            }
+            .buttonStyle(LiquidPressStyle())
+        }
+    }
+
+    private var healthMonitorContent: some View {
+        let present = [displayDay?.avgHrv, displayDay?.restingHr.map(Double.init), displayDay?.respRateBpm]
+            .compactMap { $0 }.count
+        return HStack(spacing: 8) {
+            Image(systemName: present > 0 ? "checkmark.circle.fill" : "circle")
+                .foregroundStyle(present > 0 ? StrandPalette.statusPositive : StrandPalette.textTertiary)
+            VStack(alignment: .leading, spacing: 2) {
+                TrackedCapsLabel(present > 0 ? "Within Range" : "No Data", size: 10,
+                                 color: present > 0 ? StrandPalette.statusPositive : StrandPalette.textTertiary)
+                Text("\(present)/3 Metrics")
+                    .font(StrandFont.subhead)
+                    .foregroundStyle(StrandPalette.textSecondary)
+            }
+        }
+    }
+
+    private var stressMonitorContent: some View {
+        HStack(spacing: 8) {
+            Text(stress.map { String(format: "%.1f", $0) } ?? "-")
+                .font(StrandFont.number(15, weight: .bold))
+                .foregroundStyle(StrandPalette.stressColor)
+            VStack(alignment: .leading, spacing: 2) {
+                TrackedCapsLabel(stressWord, size: 10, color: StrandPalette.textPrimary)
+                Text("of 3")
+                    .font(StrandFont.subhead)
+                    .foregroundStyle(StrandPalette.textSecondary)
+            }
+        }
+    }
+
+    /// A short stress band word for the stress monitor tile (stress runs 0...3).
+    private var stressWord: String {
+        guard let s = stress else { return "Calibrating" }
+        switch s {
+        case ..<1:  return "Low"
+        case ..<2:  return "Medium"
+        default:    return "High"
+        }
     }
 
     // MARK: - Heart rate
@@ -545,7 +633,7 @@ struct LiquidTodayView: View {
                                       value: String, tint: Color, frac: Double?) -> some View {
         NavigationLink { dest } label: {
             HStack(spacing: 12) {
-                LiquidVessel(value: frac, tint: tint, animated: false).frame(width: 30, height: 30)
+                miniRing(frac, tint: tint, size: 30)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(title.uppercased()).font(StrandFont.overlineScaled(11)).tracking(1.0)
                         .foregroundStyle(StrandPalette.textPrimary)
@@ -655,7 +743,7 @@ struct LiquidTodayView: View {
 
     private func vitalRow(_ label: String, _ value: String, _ tint: Color, _ frac: Double?) -> some View {
         HStack(spacing: 12) {
-            LiquidVessel(value: frac, tint: tint, animated: false).frame(width: 26, height: 26)
+            miniRing(frac, tint: tint, size: 26)
             Text(label).font(StrandFont.subhead).foregroundStyle(StrandPalette.textSecondary)
             Spacer()
             Text(value).font(StrandFont.number(15)).foregroundStyle(StrandPalette.textPrimary)
@@ -1032,72 +1120,6 @@ private struct LiquidWordmark: View {
             scaleX = 1.35; scaleY = 0.7
             withAnimation(.spring(response: 0.5, dampingFraction: 0.3)) { scaleX = 1; scaleY = 1 }
         }
-    }
-}
-
-// MARK: - Hero score cell (count-up number over a filling vessel, tap-to-splash)
-
-/// One of the three hero scores (Charge / Effort / Rest). The vessel fills from empty and the number
-/// COUNTS UP to the value when data lands; tapping the gauge itself splashes (the number is
-/// hit-transparent so the tap reaches the vessel). The label row taps through to the scoring guide.
-private struct HeroScoreCell: View {
-    let label: String
-    let score: Double?            // 0–100 (nil = no data yet)
-    let tint: Color
-    let pill: String?
-    let animated: Bool
-    let onGuide: () -> Void
-
-    @State private var shown: Double = 0
-
-    private var frac: Double? { score.map { max(0, min(1, $0 / 100)) } }
-
-    var body: some View {
-        VStack(spacing: 7) {
-            ZStack {
-                LiquidVessel(value: frac, tint: tint, animated: animated)
-                    .frame(width: 96, height: 96)
-                Group {
-                    if score != nil {
-                        CountUpNumber(value: shown, font: StrandFont.rounded(26))
-                    } else {
-                        Text("–").font(StrandFont.rounded(26))
-                    }
-                }
-                .foregroundStyle(.white)
-                .shadow(color: .black.opacity(0.5), radius: 6, y: 1)
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
-                .allowsHitTesting(false)   // taps fall through to the vessel → splash
-            }
-            Button(action: onGuide) {
-                HStack(spacing: 3) {
-                    Text(label.uppercased()).font(StrandFont.overline).tracking(1.6)
-                    Image(systemName: "chevron.right").font(.system(size: 9, weight: .semibold)).opacity(0.6)
-                }
-                .foregroundStyle(StrandPalette.textSecondary)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(Text("\(label), \(score.map { String(Int($0.rounded())) } ?? "no data yet"). See how it is scored."))
-            if let pill {
-                Text(pill)
-                    .font(StrandFont.overlineScaled(8.5)).tracking(1.2)
-                    .foregroundStyle(StrandPalette.textSecondary)
-                    .padding(.horizontal, 8).padding(.vertical, 2.5)
-                    .background(Capsule().fill(.white.opacity(0.05))
-                        .overlay(Capsule().strokeBorder(.white.opacity(0.18), lineWidth: 1)))
-            } else {
-                Color.clear.frame(height: 18) // keep the three labels vertically aligned
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .onAppear { rollTo(score) }
-        .onChangeCompat(of: score) { v in rollTo(v) }
-    }
-
-    private func rollTo(_ v: Double?) {
-        guard let v else { shown = 0; return }
-        withAnimation(.easeOut(duration: 0.9)) { shown = v }   // counts up in step with the vessel filling
     }
 }
 

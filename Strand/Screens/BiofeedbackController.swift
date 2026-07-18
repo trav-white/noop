@@ -3,7 +3,7 @@ import Combine
 import SwiftUI
 import StrandAnalytics
 
-// BiofeedbackController.swift — the live session controller for the three haptic-biofeedback layers
+// BiofeedbackController.swift: the live session controller for the three haptic-biofeedback layers
 // (v5 "the strap that breathes you down"). It is the ONLY thing in the UI lane that walks the pure
 // StrandAnalytics engines over time and fires the proven strap buzz path. The views (BreathingView's
 // resonance + "Calm me" + stress-check-in surfaces) own *presentation*; this owns the *clock + the BLE
@@ -13,7 +13,7 @@ import StrandAnalytics
 // See docs/superpowers/specs/2026-06-19-v5-haptic-biofeedback-design.md (Architecture & files → Wiring).
 //
 // Buzz path (reused verbatim, hardware-confirmed): `AppModel.buzz(loops:)` → `send(.runHapticsPattern,
-// payload: [2, loops, 0, 0, 0])` — the SAME call the Haptic Clock (`buzzTimeNow`) and the inactivity
+// payload: [2, loops, 0, 0, 0])` (the SAME call the Haptic Clock (`buzzTimeNow`) and the inactivity
 // nudge use. We only schedule WHEN to fire it; the buzz itself is the shipped one.
 //
 // All work is @MainActor (it touches AppModel + drives @Published UI state). Everything is opt-in,
@@ -27,7 +27,7 @@ final class BiofeedbackController: ObservableObject {
     /// Which biofeedback flow is currently running (or none). Drives the views' "session live" chrome.
     enum SessionKind: Equatable {
         case none
-        /// L1 resonance sweep — pacing one candidate of the "find my pace" flow.
+        /// L1 resonance sweep: pacing one candidate of the "find my pace" flow.
         case resonanceSweep(bpm: Double, paceIndex: Int, paceCount: Int)
         /// L1 paced breathing at the locked (or chosen) resonance pace.
         case resonanceSession(bpm: Double)
@@ -40,7 +40,7 @@ final class BiofeedbackController: ObservableObject {
     /// The flow running right now (`.none` when idle). A manual L1/L2 session sets this; the L3 detector
     /// must never fire over a non-`.none` session (the spec's "never nudge over a manual session" rule).
     @Published private(set) var session: SessionKind = .none
-    /// True while any biofeedback session is live — the single "is something running" flag.
+    /// True while any biofeedback session is live, the single "is something running" flag.
     @Published private(set) var running = false
     /// The current paced breath phase, for the orb/phase word when the screen is on.
     @Published private(set) var phase: BreathPhase = .inhale
@@ -49,9 +49,9 @@ final class BiofeedbackController: ObservableObject {
 
     // MARK: - L1 sweep progress
 
-    /// Human label for the pace under test, e.g. "Testing 5.5 br/min…" — nil when not sweeping.
+    /// Human label for the pace under test, e.g. "Testing 5.5 br/min...", nil when not sweeping.
     @Published private(set) var sweepLabel: String? = nil
-    /// 0…1 progress through the whole sweep (paces completed / total) — for a calm progress bar.
+    /// 0...1 progress through the whole sweep (paces completed / total), for a calm progress bar.
     @Published private(set) var sweepProgress: Double = 0
     /// The finished sweep result (locked pace + per-pace RSA curve), set when a sweep completes. nil until
     /// then; the result card reads this.
@@ -66,7 +66,7 @@ final class BiofeedbackController: ObservableObject {
     /// The honest L2 outcome line once the session ends ("HR settled 78 → 69 over 2:30" or the
     /// "held steady" path). nil while running / before any L2 ran.
     @Published private(set) var calmOutcome: String? = nil
-    /// True when the just-finished L2 session did NOT settle the heart — the view offers L1 instead, no
+    /// True when the just-finished L2 session did NOT settle the heart, the view offers L1 instead, no
     /// fabricated win.
     @Published private(set) var calmDidNotFall = false
 
@@ -102,7 +102,7 @@ final class BiofeedbackController: ObservableObject {
     private var secondTimer: AnyCancellable?
     /// A repeating driver for L2 (it recomputes the interval each pulse rather than a fixed cue list).
     private var calmTick: DispatchWorkItem?
-    /// The sweep's live R-R subscription (L1) — held so stop() tears it down cleanly.
+    /// The sweep's live R-R subscription (L1), held so stop() tears it down cleanly.
     private var sweepRRSub: AnyCancellable?
 
     /// Can we actually buzz the strap? L2/L3 are haptic-FIRST, so they are disabled (not faked) when the
@@ -177,7 +177,7 @@ final class BiofeedbackController: ObservableObject {
     }
 
     /// Walk a `[BreathCue]` list: drive `phase` and fire the per-cue buzz at each offset, then call
-    /// `onComplete` after the last cue's cycle finishes. Pure cue list in, scheduled side-effects out —
+    /// `onComplete` after the last cue's cycle finishes. Pure cue list in, scheduled side-effects out:
     /// the spec's "the existing asyncAfter walk drives it".
     private func walkCues(_ cues: [BreathCue], onComplete: @escaping () -> Void) {
         guard !cues.isEmpty else { onComplete(); return }
@@ -234,7 +234,7 @@ final class BiofeedbackController: ObservableObject {
             sweepRRSub?.cancel()
             sweepRRSub = live.$rr.sink { rr in
                 let now = Int(Date().timeIntervalSince1970)
-                for ms in rr where ms > 300 && ms < 2000 {  // plausible R-R (30–200 bpm)
+                for ms in rr where ms > 300 && ms < 2000 {  // plausible R-R (30-200 bpm)
                     bucket.append(ResonanceEngine.RrBeat(ts: now, rrMs: ms))
                 }
             }
@@ -302,7 +302,7 @@ final class BiofeedbackController: ObservableObject {
             return
         }
         calmTargetBpm = step.targetBpm
-        fireBuzz(loops: 1)   // one light pulse per target beat — a felt metronome, not a shock
+        fireBuzz(loops: 1)   // one light pulse per target beat, a felt metronome, not a shock
 
         let interval = step.intervalMs ?? 1_000
         let next = DispatchWorkItem { [weak self] in self?.scheduleCalmStep(config: config) }

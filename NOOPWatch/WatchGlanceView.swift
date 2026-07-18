@@ -1,7 +1,7 @@
 import SwiftUI
 import StrandDesign
 
-// MARK: - WatchGlanceView — the watch app's single primary screen
+// MARK: - WatchGlanceView , the watch app's single primary screen
 //
 // The Apple-Fitness-x-WHOOP look scaled to the wrist: the three NOOP rings (Charge / Effort / Rest) with
 // their numbers in SF-Rounded, each honouring confidence (a calibrating score shows a dash plus a small
@@ -45,13 +45,13 @@ struct WatchGlanceView: View {
             HStack(spacing: 8) {
                 // The labels ride a plain String property into ScoreRing, so they must be wrapped HERE;
                 // a bare literal would bypass the string catalog entirely.
-                ScoreRing(label: String(localized: "Charge"), value: snap.charge,
+                ScoreRing(label: String(localized: "Recovery"), value: snap.charge,
                           calibrating: snap.chargeCalibrating || stale,
                           color: StrandPalette.chargeColor)
-                ScoreRing(label: String(localized: "Effort"), value: snap.effort,
+                ScoreRing(label: String(localized: "Strain"), value: snap.effort,
                           calibrating: snap.effortCalibrating || stale,
                           color: StrandPalette.effortColor)
-                ScoreRing(label: String(localized: "Rest"), value: snap.rest,
+                ScoreRing(label: String(localized: "Sleep"), value: snap.rest,
                           calibrating: snap.restCalibrating || stale,
                           color: StrandPalette.restColor)
             }
@@ -142,7 +142,7 @@ struct WatchGlanceView: View {
     // ageString helper was retired with that move.
 }
 
-// MARK: - ScoreRing — one clean NOOP ring scaled for the wrist
+// MARK: - ScoreRing , one clean NOOP ring scaled for the wrist
 //
 // Wraps the shared GlowRing (the flat, crisp Apple-Fitness-x-WHOOP arc) so the watch matches the phone's
 // rings exactly. A calibrating score draws an EMPTY track with a dash centre and a small "cal" marker

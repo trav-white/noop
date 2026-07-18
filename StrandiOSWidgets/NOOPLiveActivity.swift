@@ -3,7 +3,7 @@ import SwiftUI
 import ActivityKit
 import StrandDesign
 
-/// Live Activity for an active live-HR session — shown on the Lock Screen and in the Dynamic Island.
+/// Live Activity for an active live-HR session, shown on the Lock Screen and in the Dynamic Island.
 struct NOOPLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: NOOPActivityAttributes.self) { context in
@@ -16,17 +16,17 @@ struct NOOPLiveActivity: Widget {
                     Text(context.attributes.title)
                         .font(.caption).foregroundStyle(StrandPalette.textSecondary)
                     Text("\(context.state.bpm.map(String.init) ?? "–") bpm")
-                        .font(.system(size: 26, weight: .bold, design: .rounded))
+                        .font(StrandFont.number(26, weight: .bold))
                         .foregroundStyle(StrandPalette.textPrimary)
                 }
                 Spacer()
                 // Charge + Effort (#446) on the banner, mirroring the Dynamic Island expanded stats.
                 HStack(spacing: 12) {
                     if let r = context.state.recovery {
-                        bannerStat(label: "Charge", value: "\(r)%")
+                        bannerStat(label: "Recovery", value: "\(r)%")
                     }
                     if let e = context.state.effort {
-                        bannerStat(label: "Effort", value: "\(e)")
+                        bannerStat(label: "Strain", value: "\(e)")
                     }
                 }
             }
@@ -40,13 +40,13 @@ struct NOOPLiveActivity: Widget {
                         .foregroundStyle(StrandPalette.statusCritical)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    // Charge + Effort (#446) — one more stat alongside the leading live HR.
+                    // Charge + Effort (#446): one more stat alongside the leading live HR.
                     HStack(spacing: 10) {
                         if let r = context.state.recovery {
-                            statColumn(label: "Charge", value: "\(r)%")
+                            statColumn(label: "Recovery", value: "\(r)%")
                         }
                         if let e = context.state.effort {
-                            statColumn(label: "Effort", value: "\(e)")
+                            statColumn(label: "Strain", value: "\(e)")
                         }
                     }
                 }

@@ -367,7 +367,9 @@ fun SleepScreen(
         // settles into the theme canvas behind the header + hero, bled full-width up behind the status bar
         // via the scaffold's topBackground plumbing. Gated on the day-cycle preference exactly like Today
         // (showDayCycleBackground ? sky : plain canvas). Replaces the classic per-hero scene backdrop.
-        topBackground = if (showDayCycleBackground) { { LiquidScreenSky() } } else null,
+        // WHOOP reskin: the animated LiquidScreenSky is replaced by the flat WHOOP slate backdrop, still
+        // gated on the day-cycle preference (OFF = plain near-black surface). Mirrors the Today reskin.
+        topBackground = if (showDayCycleBackground) { { WhoopScreenSky() } } else null,
     ) {
         // #65: the transient UNDO banner after a suppressing delete. Restores the deleted row into its
         // ORIGINAL namespace + lifts the tombstone. Mirrors the macOS SleepView sleepUndoBanner.
@@ -663,7 +665,7 @@ private val LIQUID_HERO_RADIUS: Dp = 26.dp
 @Composable
 private fun RestHero(score: Double?, asleepMin: Double?, source: String) {
     Column(verticalArrangement = Arrangement.spacedBy(Metrics.gap)) {
-        SectionHeader("Sleep performance", overline = "Last night", trailing = "Rest")
+        SectionHeader("Sleep performance", overline = "Last night", trailing = "Sleep")
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -726,23 +728,19 @@ private fun RestHero(score: Double?, asleepMin: Double?, source: String) {
  */
 @Composable
 private fun SleepHeroVessel(fraction: Double, value: Double, tint: Color, diameter: Dp) {
+    // WHOOP reskin: the liquid vessel is replaced by the Phase 2 hero RingDial (frame 02: the big Sleep
+    // Performance ring). The dial fills to [fraction] in the Rest [tint] on the dark WHOOP track with the
+    // score as a centred D-DIN numeral, animating its arc in on appear. The trio label is drawn by the
+    // caller's SectionHeader + score word, so the dial itself carries no label (showsLabel = false). The
+    // outer Box keeps the previous [diameter] footprint, so the RingDial hero geometry scales down into it.
     Box(modifier = Modifier.size(diameter), contentAlignment = Alignment.Center) {
-        LiquidVessel(
+        com.noop.ui.components.RingDial(
             value = fraction.coerceIn(0.0, 1.0),
+            display = value.roundToInt().toString(),
+            label = "",
             tint = tint,
-            animated = true,
-            modifier = Modifier.size(diameter),
-        )
-        // Count-up number over the vessel — white, tabular, a soft shadow for legibility, hit-transparent so
-        // the tap reaches the vessel (splash). Size ≈ diameter × 0.27 (the Today 96→26 ratio), capped.
-        val numberSp = (diameter.value * 0.27f).coerceIn(20f, 52f)
-        CountUpText(
-            value = value,
-            format = { it.roundToInt().toString() },
-            style = NoopType.number(numberSp, weight = FontWeight.Bold)
-                .copy(shadow = Shadow(color = Color.Black.copy(alpha = 0.5f), offset = Offset(0f, 1f), blurRadius = 6f)),
-            color = Color.White,
-            modifier = Modifier.clearAndSetSemantics {},
+            size = com.noop.ui.components.RingDialSize.Hero,
+            showsLabel = false,
         )
     }
 }
@@ -1916,7 +1914,7 @@ private fun MetricGrid(m: SleepModel, onMetricClick: (String) -> Unit = {}) {
     val tiles = listOf<@Composable (Modifier) -> Unit>(
         { mod ->
             SparkTile(
-                mod, "Rest",
+                mod, "Sleep",
                 value = pctValue(m.performance.latest),
                 caption = vsTypical(m.performance.latest, m.performance.typical, "%"),
                 accent = m.performance.latest?.let { Palette.recoveryColor(it) } ?: Palette.textPrimary,
@@ -3462,7 +3460,7 @@ private data class SleepMetricSpec(
 )
 
 private fun sleepMetricSpec(key: String): SleepMetricSpec = when (key) {
-    "performance"     -> SleepMetricSpec("Rest", "%", Palette.restColor) { "${it.roundToInt()}" }
+    "performance"     -> SleepMetricSpec("Sleep", "%", Palette.restColor) { "${it.roundToInt()}" }
     "efficiency"      -> SleepMetricSpec("Sleep Efficiency", "%", Palette.statusPositive) { "${it.roundToInt()}" }
     "consistency"     -> SleepMetricSpec("Consistency", "%", Palette.metricCyan) { "${it.roundToInt()}" }
     "hours_vs_needed" -> SleepMetricSpec("Hours vs Needed", "%", Palette.restColor) { "${it.roundToInt()}" }

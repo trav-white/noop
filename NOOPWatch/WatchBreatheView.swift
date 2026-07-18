@@ -1,7 +1,7 @@
 import SwiftUI
 import StrandDesign
 
-// MARK: - WatchBreatheView — a wrist-native guided breathing session
+// MARK: - WatchBreatheView , a wrist-native guided breathing session
 //
 // The phone is the brain for SCORES, but this runs entirely ON the watch: its own clock paces the breath,
 // the Taptic engine carries the cue so it works with the wrist down and eyes closed, and a concentric guide
@@ -20,9 +20,9 @@ struct WatchBreatheView: View {
     // MARK: Pace presets (mirrors the iOS BreathingView.Pace inhale/exhale seconds)
 
     private enum Pace: CaseIterable, Hashable {
-        case relax       // 4s inhale / 6s exhale — long exhale, downshift to rest
-        case coherence   // 5.5s / 5.5s — equal breath, ~5.5 br/min
-        case box         // 4s / 4s — square breath, steady focus
+        case relax       // 4s inhale / 6s exhale , long exhale, downshift to rest
+        case coherence   // 5.5s / 5.5s , equal breath, ~5.5 br/min
+        case box         // 4s / 4s , square breath, steady focus
 
         var label: String {
             switch self {
@@ -32,7 +32,7 @@ struct WatchBreatheView: View {
             }
         }
 
-        /// Inhale seconds — same values the iOS fixed-pace trainer uses.
+        /// Inhale seconds , same values the iOS fixed-pace trainer uses.
         var inhale: Double {
             switch self {
             case .relax:     return 4.0
@@ -41,7 +41,7 @@ struct WatchBreatheView: View {
             }
         }
 
-        /// Exhale seconds — same values the iOS fixed-pace trainer uses.
+        /// Exhale seconds , same values the iOS fixed-pace trainer uses.
         var exhale: Double {
             switch self {
             case .relax:     return 6.0
@@ -58,7 +58,7 @@ struct WatchBreatheView: View {
 
     // MARK: State
 
-    /// When Reduce Motion is on the swelling ring is suppressed — the breath is cued by the phase word +
+    /// When Reduce Motion is on the swelling ring is suppressed , the breath is cued by the phase word +
     /// haptics instead, so the screen stays still. (watchOS a11y)
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -72,7 +72,7 @@ struct WatchBreatheView: View {
     /// When the current phase ends (wall-clock). The 0.05s ticker compares against this so the pace stays
     /// true even if a frame is dropped, rather than counting ticks.
     @State private var phaseDeadline: Date = .distantFuture
-    /// When the current phase began — used to drive the on-ring countdown.
+    /// When the current phase began , used to drive the on-ring countdown.
     @State private var phaseStart: Date = Date()
     /// Seconds left in the current phase, recomputed each tick for the centre countdown.
     @State private var phaseRemaining: Int = 0
@@ -84,7 +84,7 @@ struct WatchBreatheView: View {
     private let phaseTimer = Timer.publish(every: 0.05, on: .main, in: .common).autoconnect()
     private let secondTimer = Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()
 
-    /// Parked radius under Reduce Motion — the ring sits mid-way rather than pulsing.
+    /// Parked radius under Reduce Motion , the ring sits mid-way rather than pulsing.
     private let reducedSteadyRing: CGFloat = 0.5
 
     var body: some View {
@@ -156,7 +156,7 @@ struct WatchBreatheView: View {
                 .strokeBorder(StrandPalette.restColor.opacity(0.26), lineWidth: 1)
                 .frame(width: maxDiameter, height: maxDiameter)
 
-            // A soft radial-shaded disc that swells with the breath (shading, not a bloom halo) — the
+            // A soft radial-shaded disc that swells with the breath (shading, not a bloom halo) , the
             // same cue as the iOS orb. Held steady under Reduce Motion.
             Circle()
                 .fill(
@@ -171,7 +171,7 @@ struct WatchBreatheView: View {
                 )
                 .frame(width: guideDiameter, height: guideDiameter)
 
-            // The travelling guide ring — a brighter 2px stroke riding the breath out and back, the
+            // The travelling guide ring , a brighter 2px stroke riding the breath out and back, the
             // crisp pace line on top of the soft swell.
             Circle()
                 .strokeBorder(StrandPalette.restBright.opacity(running ? 0.70 : 0.40), lineWidth: 2)
@@ -206,7 +206,7 @@ struct WatchBreatheView: View {
                     .foregroundStyle(StrandPalette.textTertiary)
             }
         }
-        // Keep every centre word on ONE line — it sits inside the orb, which shrinks on the smallest
+        // Keep every centre word on ONE line , it sits inside the orb, which shrinks on the smallest
         // watch, so let the text scale down rather than wrap (no "Breath / e").
         .lineLimit(1)
         .minimumScaleFactor(0.6)
@@ -325,7 +325,7 @@ struct WatchBreatheView: View {
     }
 
     /// Arm a new phase: set its deadline, animate the ring toward the target radius over the phase duration,
-    /// and (when `buzz`) fire the wrist haptic — one tap on the inhale start, two on the exhale start, so the
+    /// and (when `buzz`) fire the wrist haptic , one tap on the inhale start, two on the exhale start, so the
     /// pace is felt without looking. Mirrors the iOS armPhase, swapping the strap buzz for StrandHaptic.
     private func armPhase(_ newPhase: Phase, from now: Date, buzz: Bool) {
         phase = newPhase
@@ -343,7 +343,7 @@ struct WatchBreatheView: View {
         }
 
         if buzz {
-            // One tap leading the inhale, a double tap leading the exhale — the iOS 1-buzz / 2-buzz cue,
+            // One tap leading the inhale, a double tap leading the exhale , the iOS 1-buzz / 2-buzz cue,
             // reproduced on the wrist. The second exhale tap is nudged slightly so they read as a pair.
             StrandHaptic.light.play()
             if newPhase == .exhale {

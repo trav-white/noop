@@ -61,15 +61,15 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-// MARK: - Hydration detail (MVP, opt-in, local-only) — LIQUID restyle
+// MARK: - Hydration detail (MVP, opt-in, local-only), LIQUID restyle
 //
-// Liquid finish (matching the liquid Today pilot — TodayScreen.kt / LiquidScreenSky.kt / LiquidPrimitives.kt):
-// the day-of-sky settles behind the header (LiquidScreenSky, gated on the same showDayCycleBackground pref),
-// the headline fill becomes a LiquidVessel (water in a vessel — the literal fit) with the litre figure
-// counting up over it, the daily goal reads as a LiquidTube, and the quick-log controls are liquid-press
-// tiles. Everything below stays crisp: the 7-day mini bars are a multi-bar chart (not a single value, so no
-// tube), the flat cards keep the frosted surface. All data bindings, the pure HydrationGoal engine, and the
-// local-only HydrationStore reads/writes are UNCHANGED — this is a restyle only. Mirrors the iOS HydrationView.
+// Liquid finish (matching Today, TodayScreen.kt / LiquidPrimitives.kt), with the WHOOP slate backdrop
+// (WhoopScreenSky, gated on the same showDayCycleBackground pref) settling behind the header: the headline
+// fill is a LiquidVessel (water in a vessel, the literal fit) with the litre figure counting up over it, the
+// daily goal reads as a LiquidTube, and the quick-log controls are liquid-press tiles. Everything below
+// stays crisp: the 7-day mini bars are a multi-bar chart (not a single value, so no tube), the flat cards
+// keep the frosted surface. All data bindings, the pure HydrationGoal engine, and the local-only
+// HydrationStore reads/writes are UNCHANGED, this is a restyle only. Mirrors the iOS HydrationView.
 
 /** The reset accent blue (matches NoopButton's pinned iOS `StrandPalette.accent`: #234F9E / #60A0E0). */
 private val hydrationAccent: Color
@@ -78,8 +78,8 @@ private val hydrationAccent: Color
 // MARK: - Liquid hero tokens (shared with the liquid Today hero card)
 //
 // The frosted translucent near-black the hydration vessel floats on (mock rgba(13,14,20,.80)), so the vessel
-// + the white count-up litre figure read crisp over the day-of-sky. Radius 26 + a white@0.11 hairline give
-// the frosted-glass edge. Same numbers as the liquid Today heroCard (TodayScreen.kt LIQUID_HERO_*).
+// + the white count-up litre figure read crisp over the WHOOP slate backdrop. Radius 26 + a white@0.11
+// hairline give the frosted-glass edge. Same numbers as the liquid Today heroCard (TodayScreen.kt LIQUID_HERO_*).
 private val LIQUID_HERO_FILL: Color = Color(red = 13f / 255f, green = 14f / 255f, blue = 20f / 255f, alpha = 0.80f)
 private val LIQUID_HERO_RADIUS = 26.dp
 
@@ -112,8 +112,8 @@ fun HydrationScreen(viewModel: AppViewModel) {
     val sex = remember { ProfileStore.from(context).sex }
     val goalMl = remember(sex, strain) { HydrationGoal.dailyGoalMl(sex, strain) }
 
-    // The liquid sky backdrop honours the SAME opt-out pref as the liquid Today (a user who turned the
-    // day-cycle sky off gets the flat canvas here too). Mirrors iOS `showDayCycleBackground ? ... : nil`.
+    // The WHOOP slate backdrop honours the SAME opt-out pref as Today (a user who turned the day-cycle
+    // backdrop off gets the flat canvas here too). Mirrors iOS `showDayCycleBackground ? ... : nil`.
     val showDayCycleBackground = remember { NoopPrefs.showDayCycleBackground(context) }
 
     // Today's running total + the per-day history, loaded off the gesture path and refreshed after a log.
@@ -172,18 +172,18 @@ fun HydrationScreen(viewModel: AppViewModel) {
     // (LazyColumn reproduces the eager `spacedBy(20.dp)`); only on-screen cards compose + are
     // accessibility-walked. All children are unconditional, so every wrap is a bare `item { }`.
     //
-    // LIQUID: the day-of-sky sits behind the header via the scaffold's topBackground slot (the pilot
-    // pattern — LiquidScreenSky.kt), replacing the classic flat canvas. Gated on the day-cycle pref, so an
-    // opted-out user still gets the plain surface. Mirrors the liquid Today scaffold.
+    // WHOOP SLATE BACKDROP: the flat WHOOP canvas gradient (WhoopScreenSky) sits behind the header via the
+    // scaffold's topBackground slot, replacing the classic flat canvas. Gated on the day-cycle pref, so an
+    // opted-out user still gets the plain surface. Mirrors the Today scaffold.
     LazyScreenScaffold(
         title = "Hydration",
         subtitle = "Your fluid intake today, on this phone only.",
-        topBackground = if (showDayCycleBackground) { { LiquidScreenSky() } } else null,
+        topBackground = if (showDayCycleBackground) { { WhoopScreenSky() } } else null,
     ) {
-        // HERO — the day's intake as a LiquidVessel (water in a vessel: the literal fit), with the litre
+        // HERO: the day's intake as a LiquidVessel (water in a vessel, the literal fit), with the litre
         // figure counting up over it, floating on the frosted translucent-black liquid hero card so it reads
-        // crisp on the day-of-sky. The daily goal is a LiquidTube beneath. Same fraction math + accent +
-        // litre values as the GlowRing this replaced. Mirrors the iOS liquid hero idiom (HeroScoreVessel).
+        // crisp on the WHOOP slate backdrop. The daily goal is a LiquidTube beneath. Same fraction math +
+        // accent + litre values as the GlowRing this replaced. Mirrors the iOS liquid hero idiom (HeroScoreVessel).
         item {
             Box(
                 modifier = Modifier

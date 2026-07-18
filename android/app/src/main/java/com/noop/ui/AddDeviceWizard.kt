@@ -1102,7 +1102,7 @@ private fun OuraGateStep(
                     "Live heart rate, and HRV when the ring can measure it.",
                     "Overnight sleep staging, resting heart rate, skin-temperature trend, motion and " +
                         "battery, read straight off the ring.",
-                    "NOOP's own Charge, Effort and Rest, computed on your device from published methods.",
+                    "NOOP's own Recovery, Strain and Sleep, computed on your device from published methods.",
                 ),
             )
             Overline("What you lose")

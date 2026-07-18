@@ -185,7 +185,7 @@ struct MetricExplorerView: View {
         // so the layout is byte-identical to the eager VStack.
         ScreenScaffold(title: "Explore", subtitle: "Every signal, one tap deep.",
                        onRefresh: { await repo.refresh() }, lazy: true,
-                       topBackground: liquidScaffoldSky()) {
+                       topBackground: AnyView(CanvasBackground())) {
             // A quiet, non-blocking hint while the empty-dot probe runs its first pass. The rows below
             // render in full immediately regardless — this only reassures during the scan, and never
             // leaves the screen reading as a bare/empty list before the probe lands (#199).
@@ -601,11 +601,11 @@ struct MetricDetailView: View {
 
     // MARK: Scenic hero
 
-    /// The detail's opening hero: the metric's latest value as either the signature liquid
-    /// LiquidVessel gauge (for 0–100 scores, filled to the score with the number counting up over
-    /// it) or a big count-up headline number, floated over a domain-tinted ScenicHeroBackground,
-    /// with the category overline, the "as of" line, and the range pill. Mirrors TodayView's
-    /// liquid score-hero idiom (and Health's Fitness-Age / Vitality vessels).
+    /// The detail's opening hero: the metric's latest value as either a RingDial gauge (for 0 to 100
+    /// scores, filled to the score with the number counting up over it) or a big count-up headline
+    /// number, floated over a domain-tinted ScenicHeroBackground, with the category overline, the
+    /// "as of" line, and the range pill. Mirrors TodayView's score-hero idiom (and Health's
+    /// Fitness-Age / Vitality rings).
     @ViewBuilder
     private func heroHeader(effectiveRange: ExploreRange,
                             windowed: [(day: String, value: Double)],
@@ -637,21 +637,23 @@ struct MetricDetailView: View {
                 SegmentedPillControl(ExploreRange.allCases, selection: selectionBinding,
                                      isEnabled: isUnlocked) { $0.label }
 
-                // The headline read-out in the liquid language: for a 0–100 score, the signature
-                // LiquidVessel gauge filled to the score (the same hero idiom as Today's rings / Health's
-                // Fitness-Age + Vitality heroes), with the integer counting up over it and the unit + "as
-                // of" line beneath. For a non-score metric, a big count-up number. The vessel fills from 0
-                // to its fraction on appear (`heroAnimatedFraction`), so it settles once like TodayView's
-                // rings; the number ticks itself. A liquid accent on the ONE headline value, where it reads
-                // well — never over the chart below.
+                // The headline read-out: for a 0 to 100 score, a RingDial gauge filled to the score
+                // (the same hero idiom as Today's rings / Health's Fitness-Age + Vitality heroes), with
+                // the integer counting up over it and the unit + "as of" line beneath. For a non-score
+                // metric, a big count-up number. The ring fills from 0 to its fraction on appear
+                // (`heroAnimatedFraction`), so it draws in once like TodayView's rings; the number ticks
+                // itself. An accent on the ONE headline value, where it reads well, never over the chart
+                // below.
                 HStack {
                     Spacer(minLength: 0)
                     if let fraction, let v = value {
                         VStack(spacing: 10) {
                             ZStack {
-                                // The big hero vessel stays live (animated) — the one sloshing gauge on the
+                                // The big hero ring stays live (animated), the one drawn-in gauge on the
                                 // screen, exactly like the hero gauges on Today.
-                                LiquidVessel(value: heroAnimatedFraction, tint: domain.bright, animated: true)
+                                RingDial(value: heroAnimatedFraction, display: "", label: "",
+                                         tint: domain.bright, size: .mini)
+                                    .scaleEffect(188 / 44.0)
                                     .frame(width: 188, height: 188)
                                     .accessibilityHidden(true)
                                 VStack(spacing: 2) {

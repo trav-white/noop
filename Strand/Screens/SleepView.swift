@@ -121,7 +121,7 @@ struct SleepView: View {
                        // re-evaluates this heavy body.
                        onRefresh: { await repo.refresh() },
                        lazy: true,
-                       topBackground: liquidScaffoldSky()) {
+                       topBackground: AnyView(CanvasBackground())) {
             Group {
                 if let resolved {
                     // Each top-level section fades + rises in sequence on first appear (Reduce-Motion safe).
@@ -338,7 +338,7 @@ struct SleepView: View {
     private func restHero(_ model: SleepModel) -> some View {
         let score = model.performance.latest
         VStack(alignment: .leading, spacing: NoopMetrics.gap) {
-            SectionHeader("Sleep performance", overline: "Last night", trailing: String(localized: "Rest"))
+            SectionHeader("Sleep performance", overline: "Last night", trailing: String(localized: "Sleep"))
             // A subtle night atmosphere sits behind the sleep hero ONLY (the Rest world's whisper:
             // faint indigo wash + crescent moon over the near-black canvas, no glow), clipped to the
             // card. Replaces the now-flat ScenicHeroBackground here.
@@ -349,23 +349,13 @@ struct SleepView: View {
                     // animated `heroFraction` the screen already drives on appear / on score change, so
                     // the arc draw-in and the number roll-up land together (Today's HeroScoreCell idiom).
                     VStack(spacing: NoopMetrics.space3) {
-                        ZStack {
-                            LiquidVessel(value: heroFraction, tint: StrandPalette.restColor, animated: true)
-                                .frame(width: 184, height: 184)
-                            VStack(spacing: 0) {
-                                CountUpText(
-                                    value: score,
-                                    format: { "\(Int($0.rounded()))" },
-                                    font: StrandFont.rounded(52),
-                                    color: StrandPalette.textPrimary
-                                )
-                                .shadow(color: .black.opacity(0.5), radius: 6, y: 1)
-                                Text("of 100")
-                                    .font(StrandFont.caption)
-                                    .foregroundStyle(StrandPalette.textSecondary)
-                            }
-                            .allowsHitTesting(false)   // taps fall through to the vessel → splash
-                        }
+                        // The WHOOP sleep hero dial: a thick Rest-tinted arc filled to the night's
+                        // performance, the score centred in D-DIN with a caps label inside the ring.
+                        // Fills to the same animated `heroFraction` the screen already drives.
+                        RingDial(value: heroFraction,
+                                 display: "\(Int(score.rounded()))%",
+                                 label: "Performance",
+                                 tint: StrandPalette.restColor, size: .hero)
                         Text(sleepScoreWord(score))
                             .font(StrandFont.subhead.weight(.semibold))
                             .foregroundStyle(StrandPalette.restColor)
@@ -1006,7 +996,7 @@ struct SleepView: View {
             LazyVGrid(columns: tileColumns, alignment: .leading, spacing: NoopMetrics.gap) {
 
                 StatTile(
-                    label: "Rest",
+                    label: "Sleep",
                     value: pctValue(perf.latest),
                     caption: vsTypical(perf.latest, perf.typical, suffix: "%"),
                     accent: perf.latest.map { StrandPalette.recoveryColor($0) } ?? StrandPalette.textPrimary,

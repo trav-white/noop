@@ -221,9 +221,6 @@ struct TrendsReportPage: View {
                 .fill(StrandPalette.surfaceRaised)
             VStack(alignment: .leading, spacing: NoopMetrics.space1) {
                 HStack(alignment: .firstTextBaseline) {
-                    BrandMark(size: 22)
-                    Text("NOOP").font(StrandFont.overline).tracking(StrandFont.overlineTracking)
-                        .foregroundStyle(StrandPalette.accent)
                     Spacer()
                     Text(range.longName).strandOverline()
                 }

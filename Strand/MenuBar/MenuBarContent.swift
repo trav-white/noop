@@ -75,7 +75,7 @@ public struct MenuBarContent: View {
     @EnvironmentObject private var live: LiveState
     @EnvironmentObject private var model: AppModel
     /// The menu-bar popover is a SEPARATE scene from the main window, so it doesn't inherit the
-    /// window's appearance — drive it from the same setting directly.
+    /// window's appearance , drive it from the same setting directly.
     @AppStorage(AppearanceMode.storageKey) private var appearanceRaw = AppearanceMode.system.rawValue
 
     public init() {}
@@ -146,9 +146,6 @@ public struct MenuBarContent: View {
     private var header: some View {
         HStack(alignment: .center) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("NOOP")
-                    .font(StrandFont.headline)
-                    .foregroundStyle(StrandPalette.textPrimary)
                 Text("ALL YOUR DATA · NONE OF THE CLOUD")
                     .font(StrandFont.overline)
                     .tracking(StrandFont.overlineTracking)
@@ -382,7 +379,7 @@ private func previewEnv(
     return (repo, live, model)
 }
 
-#Preview("Label — zones") {
+#Preview("Label , zones") {
     let (repo, live, model) = previewEnv(
         connected: true, bonded: true, hr: 148, battery: 78,
         metric: .sample(recovery: 71, restingHr: 51, hrv: 62)
@@ -399,7 +396,7 @@ private func previewEnv(
     .preferredColorScheme(.dark)
 }
 
-#Preview("Popover — streaming") {
+#Preview("Popover , streaming") {
     let (repo, live, model) = previewEnv(
         connected: true, bonded: true, hr: 132, battery: 78,
         metric: .sample(recovery: 71, restingHr: 51, hrv: 62)
@@ -410,7 +407,7 @@ private func previewEnv(
         .environmentObject(model)
 }
 
-#Preview("Popover — offline / no data") {
+#Preview("Popover , offline / no data") {
     let (repo, live, model) = previewEnv(
         connected: false, bonded: false, hr: nil, battery: nil, metric: nil
     )

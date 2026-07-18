@@ -23,10 +23,12 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.noop.R
 
 // MARK: - Palette — the "Titanium & Gold" re-skin (mirrors StrandDesign/Palette.swift)
 //
@@ -84,10 +86,28 @@ object Palette {
     val recovery078 get() = active.recovery078
     val recovery100 get() = active.recovery100
 
-    /** Ordered gradient stops for the recovery scale (Titanium gold, or Classic red→green). */
+    /** Recovery-domain data shown WITHOUT a verdict (WHOOP's calm blue, no traffic-light judgement). */
+    val recoveryNoJudgement get() = active.recoveryNoJudgement
+
+    /** Ordered gradient stops for the recovery scale. WHOOP hard three-band traffic light: the
+     *  locations are DUPLICATED (red 0..0.335, yellow 0.335..0.665, green 0.665..1) so the band
+     *  switches instead of blending. sample() breaks on the first matching span, so a value at a
+     *  boundary reads as the lower band and a hair above flips cleanly to the next. */
     val recoveryStops: List<Pair<Float, Color>>
         get() = if (isClassic) classic.recovery
-                else listOf(0.00f to recovery000, 0.30f to recovery030, 0.55f to recovery055, 0.78f to recovery078, 1.00f to recovery100)
+                else listOf(
+                    0.00f to recovery000, 0.335f to recovery000,
+                    0.335f to recovery055, 0.665f to recovery055,
+                    0.665f to recovery100, 1.00f to recovery100,
+                )
+
+    /** The WHOOP recovery band colour for a score 0..100: 0-33 red, 34-66 yellow, 67-100 green.
+     *  A hard band (no blend) for the ring tint / verdict chip. */
+    fun recoveryBand(score: Double): Color = when {
+        score <= 33 -> recovery000
+        score <= 66 -> recovery055
+        else -> recovery100
+    }
 
     // Strain / Effort ramp.
     val strain000 get() = active.strain000
@@ -154,6 +174,14 @@ object Palette {
     // Stress ramp: Titanium calm-blue→gold→orange, or Classic green→amber→red.
     val stressGradientStops: List<Pair<Float, Color>>
         get() = if (isClassic) classic.stress else listOf(0.0f to stressDeep, 0.5f to stressColor, 1.0f to stressBright)
+
+    // WHOOP slate canvas gradient (replaces the flat navy AND the animated LiquidSky header).
+    val canvasTop get() = active.canvasTop
+    val canvasBottom get() = active.canvasBottom
+
+    /** The WHOOP slate page background as a vertical brush: lighter slate #283339 at the top fading
+     *  to near-black #101518 at the bottom. Every header/screen sits on this in the reskin. */
+    fun canvasGradient(): Brush = Brush.verticalGradient(listOf(canvasTop, canvasBottom))
 
     // Scenic background.
     val scenicCenter get() = active.scenicCenter
@@ -319,8 +347,16 @@ enum class DomainTheme {
             else -> Palette.recoveryStops
         }
 
-    /** A short upper-case label for the world (CHARGE / EFFORT / REST / STRESS). */
-    val label: String get() = name
+    /** A short display label for the world (Recovery / Strain / Sleep / Stress). The enum case
+     *  names stay Charge/Effort/Rest as stable code identifiers; only this user-facing label maps
+     *  to the current pillar wording. */
+    val label: String
+        get() = when (this) {
+            Charge -> "Recovery"
+            Effort -> "Strain"
+            Rest -> "Sleep"
+            Stress -> "Stress"
+        }
 }
 
 // MARK: - Motion (ported from StrandDesign/Motion.swift §9.6)
@@ -408,29 +444,45 @@ object Metrics {
     val progressHeight = 10.dp
 }
 
+// MARK: - WHOOP font families (bundled in res/font, OFL-licensed, see android/licenses/fonts/)
+//
+// The WHOOP two-font rule: D-DIN for every numeral, Montserrat for every word (the free OFL
+// stand-ins for WHOOP's DINPro plus Proxima Nova). Mirrors StrandFont.number/text on Apple.
+
+/** D-DIN, for every numeral (hero scores, tile values, chart labels). Regular plus Bold bundled. */
+val numberFont = FontFamily(
+    Font(R.font.d_din, FontWeight.Normal),
+    Font(R.font.d_din_bold, FontWeight.Bold),
+)
+
+/** Montserrat, for every word (titles, body, tracked caps labels). Regular/Medium/SemiBold/Bold. */
+val textFont = FontFamily(
+    Font(R.font.montserrat_regular, FontWeight.Normal),
+    Font(R.font.montserrat_medium, FontWeight.Medium),
+    Font(R.font.montserrat_semibold, FontWeight.SemiBold),
+    Font(R.font.montserrat_bold, FontWeight.Bold),
+)
+
 // MARK: - Typography (ported from StrandDesign/Typography.swift §9.2)
 //
-// Helvetica Neue on Apple; on Android we use a Helvetica-Neue FontFamily where one
-// is bundled in res/font, else FontFamily.SansSerif as the documented substitute
-// (no Helvetica asset is bundled, so the platform grotesque stands in) with the same
-// sizes/weights. Numeric/live styles stay in the house sans and request TABULAR
-// figures via fontFeatureSettings = "tnum" (mirroring iOS .monospacedDigit()) so live
-// values don't reflow; Monospace is reserved for the `mono` raw/log style only.
+// WHOOP reskin: words render in Montserrat (`textFont`), numerals in D-DIN (`numberFont`). Numeric
+// and live styles keep TABULAR figures via fontFeatureSettings = "tnum" (mirroring iOS
+// .monospacedDigit()) so live values don't reflow; Monospace is reserved for the `mono` style only.
 
 object NoopType {
-    // Helvetica Neue family — falls back to the platform grotesque (SansSerif) when
-    // no res/font/helvetica_neue asset is bundled, per the v3 type spec.
-    private val sans = FontFamily.SansSerif
+    // Montserrat for words, D-DIN for numerals (the WHOOP two-font rule).
+    private val sans = textFont
+    private val numeric = numberFont
     private val monoFamily = FontFamily.Monospace
 
-    /** Display 64–80 / Bold — the recovery ring number. Tight tracking (≈ -0.04em),
+    /** Display 64 to 80 / Bold, the recovery ring number in D-DIN. Tight tracking (about -0.04em),
      *  tabular figures so a changing value never reflows. Mirrors StrandFont.display. */
     fun display(size: Float = 72f) = TextStyle(
-        fontFamily = sans, fontWeight = FontWeight.Bold, fontSize = size.sp,
+        fontFamily = numeric, fontWeight = FontWeight.Bold, fontSize = size.sp,
         letterSpacing = displayTracking(size).sp, fontFeatureSettings = "tnum",
     )
 
-    /** The tight tracking for big display numbers (≈ -0.04em). Already applied inside
+    /** The tight tracking for big display numbers (about -0.04em). Already applied inside
      *  display(); exposed to mirror StrandFont.displayTracking. */
     fun displayTracking(size: Float = 72f): Float = -size * 0.04f
 
@@ -451,18 +503,23 @@ object NoopType {
     /** Mono 13 — raw / log views. */
     val mono = TextStyle(fontFamily = monoFamily, fontWeight = FontWeight.Normal, fontSize = 13.sp)
 
-    /** A numeric style at an arbitrary size — the house sans with TABULAR figures
-     *  ('tnum') so live values don't reflow. Mirrors StrandFont.number. */
+    /** A numeric style at an arbitrary size: D-DIN with TABULAR figures ('tnum') so live values
+     *  don't reflow. Mirrors StrandFont.number. */
     fun number(size: Float, weight: FontWeight = FontWeight.SemiBold) = TextStyle(
-        fontFamily = sans, fontWeight = weight, fontSize = size.sp, fontFeatureSettings = "tnum",
+        fontFamily = numeric, fontWeight = weight, fontSize = size.sp, fontFeatureSettings = "tnum",
+    )
+
+    /** A word/text style at an arbitrary size in Montserrat. Mirrors StrandFont.text. */
+    fun text(size: Float, weight: FontWeight = FontWeight.Normal) = TextStyle(
+        fontFamily = sans, fontWeight = weight, fontSize = size.sp,
     )
 
     fun mono(size: Float, weight: FontWeight = FontWeight.Normal) = TextStyle(
         fontFamily = monoFamily, fontWeight = weight, fontSize = size.sp,
     )
 
-    val bodyNumber = TextStyle(fontFamily = sans, fontWeight = FontWeight.Medium, fontSize = 15.sp, fontFeatureSettings = "tnum")
-    val captionNumber = TextStyle(fontFamily = sans, fontWeight = FontWeight.Medium, fontSize = 12.sp, fontFeatureSettings = "tnum")
+    val bodyNumber = TextStyle(fontFamily = numeric, fontWeight = FontWeight.Medium, fontSize = 15.sp, fontFeatureSettings = "tnum")
+    val captionNumber = TextStyle(fontFamily = numeric, fontWeight = FontWeight.Medium, fontSize = 12.sp, fontFeatureSettings = "tnum")
     val metricInline = number(15f)
     val chartValue = number(18f)
     val chartValueLarge = number(22f)

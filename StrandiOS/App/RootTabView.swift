@@ -61,9 +61,11 @@ struct RootTabView: View {
             // cleanly in the gap between them — replaces the native tab bar: no overlap, no glow. The
             // native TabView still drives content + per-tab nav state; only its bar is hidden.
             TabView(selection: $selectedTab) {
-                tab(todayTabRoot, "Today", "square.grid.2x2").tag(0)
-                tab(TrendsView(), "Trends", "chart.line.uptrend.xyaxis").tag(1)
-                tab(SleepView(), "Sleep", "bed.double").tag(2)
+                // WHOOP tab bar: Home, Health, centre quick-add, Coach, More. Trends and Sleep move under
+                // the More index (still one tap away) so the primary bar matches the reference app.
+                tab(todayTabRoot, "Home", "square.grid.2x2").tag(0)
+                tab(HealthView(), "Health", "heart.text.square").tag(1)
+                tab(CoachView(), "Coach", "sparkles").tag(2)
                 moreTab.tag(3)
             }
             .tint(StrandPalette.accent)
@@ -90,6 +92,10 @@ struct RootTabView: View {
             FloatingTabBar(selection: $selectedTab, onReselect: { _ in
                 // Re-tapping the active tab refreshes that page's data (2026-07-02).
                 Task { await repo.refresh() }
+            }, onQuickAdd: {
+                // The centre white "+" opens the shared quick-action sheet (Live HR / start workout /
+                // journal / breathe), routed through the shell's existing quick-action handling.
+                withAnimation(Self.sheetEase) { quickAction = .menu }
             })
         }
         .task {
@@ -128,8 +134,9 @@ struct RootTabView: View {
                 routedPillar = dest
                 router.requestedDestination = nil
             case .trends:
-                // Trends is a primary tab on iPhone (not a pillar sheet) — switch to it.
-                withAnimation(.timingCurve(0.22, 1, 0.36, 1, duration: 0.24)) { selectedTab = 1 }
+                // Trends is no longer a primary tab (it moved under More in the WHOOP layout), so present
+                // it as a sheet via the shared pillar host, the same idiom the other More screens use.
+                routedPillar = .trends
                 router.requestedDestination = nil
             case .activeWorkout:
                 // The Today active-workout indicator opens Live through the quick-action Live sheet; once
@@ -280,24 +287,24 @@ struct RootTabView: View {
         NavigationStack {
             ScreenScaffold(title: "More", subtitle: "Everything else, one tap away",
                            onRefresh: { await repo.refresh() },
-                           topBackground: liquidScaffoldSky()) {
+                           topBackground: AnyView(CanvasBackground())) {
                 moreSection("Insights") {
                     MoreRow("What Moves You", "wand.and.sparkles") { InsightsHubView() }
                     MoreRow("Intelligence", "brain.head.profile") { IntelligenceView() }
-                    MoreRow("Coach", "sparkles") { CoachView() }
+                    MoreRow("Trends", "chart.line.uptrend.xyaxis") { TrendsView() }
                     MoreRow("Insights", "lightbulb.fill") { InsightsView() }
                     MoreRow("Explore", "square.grid.2x2.fill") { MetricExplorerView() }
                     MoreRow("Compare", "rectangle.split.2x1.fill") { CompareView() }
                 }
                 moreSection("Body") {
+                    MoreRow("Sleep", "bed.double") { SleepView() }
                     MoreRow("Live", "waveform.path.ecg") { LiveView() }
                     MoreRow("Workouts", "figure.run") { WorkoutsView() }
-                    MoreRow("Health", "heart.text.square.fill") { HealthView() }
                     MoreRow("Lab Book", "books.vertical.fill") { LabBookView() }
                     MoreRow("Stress", "bolt.heart.fill") { StressView() }
                     MoreRow("Breathe", "wind") { BreathingView() }
                     MoreRow("Intervals", "timer") { IntervalTimerView() }
-                    // Experimental beat-to-beat regularity visualization — self-gates on its own consent.
+                    // Experimental beat-to-beat regularity visualization: self-gates on its own consent.
                     MoreRow("Rhythm", "waveform.path") { RhythmHost() }
                 }
                 moreSection("Data") {
@@ -537,19 +544,22 @@ private struct FloatingTabBar: View {
     @Binding var selection: Int
     /// Fires when the user taps the ALREADY-active tab (2026-07-02: re-tap should refresh).
     var onReselect: (Int) -> Void = { _ in }
+    /// Fires when the centre white "+" is tapped (opens the quick-action sheet).
+    var onQuickAdd: () -> Void = { }
 
     private struct Item: Identifiable { let title: LocalizedStringKey; let icon: String; let tag: Int; var id: Int { tag } }
-    private let nav = [Item(title: "Today", icon: "square.grid.2x2", tag: 0),
-                       Item(title: "Trends", icon: "chart.line.uptrend.xyaxis", tag: 1),
-                       Item(title: "Sleep", icon: "bed.double", tag: 2),
+    private let nav = [Item(title: "Home", icon: "square.grid.2x2", tag: 0),
+                       Item(title: "Health", icon: "heart.text.square", tag: 1),
+                       Item(title: "Coach", icon: "sparkles", tag: 2),
                        Item(title: "More", icon: "ellipsis", tag: 3)]
 
     var body: some View {
-        // One frosted glass bar, four evenly-spaced tabs. The quick-action "+" now lives in the
-        // top-right of each screen's header (balancing the profile avatar on the left).
+        // One frosted glass bar in the WHOOP five-slot shape: Home, Health, the circular white quick-add
+        // button, Coach, More. The "+" sits dead centre, raised in a white circle.
         HStack(spacing: 2) {
             tabButton(nav[0])
             tabButton(nav[1])
+            quickAddButton
             tabButton(nav[2])
             tabButton(nav[3])
         }
@@ -572,6 +582,20 @@ private struct FloatingTabBar: View {
         .shadow(color: .black.opacity(0.22), radius: 18, x: 0, y: 8)
         .padding(.horizontal, 22)
         .padding(.bottom, 4)
+    }
+
+    /// The centre circular white quick-add button (WHOOP's raised "+").
+    private var quickAddButton: some View {
+        Button(action: onQuickAdd) {
+            Image(systemName: "plus")
+                .font(.system(size: 20, weight: .bold))
+                .foregroundStyle(StrandPalette.surfaceBase)
+                .frame(width: 44, height: 44)
+                .background(Circle().fill(Color.white))
+                .shadow(color: .black.opacity(0.25), radius: 8, y: 3)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Quick add")
     }
 
     private func tabButton(_ item: Item) -> some View {

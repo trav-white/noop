@@ -5,13 +5,13 @@ import StrandDesign
 /// The MarkdownUI theme for Coach replies.
 ///
 /// LLM chat replies (OpenAI / Anthropic / Gemini) arrive as GitHub-flavored
-/// Markdown — overwhelmingly bold, bullet/numbered lists, `###` headings, and the
+/// Markdown: overwhelmingly bold, bullet/numbered lists, `###` headings, and the
 /// occasional table for a weekly plan. This theme renders that set in the Strand
 /// look, sized for a chat bubble: headings are capped near body size (a `#` must
 /// not shout inside a 560pt bubble), and tables get hairline borders.
 extension Theme {
     static let strand = Theme()
-        // Base body text — mirrors StrandFont.body (15 / regular).
+        // Base body text, mirrors StrandFont.body (15 / regular).
         .text {
             ForegroundColor(StrandPalette.textPrimary)
             FontSize(15)
@@ -32,7 +32,7 @@ extension Theme {
             ForegroundColor(StrandPalette.accent)
         }
         // Headings: h1/h2 land at headline (17 / semibold), h3 just above body,
-        // h4–h6 as overline-ish small caps labels.
+        // h4-h6 as overline-ish small caps labels.
         .heading1 { configuration in
             configuration.label
                 .markdownMargin(top: 14, bottom: 6)

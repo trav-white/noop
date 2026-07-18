@@ -33,7 +33,7 @@ struct HealthView: View {
                        lazy: true,
                        // The day-of-sky liquid backdrop, matching Today / Sleep / Trends: a fixed,
                        // full-bleed time-of-day sky behind the scroll content (does not scroll).
-                       topBackground: liquidScaffoldSky()) {
+                       topBackground: AnyView(CanvasBackground())) {
             if repo.days.isEmpty {
                 // First run / no history: whether to show the empty state or the full live stack depends
                 // on whether a strap is streaming live HR — a `live`-dependent choice. It's isolated to
@@ -768,14 +768,11 @@ private struct FitnessAgeSection: View {
                     // The signature liquid gauge anchors the hero: a vessel tinted to the Charge world,
                     // filled by how young the fitness age reads (younger = fuller), with the age counting
                     // up over it. Same HeroScoreCell idiom as Today; taps fall through to the trend button.
-                    ZStack {
-                        LiquidVessel(value: fitnessAgeFraction(age), tint: StrandPalette.chargeColor, animated: true)
-                            .frame(width: 96, height: 96)
-                        CountUpNumber(value: Double(shown), font: StrandFont.rounded(30))
-                            .foregroundStyle(.white)
-                            .shadow(color: .black.opacity(0.5), radius: 6, y: 1)
-                            .allowsHitTesting(false)
-                    }
+                    RingDial(value: fitnessAgeFraction(age),
+                             display: "\(shown)",
+                             label: "Years",
+                             tint: StrandPalette.chargeColor, size: .trio)
+                        .allowsHitTesting(false)
                     VStack(alignment: .leading, spacing: NoopMetrics.space1) {
                         Text("Fitness Age").strandOverline()
                         Text(ageDeltaLine(years: years, younger: younger))
@@ -1047,17 +1044,11 @@ private struct VitalitySection: View {
                 // HeroScoreCell idiom). Taps splash the gauge; the number is hit-transparent.
                 VStack(alignment: .leading, spacing: NoopMetrics.space1) {
                     Text("Vitality").strandOverline()
-                    ZStack {
-                        LiquidVessel(value: max(0, min(1, v / 100)), tint: StrandPalette.chargeColor, animated: true)
-                            .frame(width: 108, height: 108)
-                        VStack(spacing: 0) {
-                            CountUpNumber(value: v, font: StrandFont.rounded(38))
-                                .foregroundStyle(.white)
-                                .shadow(color: .black.opacity(0.5), radius: 6, y: 1)
-                            Text("of 100").font(StrandFont.caption).foregroundStyle(StrandPalette.textSecondary)
-                        }
+                    RingDial(value: max(0, min(1, v / 100)),
+                             display: "\(Int(v.rounded()))",
+                             label: "of 100",
+                             tint: StrandPalette.chargeColor, size: .trio)
                         .allowsHitTesting(false)
-                    }
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel("Vitality \(Int(v.rounded())) out of 100")
                 }
@@ -1178,9 +1169,11 @@ private struct LiquidVitalTile: View {
                 Text("\(reading.label)").strandOverline()
                 Spacer(minLength: 8)
                 HStack(alignment: .center, spacing: 10) {
-                    // The signature liquid gauge — static (posed) so a grid of them doesn't each run a live
-                    // 30fps Canvas. nil fraction (no value) reads as an empty vessel, no fabricated fill.
-                    LiquidVessel(value: vesselFraction, tint: reading.metricColor, animated: false)
+                    // The WHOOP mini ring dial (numeral-free): the tinted arc over the faint track, filled
+                    // to the vital's physiological fraction. nil fraction (no value) reads as an empty ring.
+                    RingDial(value: vesselFraction ?? 0, display: "", label: "",
+                             tint: reading.metricColor, size: .mini)
+                        .scaleEffect(34.0 / 44.0)
                         .frame(width: 34, height: 34)
                     if let value = reading.value {
                         // The value counts up on appear (snaps under Reduce Motion), formatted exactly as

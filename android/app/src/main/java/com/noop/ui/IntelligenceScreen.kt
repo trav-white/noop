@@ -101,7 +101,7 @@ fun IntelligenceScreen(vm: AppViewModel) {
 
     LazyScreenScaffold(
         title = "Intelligence",
-        subtitle = "Charge, effort and rest - scored with the model, explained in plain terms.",
+        subtitle = "Recovery, strain and sleep - scored with the model, explained in plain terms.",
     ) {
         item { forecast?.let { ForecastCard(it) } }
         item { ExplainerCard(effortScale) }
@@ -177,7 +177,7 @@ private fun ForecastCard(f: RecoveryForecast) {
     val charge = f.charge.roundToInt()
     val band = f.band.roundToInt()
     Column(verticalArrangement = Arrangement.spacedBy(Metrics.gap)) {
-        SectionHeader("Tomorrow's Charge", overline = "Evening forecast", trailing = "Estimate")
+        SectionHeader("Tomorrow's Recovery", overline = "Evening forecast", trailing = "Estimate")
         NoopCard(padding = 20.dp) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -210,14 +210,14 @@ private fun ForecastCard(f: RecoveryForecast) {
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     Text(
-                        "You'll likely wake around $charge ± $band Charge if you sleep about " +
+                        "You'll likely wake around $charge ± $band Recovery if you sleep about " +
                             "${sleepHoursLabel(f.plannedSleepHours)} tonight.",
                         style = NoopType.subhead,
                         color = Palette.textSecondary,
                     )
                     Text(
                         "Estimate from today's effort, your typical sleep and your ${f.nights}-night " +
-                            "recovery baseline - not a measurement. Your real Charge is scored from " +
+                            "recovery baseline - not a measurement. Your real Recovery is scored from " +
                             "tomorrow's HRV when you wake.",
                         style = NoopType.footnote,
                         color = Palette.textTertiary,
@@ -255,10 +255,10 @@ private fun ExplainerCard(effortScale: EffortScale) {
                 Text("How this works", style = NoopType.headline, color = Palette.textPrimary)
             }
             Text(
-                "Charge weighs your heart-rate variability against your personal baseline " +
+                "Recovery weighs your heart-rate variability against your personal baseline " +
                     "(~55%), resting heart rate (~20%), rest quality (~15%), respiration (~5%) " +
-                    "and skin-temperature deviation (~5%). Effort is a 0 - ${UnitFormatter.effortScaleMax(effortScale)} " +
-                    "cardiovascular load from time spent in each heart-rate zone. Rest is staged " +
+                    "and skin-temperature deviation (~5%). Strain is a 0 - ${UnitFormatter.effortScaleMax(effortScale)} " +
+                    "cardiovascular load from time spent in each heart-rate zone. Sleep is staged " +
                     "from movement and heart rate. The full on-device recompute from the strap's raw " +
                     "streams is a later port; the scores below are read from each day's cached metrics.",
                 style = NoopType.subhead,
@@ -284,8 +284,8 @@ private fun EmptyNote() {
                 modifier = Modifier.size(18.dp),
             )
             Text(
-                "No scored days yet. Sync your strap to collect raw streams. Effort and Rest are " +
-                    "scored once a day's data is in. Charge needs about four nights of sleep to learn your " +
+                "No scored days yet. Sync your strap to collect raw streams. Strain and Sleep are " +
+                    "scored once a day's data is in. Recovery needs about four nights of sleep to learn your " +
                     "baseline (you'll see \"Calibrating\" until then), and keeps sharpening over your first " +
                     "couple of weeks. On a WHOOP 5 or MG the strap banks little history, so that night count " +
                     "can climb slowly or sit at 0 of 4 until you have worn it across a few nights. That's " +
@@ -307,7 +307,7 @@ private fun EmptyNote() {
 private fun ModelBreakdownCard(effortScale: EffortScale) {
     NoopCard(padding = 20.dp, tint = Palette.chargeColor) {
         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            Overline("Charge model")
+            Overline("Recovery model")
             WeightRow("Heart-rate variability", "~55%", 0.55f, Palette.metricPurple)
             WeightRow("Resting heart rate", "~20%", 0.20f, Palette.metricRose)
             WeightRow("Rest quality", "~15%", 0.15f, Palette.metricCyan)
@@ -319,7 +319,7 @@ private fun ModelBreakdownCard(effortScale: EffortScale) {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    "Effort",
+                    "Strain",
                     style = NoopType.subhead,
                     color = Palette.textSecondary,
                     modifier = Modifier.weight(1f),
@@ -399,19 +399,19 @@ private fun DayCard(d: DailyMetric, effortScale: EffortScale) {
 
             Row(modifier = Modifier.fillMaxWidth()) {
                 DayStat(
-                    "Charge",
+                    "Recovery",
                     d.recovery?.let { "${it.roundToInt()}%" } ?: "—",
                     d.recovery?.let { Palette.recoveryColor(it) } ?: Palette.textSecondary,
                     Modifier.weight(1f),
                 )
                 DayStat(
-                    "Effort",
+                    "Strain",
                     d.strain?.let { UnitFormatter.effortDisplay(it, effortScale) } ?: "—",
                     d.strain?.let { Palette.strainColor(it) } ?: Palette.textSecondary,
                     Modifier.weight(1f),
                 )
                 DayStat(
-                    "Rest",
+                    "Sleep",
                     sleepValue(d.totalSleepMin),
                     Palette.restColor,
                     Modifier.weight(1f),

@@ -25,7 +25,7 @@ struct NOOPProvider: TimelineProvider {
     }
 }
 
-/// The glanceable widget — the iOS analogue of the macOS menu-bar extra. Recovery, live/last HR,
+/// The glanceable widget, the iOS analogue of the macOS menu-bar extra. Recovery, live/last HR,
 /// and strap battery.
 struct NOOPWidgetView: View {
     @Environment(\.widgetFamily) private var family
@@ -53,8 +53,8 @@ struct NOOPWidgetView: View {
         return r >= 67 ? StrandPalette.statusPositive : r >= 34 ? StrandPalette.statusWarning : StrandPalette.statusCritical
     }
 
-    /// Effort is on the 0–100 axis (`StrainScorer.maxStrain == 100`), so the fraction is just the value
-    /// over 100 — the same input `effortTint` takes on the Today Effort tile.
+    /// Effort is on the 0 to 100 axis (`StrainScorer.maxStrain == 100`), so the fraction is just the value
+    /// over 100: the same input `effortTint` takes on the Today Effort tile.
     private var effortColor: Color {
         guard let e = snap.effort else { return StrandPalette.textTertiary }
         return StrandPalette.effortTint(fraction: Double(e) / 100)
@@ -67,7 +67,7 @@ struct NOOPWidgetView: View {
 
     private var inlineText: String {
         var parts: [String] = []
-        if let r = snap.recovery { parts.append("Charge \(r)%") }
+        if let r = snap.recovery { parts.append("Recovery \(r)%") }
         if let b = snap.bpm { parts.append("\(b) bpm") }
         return parts.isEmpty ? "NOOP" : parts.joined(separator: " · ")
     }
@@ -88,9 +88,9 @@ struct NOOPWidgetView: View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: 4) {
                 Image(systemName: "heart.fill").foregroundStyle(recoveryColor)
-                Text("Charge \(snap.recovery.map(String.init) ?? "–")%").font(.headline)
+                Text("Recovery \(snap.recovery.map(String.init) ?? "–")%").font(.headline)
             }
-            Text("HR \(snap.bpm.map(String.init) ?? "–") · Effort \(snap.effort.map(String.init) ?? "–")")
+            Text("HR \(snap.bpm.map(String.init) ?? "–") · Strain \(snap.effort.map(String.init) ?? "–")")
                 .font(.caption)
         }
     }
@@ -98,8 +98,6 @@ struct NOOPWidgetView: View {
     private var home: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("NOOP").font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(StrandPalette.textSecondary)
                 Spacer()
                 Circle().fill(snap.bonded ? StrandPalette.statusPositive : StrandPalette.statusCritical)
                     .frame(width: 8, height: 8)
@@ -107,11 +105,11 @@ struct NOOPWidgetView: View {
             Spacer(minLength: 0)
             HStack(alignment: .firstTextBaseline, spacing: 4) {
                 Text(snap.recovery.map(String.init) ?? "–")
-                    .font(.system(size: 40, weight: .bold, design: .rounded))
+                    .font(StrandFont.number(40, weight: .bold))
                     .foregroundStyle(recoveryColor)
                 Text("%").font(.headline).foregroundStyle(StrandPalette.textTertiary)
             }
-            Text("Charge").font(.caption).foregroundStyle(StrandPalette.textTertiary)
+            Text("Recovery").font(.caption).foregroundStyle(StrandPalette.textTertiary)
             Spacer(minLength: 0)
             HStack {
                 Label("\(snap.bpm.map(String.init) ?? "–")", systemImage: "waveform.path.ecg")
@@ -129,30 +127,28 @@ struct NOOPWidgetView: View {
     }
 
     /// The rich `systemLarge` layout (#446): the Charge headline plus a stat grid of Effort, Rest, HRV,
-    /// Resting HR, live HR and strap battery — the "show me more" the issue asked for.
+    /// Resting HR, live HR and strap battery: the "show me more" the issue asked for.
     private var large: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("NOOP").font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(StrandPalette.textSecondary)
                 Spacer()
                 Circle().fill(snap.bonded ? StrandPalette.statusPositive : StrandPalette.statusCritical)
                     .frame(width: 8, height: 8)
             }
             HStack(alignment: .firstTextBaseline, spacing: 4) {
                 Text(snap.recovery.map(String.init) ?? "–")
-                    .font(.system(size: 48, weight: .bold, design: .rounded))
+                    .font(StrandFont.number(48, weight: .bold))
                     .foregroundStyle(recoveryColor)
                 Text("%").font(.title3).foregroundStyle(StrandPalette.textTertiary)
-                Text("Charge").font(.subheadline).foregroundStyle(StrandPalette.textTertiary)
+                Text("Recovery").font(.subheadline).foregroundStyle(StrandPalette.textTertiary)
                     .padding(.leading, 2)
             }
             Divider()
             // Two-by-three stat grid of the richer scores. Each cell is a value + label pairing, tinted to
             // match its Today tile where a token exists (Effort, Rest); raw vitals stay neutral.
             HStack(alignment: .top, spacing: 0) {
-                statCell("Effort", value: snap.effort.map(String.init), tint: effortColor)
-                statCell("Rest", value: snap.rest.map { "\($0)%" }, tint: restColor)
+                statCell("Strain", value: snap.effort.map(String.init), tint: effortColor)
+                statCell("Sleep", value: snap.rest.map { "\($0)%" }, tint: restColor)
                 statCell("HRV", value: snap.hrv.map { "\($0)" }, unit: "ms")
             }
             HStack(alignment: .top, spacing: 0) {
@@ -165,13 +161,13 @@ struct NOOPWidgetView: View {
         .padding(16)
     }
 
-    /// One labelled stat in the large grid — value over a caption, equal-width so the three columns align.
+    /// One labelled stat in the large grid: value over a caption, equal-width so the three columns align.
     private func statCell(_ label: String, value: String?, unit: String? = nil,
                           tint: Color = StrandPalette.textPrimary) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text(value ?? "–")
-                    .font(.system(size: 20, weight: .semibold, design: .rounded))
+                    .font(StrandFont.number(20, weight: .semibold))
                     .foregroundStyle(value == nil ? StrandPalette.textTertiary : tint)
                 if let unit, value != nil {
                     Text(unit).font(.caption2).foregroundStyle(StrandPalette.textTertiary)
@@ -197,8 +193,8 @@ struct NOOPWidget: Widget {
                     .background(StrandPalette.surfaceBase)
             }
         }
-        .configurationDisplayName("NOOP Charge")
-        .description("Charge, Effort, Rest, HRV, resting and live heart rate, and strap battery at a glance.")
+        .configurationDisplayName("NOOP Recovery")
+        .description("Recovery, Strain, Sleep, HRV, resting and live heart rate, and strap battery at a glance.")
         .supportedFamilies([
             .systemSmall, .systemMedium, .systemLarge,
             .accessoryCircular, .accessoryInline, .accessoryRectangular

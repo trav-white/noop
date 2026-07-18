@@ -7,7 +7,7 @@ import Foundation
 // MARK: - Coupled view (task #43), the optional classic coupled day read
 //
 // An optional, default-OFF day view that reads like the classic coupled home: one screen, three numbers,
-// Recovery % / Day Strain on 0–21 / Sleep, for users who came across from another band and want the old
+// Recovery % / Day Strain on 0-21 / Sleep, for users who came across from another band and want the old
 // glance back. NOOP's Today stays the default and is untouched.
 //
 // DISPLAY-ONLY, like the #268 Effort-scale toggle. This screen invents no score and stores nothing: it
@@ -15,9 +15,9 @@ import Foundation
 // re-presents them in the coupled layout. The only new mapping is the OPTIMAL strain band, a pure
 // display-only read of today's recovery to a suggested strain range (never fed back into scoring).
 //
-// It renders in the LIQUID design language — the three scores are liquid vessels (recovery / strain on the
-// 0–21 axis / sleep performance), the optimal-strain band is a liquid tube, the cards are the frosted liquid
-// surface with UPPERCASE section overlines, and the day-of-sky backdrop carries behind — all routed through
+// It renders in the LIQUID design language: the three scores are liquid vessels (recovery / strain on the
+// 0-21 axis / sleep performance), the optimal-strain band is a liquid tube, the cards are the frosted liquid
+// surface with UPPERCASE section overlines, and the WHOOP slate canvas backdrop carries behind, all routed through
 // StrandPalette so the Classic / Titanium appearance toggle carries automatically. The word "WHOOP" appears
 // in NO shipped UI string here (legal posture); the screen is called "Coupled view".
 //
@@ -28,7 +28,7 @@ import Foundation
 struct CoupledView: View {
     @EnvironmentObject var repo: Repository
 
-    // Effort is stored 0–100; the coupled read is always the 0–21 Day-Strain axis regardless of the user's
+    // Effort is stored 0-100; the coupled read is always the 0-21 Day-Strain axis regardless of the user's
     // #268 display toggle, so the gauge reads like the classic coupled home. Display-only conversion.
     private let strainScale: EffortScale = .whoop
 
@@ -63,11 +63,11 @@ struct CoupledView: View {
     /// dimmed ring + the "Last night · <date>" stamp so an old number is never passed off as new (#543/#779).
     private var isCarryingRecovery: Bool { day?.recovery == nil && carriedRecoveryDay?.recovery != nil }
 
-    /// Effort strain on NOOP's 0–100 axis for the day (stored row; no live recompute here, this is a
+    /// Effort strain on NOOP's 0-100 axis for the day (stored row; no live recompute here, this is a
     /// glance screen, not the primary Today hero). nil when the day has no scored Effort.
     private var strain100: Double? { day?.strain }
 
-    /// Day strain mapped onto the 0–21 coupled axis via the SHIPPED formatter (UnitFormatter.effortValue),
+    /// Day strain mapped onto the 0-21 coupled axis via the SHIPPED formatter (UnitFormatter.effortValue),
     /// so the number matches every other Effort read-out's conversion factor exactly.
     private var dayStrain21: Double? { strain100.map { UnitFormatter.effortValue($0, scale: strainScale) } }
 
@@ -92,7 +92,7 @@ struct CoupledView: View {
     var body: some View {
         // CoupledView is pushed from Today's card row. On iOS each tab supplies a NavigationStack, so the
         // sleep-row + breakdown pushes land in the ambient stack. On macOS this can render as a detail pane
-        // with NO enclosing NavigationStack, so — exactly like MetricExplorerView / TrendsView (#753) —
+        // with NO enclosing NavigationStack, so, exactly like MetricExplorerView / TrendsView (#753),
         // wrap the scaffold in one here so the pushes get Back chrome instead of hanging. Same shared
         // scaffold renders on both.
         #if os(macOS)
@@ -104,9 +104,9 @@ struct CoupledView: View {
 
     private var scaffold: some View {
         ScreenScaffold(title: "Day", subtitle: subtitleText,
-                       // The day-of-sky liquid backdrop, matching Today / Health / Sleep / Trends: a fixed,
-                       // full-bleed time-of-day sky behind the scroll content (does not scroll).
-                       topBackground: liquidScaffoldSky()) {
+                       // The WHOOP slate canvas backdrop, matching Today / Health / Sleep / Trends: a fixed,
+                       // full-bleed gradient behind the scroll content (does not scroll).
+                       topBackground: AnyView(CanvasBackground())) {
             ViewThatFits(in: .horizontal) {
                 // Regular width (macOS / iPad): hero left, strain + sleep stacked right in a 2-column grid.
                 HStack(alignment: .top, spacing: NoopMetrics.gap) {
@@ -160,7 +160,7 @@ struct CoupledView: View {
                             .opacity(isCarryingRecovery ? 0.85 : 1)
                             .frame(width: 200, height: 200)
                             // The whole hero opens the Charge breakdown (the original tap contract), so the
-                            // vessel doesn't intercept the tap with its own splash — the Button owns it.
+                            // vessel doesn't intercept the tap with its own splash, the Button owns it.
                             .allowsHitTesting(false)
                         heroCentre
                             .allowsHitTesting(false)
@@ -175,7 +175,7 @@ struct CoupledView: View {
         .buttonStyle(LiquidPressStyle())
         .accessibilityElement(children: .combine)
         .accessibilityLabel(heroAccessibilityLabel)
-        .accessibilityHint("See what shaped your Charge")
+        .accessibilityHint("See what shaped your Recovery")
     }
 
     /// The centre stack over the vessel: the recovery % counting up in white over the fluid, a RECOVERY
@@ -265,10 +265,10 @@ struct CoupledView: View {
     private var strainCard: some View {
         card {
             VStack(alignment: .leading, spacing: 14) {
-                SectionHeader("Day Strain", overline: "Effort", trailing: strainBandWord)
+                SectionHeader("Day Strain", overline: "Strain", trailing: strainBandWord)
                 HStack(alignment: .center, spacing: 16) {
-                    // Left: the liquid vessel filled to the 0–21 Day-Strain fraction (Effort world), with the
-                    // strain value counting up over the fluid — the coupled read on the classic 0–21 axis.
+                    // Left: the liquid vessel filled to the 0-21 Day-Strain fraction (Effort world), with the
+                    // strain value counting up over the fluid, the coupled read on the classic 0-21 axis.
                     ZStack {
                         LiquidVessel(value: dayStrain21.map { max(0, min(1, $0 / 21)) },
                                      tint: StrandPalette.effortColor, animated: dayStrain21 != nil)
@@ -319,7 +319,7 @@ struct CoupledView: View {
     }
 
     /// The OPTIMAL strain band stat, with a liquid tube visualising where the suggested band sits on the
-    /// 0–21 axis (Charge world). A calibrating / unscored day shows a dash and an empty tube.
+    /// 0-21 axis (Charge world). A calibrating / unscored day shows a dash and an empty tube.
     private var optimalStat: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("OPTIMAL")
@@ -334,14 +334,14 @@ struct CoupledView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// The optimal band's upper bound as a 0–1 fraction of the 0–21 axis, for the tube fill. 0 (empty) when
+    /// The optimal band's upper bound as a 0-1 fraction of the 0-21 axis, for the tube fill. 0 (empty) when
     /// recovery is unknown so the tube never fabricates a band.
     private var optimalUpperFraction: Double {
         guard let band = Self.optimalStrainRange(recovery: recovery) else { return 0 }
         return max(0, min(1, Double(band.upperBound) / 21))
     }
 
-    /// The heroStat idiom (WorkoutsView.swift:500–509): an UPPERCASE tracked overline over a big tinted
+    /// The heroStat idiom (WorkoutsView.swift:500-509): an UPPERCASE tracked overline over a big tinted
     /// number. Reproduced here so the coupled stat stack reads identically to the Workouts hero stats.
     private func heroStat(_ title: String, _ value: String, tint: Color) -> some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -369,7 +369,7 @@ struct CoupledView: View {
         } label: {
             card {
                 VStack(alignment: .leading, spacing: 14) {
-                    SectionHeader("Sleep performance", overline: "Last night", trailing: String(localized: "Rest"))
+                    SectionHeader("Sleep performance", overline: "Last night", trailing: String(localized: "Sleep"))
                     HStack(alignment: .center, spacing: 16) {
                         // Left: the SLEEP PERFORMANCE % as the liquid vessel (Rest world), with the score
                         // counting up over the fluid. Empty vessel when there's no scored performance.
@@ -388,7 +388,7 @@ struct CoupledView: View {
                         }
                         .frame(width: 88, height: 88)
 
-                        // Right: the slept-vs-needed two-line read + last night's bed–wake span footnote.
+                        // Right: the slept-vs-needed two-line read + last night's bed-wake span footnote.
                         VStack(alignment: .leading, spacing: 4) {
                             if let asleep = day?.totalSleepMin, asleep > 0 {
                                 Text("\(Self.hoursMinutes(asleep)) slept")
@@ -447,7 +447,7 @@ struct CoupledView: View {
         return Swift.max(450, mean ?? 450)   // 450 min = 7.5h
     }
 
-    /// Last night's bed → wake span, e.g. "23:41 – 07:23", from the freshest banked sleep session, only
+    /// Last night's bed to wake span, e.g. "23:41-07:23", from the freshest banked sleep session, only
     /// when that session actually touches today's window (a days-old import is not "last night").
     private var bedWakeSpanText: String? {
         let dayStart = Calendar.current.startOfDay(for: Repository.logicalDay(Date()))
@@ -518,7 +518,7 @@ struct CoupledView: View {
                         } else {
                             NoopCard(padding: 18, tint: StrandPalette.chargeColor) {
                                 VStack(alignment: .leading, spacing: NoopMetrics.space2) {
-                                    Text("No Charge breakdown yet")
+                                    Text("No Recovery breakdown yet")
                                         .font(StrandFont.headline)
                                         .foregroundStyle(StrandPalette.textPrimary)
                                     Text("Wear the strap overnight to score a night first.")
@@ -549,7 +549,7 @@ struct CoupledView: View {
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundStyle(StrandPalette.chargeColor)
                             VStack(alignment: .leading, spacing: 1) {
-                                Text("How Charge is calculated")
+                                Text("How Recovery is calculated")
                                     .font(StrandFont.subhead).foregroundStyle(StrandPalette.textPrimary)
                                 Text("The method behind the score, not today's values.")
                                     .font(StrandFont.caption).foregroundStyle(StrandPalette.textTertiary)
@@ -564,13 +564,13 @@ struct CoupledView: View {
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("How Charge is calculated. The method behind the score.")
+                    .accessibilityLabel("How Recovery is calculated. The method behind the score.")
                 }
                 .padding(NoopMetrics.screenPadding)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .background(StrandPalette.surfaceBase.ignoresSafeArea())
-            .navigationTitle("What shaped your Charge")
+            .navigationTitle("What shaped your Recovery")
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
@@ -595,7 +595,7 @@ struct CoupledView: View {
     private func calibrationCard(banked: Int) -> some View {
         let remaining = max(1, Baselines.minNightsSeed - banked)
         let countdown = ChargeBreakdownFormat.calibrationCountdown(nightsRemaining: remaining)
-        let unlock = ChargeBreakdownFormat.calibrationUnlockCopy(scoreName: String(localized: "Charge"))
+        let unlock = ChargeBreakdownFormat.calibrationUnlockCopy(scoreName: String(localized: "Recovery"))
         let progress = ChargeBreakdownFormat.calibrationProgress(banked: banked, seed: Baselines.minNightsSeed)
         return NoopCard(padding: 14, tint: StrandPalette.chargeColor) {
             HStack(alignment: .top, spacing: 12) {
@@ -622,7 +622,7 @@ struct CoupledView: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Charge baseline calibrating. \(countdown), \(unlock). \(progress).")
+        .accessibilityLabel("Recovery baseline calibrating. \(countdown), \(unlock). \(progress).")
     }
 
     // MARK: Shared helpers
@@ -663,12 +663,12 @@ struct CoupledView: View {
     //
     // The classic coupled read suggests a Day-Strain target BAND from today's recovery: a green day earns a
     // higher optimal band, a red day a lower one. This is PRESENTATION ONLY, it is never fed back into any
-    // score or engine; it just tells the user where a "matched" strain would sit on the 0–21 axis. The bands
+    // score or engine; it just tells the user where a "matched" strain would sit on the 0-21 axis. The bands
     // are the APPROVED mapping and MUST stay byte-identical to the Android `optimalStrainRange`:
     //
-    //   recovery ≥ 67 (green)       → 14–18 of 21
-    //   34 ≤ recovery ≤ 66 (yellow) → 10–14
-    //   recovery < 34 (red)         → 4–10
+    //   recovery >= 67 (green)      -> 14-18 of 21
+    //   34 <= recovery <= 66 (yellow) -> 10-14
+    //   recovery < 34 (red)         -> 4-10
     //
     // nil recovery (calibrating / unscored day) → nil, the caller renders a dash, never a guessed band.
 
@@ -682,7 +682,7 @@ struct CoupledView: View {
         }
     }
 
-    /// The optimal band as display text ("14 to 18" / "—"). Byte-identical formatting to Android.
+    /// The optimal band as display text ("14 to 18" / "-"). Byte-identical formatting to Android.
     static func optimalStrainRangeText(recovery: Double?) -> String {
         guard let band = optimalStrainRange(recovery: recovery) else { return "—" }
         return String(localized: "\(band.lowerBound) to \(band.upperBound)")

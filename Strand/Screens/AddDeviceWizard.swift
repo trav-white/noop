@@ -3,7 +3,7 @@ import StrandDesign
 import WhoopStore
 import OuraProtocol
 
-// MARK: - Add a device — guided, branching wizard
+// MARK: - Add a device: guided, branching wizard
 //
 // Different bands pair COMPLETELY differently, so this wizard asks the device TYPE first, then gives
 // type-specific prep guidance and runs the RIGHT scan/connect for that type:
@@ -16,7 +16,7 @@ import OuraProtocol
 //
 // Registration goes through `model.registerDevice(_:makeActive:)` → DeviceRegistry; the
 // SourceCoordinator reacts to the active-device change and connects. The wizard never touches
-// BLEManager directly — only the AppModel pass-throughs. WHOOP-FIRST: WHOOP is the primary band; the
+// BLEManager directly, only the AppModel pass-throughs. WHOOP-FIRST: WHOOP is the primary band; the
 // type list shows it first and a footer reiterates it. Renders cleanly with nothing nearby (the type
 // picker, every prep step, and the searching/empty pick state all need no hardware).
 
@@ -33,7 +33,7 @@ struct AddDeviceWizard: View {
         case whoop4
         case hrStrap
         case gymEquipment
-        // EXPERIMENTAL tier — best-effort, clean-room, can't be hardware-verified here. Each fails to an
+        // EXPERIMENTAL tier: best-effort, clean-room, can't be hardware-verified here. Each fails to an
         // honest message and never fabricates data.
         case amazfit       // Amazfit / Zepp incl. Helio (Huami custom or standard HR)
         case miBand        // Xiaomi Mi Band (Huami; no-auth live HR path, honest message if auth needed)
@@ -111,7 +111,7 @@ struct AddDeviceWizard: View {
     @State private var ouraKeyDraft = ""
 
     /// Discovery-only HR source for the strap path. Never persists (no-op closure) and is never asked
-    /// to `connect` — we only read its `@Published discovered` / `scanning` while scanning. Built once.
+    /// to `connect`, we only read its `@Published discovered` / `scanning` while scanning. Built once.
     @StateObject private var hrScanner: StandardHRSource
     /// Discovery-only FTMS source for the gym-equipment path. `feedsLive: false` so it never writes
     /// LiveState; we only read its `discovered` / `scanning` while scanning. Built once.
@@ -304,7 +304,7 @@ struct AddDeviceWizard: View {
         }
     }
 
-    // MARK: Step 1 — type picker
+    // MARK: Step 1: type picker
 
     @ViewBuilder private var typeStep: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -321,7 +321,7 @@ struct AddDeviceWizard: View {
                     title: String(localized: "Gym equipment"),
                     subtitle: String(localized: "Treadmill, indoor bike, rower or cross-trainer (Bluetooth FTMS)"))
 
-            // EXPERIMENTAL tier — clearly labelled, opt-in, best-effort. Each is honest about what it can
+            // EXPERIMENTAL tier: clearly labelled, opt-in, best-effort. Each is honest about what it can
             // actually read; none fabricates data.
             Text("Experimental").strandOverline().padding(.top, 8)
             experimentalTierNote
@@ -386,7 +386,7 @@ struct AddDeviceWizard: View {
         .accessibilityLabel("\(title). \(subtitle)")
     }
 
-    // MARK: Step 2 — type-specific prep + guidance
+    // MARK: Step 2: type-specific prep + guidance
 
     @ViewBuilder private var prepStep: some View {
         if let type, type != .oura {
@@ -449,7 +449,7 @@ struct AddDeviceWizard: View {
         }
     }
 
-    /// Type-specific "get it ready" guidance — the point of the branching wizard.
+    /// Type-specific "get it ready" guidance, the point of the branching wizard.
     private func prepInstructions(_ t: DeviceType) -> [String] {
         switch t {
         case .whoop4:
@@ -554,7 +554,7 @@ struct AddDeviceWizard: View {
                     ouraBullet(String(localized: "Your ring talks to NOOP only, fully offline, no Oura account."))
                     ouraBullet(String(localized: "Live heart rate, and HRV when the ring can measure it."))
                     ouraBullet(String(localized: "Overnight sleep staging, resting heart rate, skin-temperature trend, motion and battery, read straight off the ring."))
-                    ouraBullet(String(localized: "NOOP's own Charge, Effort and Rest, computed on your device from published methods."))
+                    ouraBullet(String(localized: "NOOP's own Recovery, Strain and Sleep, computed on your device from published methods."))
                 }
                 Divider().overlay(StrandPalette.hairline)
                 VStack(alignment: .leading, spacing: 6) {
@@ -1012,7 +1012,7 @@ struct AddDeviceWizard: View {
         return Data(bytes)
     }
 
-    /// SF Symbol for a device type — used on the prep step header.
+    /// SF Symbol for a device type, used on the prep step header.
     private func typeIcon(_ t: DeviceType) -> String {
         switch t {
         case .whoop4, .whoop5mg: return "applewatch.side.right"
@@ -1025,7 +1025,7 @@ struct AddDeviceWizard: View {
         }
     }
 
-    // MARK: Step 3 — pick from the live scan
+    // MARK: Step 3: pick from the live scan
 
     @ViewBuilder private var pickStep: some View {
         if let type {
@@ -1092,7 +1092,7 @@ struct AddDeviceWizard: View {
         }
     }
 
-    // MARK: Step 4 — name + confirm
+    // MARK: Step 4: name + confirm
 
     @ViewBuilder private var confirmStep: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -1477,7 +1477,7 @@ struct AddDeviceWizard: View {
 // MARK: - WHOOP pick list (observes BLEManager's present-scan)
 
 /// The WHOOP family pick step. Holds `@ObservedObject ble` so the list re-renders as the present-scan
-/// surfaces straps in `discoveredWhoops`. Pure UI — selection + scan lifecycle live in the wizard.
+/// surfaces straps in `discoveredWhoops`. Pure UI: selection + scan lifecycle live in the wizard.
 private struct WhoopPickList: View {
     @ObservedObject var ble: BLEManager
     let onSelect: ((uuid: String, name: String, rssi: Int)) -> Void

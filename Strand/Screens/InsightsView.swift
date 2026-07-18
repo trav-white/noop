@@ -4,6 +4,19 @@ import StrandDesign
 import StrandAnalytics
 import WhoopStore
 
+// Display mapping for renamed pillars. The analytics engine keeps its stable outcome KEYS
+// ("Charge", "Rest", "Effort", "HRV", "Resting HR") that the dose-response priors and the
+// outcomeKey round-trip depend on; this maps those keys to the user-facing pillar names only
+// at render time. Charge shows as Recovery, Rest as Sleep, Effort as Strain; others unchanged.
+private func outcomeDisplayName(_ engineName: String) -> String {
+    switch engineName {
+    case "Charge": return String(localized: "Recovery")
+    case "Rest":   return String(localized: "Sleep")
+    case "Effort": return String(localized: "Strain")
+    default:       return engineName
+    }
+}
+
 // MARK: - Insights
 //
 // The headline "interrogate what affects what" screen. Two halves:
@@ -72,9 +85,9 @@ struct InsightsView: View {
         /// Short segment label.
         var label: String {
             switch self {
-            case .recovery: return String(localized: "Charge")
+            case .recovery: return String(localized: "Recovery")
             case .hrv:      return "HRV"
-            case .sleep:    return String(localized: "Rest")
+            case .sleep:    return String(localized: "Sleep")
             case .rhr:      return "RHR"
             }
         }
@@ -209,10 +222,10 @@ struct InsightsView: View {
                        // alignment/spacing/header). The content is one inner eager VStack, so any nested
                        // staggered reveals are unchanged; this only defers building that stack on scroll-in.
                        lazy: true,
-                       // Liquid finish: the same full-bleed day-of-sky backdrop Today + the other liquid
+                       // WHOOP finish: the same full-bleed slate canvas backdrop Today + the other
                        // tabs carry, so Insights sits in one atmosphere ("the options change, not the page").
                        // Static + non-interactive; the cards below sit on the opaque canvas and stay legible.
-                       topBackground: liquidScaffoldSky()) {
+                       topBackground: AnyView(CanvasBackground())) {
             if !loaded {
                 ComingSoon(what: "Reading your journal and outcomes…")
             } else {
@@ -294,7 +307,7 @@ struct InsightsView: View {
                         Text("WHAT MOVES YOU \u{203A}")
                             .font(StrandFont.overline).tracking(StrandFont.overlineTracking)
                             .foregroundStyle(StrandPalette.textPrimary)
-                        Text("Ranked, lag-aware: which of your habits actually move your Charge, plus your personal alcohol/caffeine dose-response.")
+                        Text("Ranked, lag-aware: which of your habits actually move your Recovery, plus your personal alcohol/caffeine dose-response.")
                             .font(StrandFont.footnote).foregroundStyle(StrandPalette.textTertiary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -607,7 +620,7 @@ struct InsightsView: View {
                         .font(StrandFont.headline)
                         .foregroundStyle(StrandPalette.textPrimary)
                         .lineLimit(2)
-                    Text("Started \(snapshot.startDay) · testing \(snapshot.outcome.outcomeName.lowercased())")
+                    Text("Started \(snapshot.startDay) · testing \(outcomeDisplayName(snapshot.outcome.outcomeName).lowercased())")
                         .font(StrandFont.footnote)
                         .foregroundStyle(StrandPalette.textTertiary)
                 }
@@ -870,13 +883,13 @@ struct InsightsView: View {
         }
         let absDelta = formatExperimentDelta(abs(delta), outcome: snapshot.outcome, includeSign: false)
         if abs(delta) < 0.05 {
-            return String(localized: "\(snapshot.outcome.outcomeName) is flat against baseline on logged intervention days.")
+            return String(localized: "\(outcomeDisplayName(snapshot.outcome.outcomeName)) is flat against baseline on logged intervention days.")
         }
         // Whole-phrase variants per direction so translators never see a stitched better/worse fragment.
         let movedGood = snapshot.outcome.higherIsBetter ? delta > 0 : delta < 0
         return movedGood
-            ? String(localized: "\(snapshot.outcome.outcomeName) is \(absDelta) better than baseline on days you logged this behaviour.")
-            : String(localized: "\(snapshot.outcome.outcomeName) is \(absDelta) worse than baseline on days you logged this behaviour.")
+            ? String(localized: "\(outcomeDisplayName(snapshot.outcome.outcomeName)) is \(absDelta) better than baseline on days you logged this behaviour.")
+            : String(localized: "\(outcomeDisplayName(snapshot.outcome.outcomeName)) is \(absDelta) worse than baseline on days you logged this behaviour.")
     }
 
     private func experimentDeltaColor(_ snapshot: ExperimentSnapshot) -> Color {
@@ -979,7 +992,7 @@ struct InsightsView: View {
             // Header + the ONE segmented pill control for choosing the outcome.
             HStack(alignment: .center) {
                 SectionHeader("Behaviour Effects",
-                              overline: "What moves your \(outcome.outcomeName.lowercased())")
+                              overline: "What moves your \(outcomeDisplayName(outcome.outcomeName).lowercased())")
                 Spacer()
                 SegmentedPillControl(Outcome.allCases, selection: $outcome) { $0.label }
                     .accessibilityLabel("Outcome metric")
@@ -998,7 +1011,7 @@ struct InsightsView: View {
 
     private var noEffects: some View {
         NoopCard {
-            Text(String(localized: "Not enough overlap between your journal answers and \(outcome.outcomeName.lowercased()) to measure an effect yet. Keep logging. Effects need days both with and without each behaviour."))
+            Text(String(localized: "Not enough overlap between your journal answers and \(outcomeDisplayName(outcome.outcomeName).lowercased()) to measure an effect yet. Keep logging. Effects need days both with and without each behaviour."))
                 .font(StrandFont.subhead)
                 .foregroundStyle(StrandPalette.textTertiary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -1037,12 +1050,14 @@ struct InsightsView: View {
         return NoopCard(tint: outcome.domain.color) {
             VStack(alignment: .leading, spacing: NoopMetrics.gap) {
 
-                // Header: behaviour name + significance pill. The old direction dot becomes a small liquid
-                // vessel filled to the effect magnitude (|Cohen's d|, capped where large is about 0.8+) in
+                // Header: behaviour name + significance pill. The old direction dot becomes a small ring
+                // dial filled to the effect magnitude (|Cohen's d|, capped where large is about 0.8+) in
                 // the sign-aware tint, the leading-gauge idiom Today uses, so the strength reads at a glance.
                 HStack(alignment: .center) {
                     HStack(spacing: 10) {
-                        LiquidVessel(value: min(1, abs(e.cohensD) / 0.8), tint: tintColor, animated: false)
+                        RingDial(value: min(1, abs(e.cohensD) / 0.8), display: "", label: "",
+                                 tint: tintColor, size: .mini)
+                            .scaleEffect(26 / 44.0)
                             .frame(width: 26, height: 26)
                             .accessibilityHidden(true)
                         Text(e.behavior)
@@ -1164,7 +1179,7 @@ struct InsightsView: View {
                           alignment: .leading, spacing: NoopMetrics.gap) {
                     StatTile(label: "Next morning",
                              value: "\(Int(cost.meanNextMorning.rounded()))",
-                             caption: String(localized: "Charge · \(pointsLabel) pts"),
+                             caption: String(localized: "Recovery · \(pointsLabel) pts"),
                              accent: accent)
                     StatTile(label: "Rest baseline",
                              value: "\(Int(cost.baselineMean.rounded()))",
@@ -1230,24 +1245,24 @@ struct InsightsView: View {
         if let c = CorrelationEngine.pearson(
             CorrelationEngine.alignByDay(series("sleep_performance"), series("recovery"))) {
             out.append(.init(id: "sleep-rec",
-                             title: String(localized: "Rest ↔ Charge"),
-                             blurb: String(localized: "How closely a good night tracks next-morning charge."),
+                             title: String(localized: "Sleep ↔ Recovery"),
+                             blurb: String(localized: "How closely a good night tracks next-morning recovery."),
                              corr: c))
         }
         // HRV ↔ recovery (same day).
         if let c = CorrelationEngine.pearson(
             CorrelationEngine.alignByDay(series("hrv"), series("recovery"))) {
             out.append(.init(id: "hrv-rec",
-                             title: String(localized: "HRV ↔ Charge"),
-                             blurb: String(localized: "Heart-rate variability as the engine behind your charge score."),
+                             title: String(localized: "HRV ↔ Recovery"),
+                             blurb: String(localized: "Heart-rate variability as the engine behind your recovery score."),
                              corr: c))
         }
         // Resting HR ↔ recovery (same day), expected to be negative.
         if let c = CorrelationEngine.pearson(
             CorrelationEngine.alignByDay(series("rhr"), series("recovery"))) {
             out.append(.init(id: "rhr-rec",
-                             title: String(localized: "Resting HR ↔ Charge"),
-                             blurb: String(localized: "A lower resting heart rate usually means a higher charge."),
+                             title: String(localized: "Resting HR ↔ Recovery"),
+                             blurb: String(localized: "A lower resting heart rate usually means a higher recovery."),
                              corr: c))
         }
         // Today's recovery ↔ NEXT-day recovery (1-day lag) as a strain/carry-over proxy.
@@ -1255,8 +1270,8 @@ struct InsightsView: View {
         //  how much yesterday carries into today.)
         if let c = CorrelationEngine.lagged(x: series("recovery"), y: series("recovery"), lagDays: 1) {
             out.append(.init(id: "rec-lag",
-                             title: String(localized: "Charge → Next-day charge"),
-                             blurb: String(localized: "How much one day's charge carries into the next."),
+                             title: String(localized: "Recovery → Next-day recovery"),
+                             blurb: String(localized: "How much one day's recovery carries into the next."),
                              corr: c))
         }
 
@@ -1271,10 +1286,11 @@ struct InsightsView: View {
         let sentence = relationshipSentence(rel)
         return VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
-                // Liquid magnitude accent: a small filling vessel showing |r| in the correlation's
-                // strength colour, the same leading-gauge idiom Today's card rows + vitals use. Static
-                // (a small gauge doesn't need live slosh); decorative, the exact r + a11y read below.
-                LiquidVessel(value: min(1, abs(r)), tint: strength, animated: false)
+                // Magnitude accent: a small ring dial showing |r| in the correlation's strength colour,
+                // the same leading-gauge idiom Today's card rows + vitals use. Static (a small gauge
+                // doesn't need animation); decorative, the exact r + a11y read below.
+                RingDial(value: min(1, abs(r)), display: "", label: "", tint: strength, size: .mini)
+                    .scaleEffect(28 / 44.0)
                     .frame(width: 28, height: 28)
                     .accessibilityHidden(true)
                 Text(rel.title)

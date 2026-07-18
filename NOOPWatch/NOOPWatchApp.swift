@@ -1,7 +1,7 @@
 import SwiftUI
 import StrandDesign
 
-// MARK: - NOOPWatch — the watchOS glance app
+// MARK: - NOOPWatch , the watchOS glance app
 //
 // The iPhone is the brain. M1 already computes Charge / Effort / Rest with confidence and provenance;
 // this watch app ONLY displays the latest snapshot the phone pushes over WatchConnectivity. It never

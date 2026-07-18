@@ -74,7 +74,7 @@ private const val COUPLED_NO_DATA = "No Data"
 
 // The liquid hero-card wrapper values, byte-identical to the liquid Today pilot (TodayScreen's
 // LIQUID_HERO_FILL / LIQUID_HERO_RADIUS are file-private, so the coupled screen carries its own copy):
-// a translucent near-black that floats over the day-of-sky so the vessel + white count-up numbers stay
+// a translucent near-black that floats over the WHOOP slate backdrop so the vessel + white count-up numbers stay
 // crisp — the card does the contrast work, not a muted sky. heroFill = rgba(13,14,20,.80), stroke
 // white@0.11, radius 26. Mirrors the iOS LiquidTodayView heroCard.
 private val LIQUID_HERO_FILL: Color = Color(red = 13f / 255f, green = 14f / 255f, blue = 20f / 255f, alpha = 0.80f)
@@ -160,14 +160,12 @@ fun CoupledScreen(
     ScreenScaffold(
         title = "Day",
         subtitle = subtitleToday(),
-        // LIQUID SKY BACKDROP (the pilot pattern — LiquidScreenSky.kt): the reusable time-of-day liquid sky
-        // sits behind the top region, full-bleed up behind the status bar via the scaffold's topBackground
-        // plumbing, top-aligned, settling into the flat canvas over its lower half so the cards float OVER it.
-        // The Android equivalent of the iOS `ScreenScaffold(topBackground: liquidScaffoldSky())`; it replaces
-        // the classic flat-canvas backdrop with the liquid day-of-sky (LiquidSkyStatic — no per-frame cost on
-        // this scrolling column). The other liquid screens drop in the SAME LiquidScreenSky() slot verbatim.
-        // Coupled has no per-screen day-cycle toggle of its own, so the sky is unconditional here.
-        topBackground = { LiquidScreenSky() },
+        // WHOOP SLATE BACKDROP: the reusable flat WHOOP canvas gradient sits behind the top region, full-bleed
+        // up behind the status bar via the scaffold's topBackground plumbing, top-aligned, settling into the
+        // flat canvas over its lower half so the cards float OVER it. The other screens drop in the SAME
+        // WhoopScreenSky() slot verbatim. Coupled has no per-screen day-cycle toggle of its own, so it is
+        // unconditional here.
+        topBackground = { WhoopScreenSky() },
     ) {
         HeroCard(
             recovery = recovery,
@@ -253,7 +251,7 @@ private fun HeroCard(
     onTap: () -> Unit,
 ) {
     val a11y = when {
-        recovery != null -> "Recovery ${recovery.roundToInt()} percent. See what shaped your Charge"
+        recovery != null -> "Recovery ${recovery.roundToInt()} percent. See what shaped your Recovery"
         calibrationNights != null ->
             "Recovery calibrating, $calibrationNights of ${Baselines.minNightsSeed} nights"
         else -> "Recovery, no data yet"
@@ -265,7 +263,7 @@ private fun HeroCard(
     // The whole hero is the breakdown's tap target, mirroring Today's Charge-vessel tap (A1). The SAME
     // interactionSource drives the clickable + the liquidPress so the card settles inward on press.
     val interaction = remember { MutableInteractionSource() }
-    // The liquid hero CARD: a translucent near-black that floats over the day-of-sky so the vessel + white
+    // The liquid hero CARD: a translucent near-black that floats over the WHOOP slate backdrop so the vessel + white
     // count-up number stay crisp — the card does the contrast work, not a muted sky. A rounded 26 corner + a
     // faint white hairline give it the frosted-glass edge of the iOS liquid heroCard. Mirrors the pilot.
     Box(
@@ -278,7 +276,7 @@ private fun HeroCard(
             .clickable(
                 interactionSource = interaction,
                 indication = null,
-                onClickLabel = "See what shaped your Charge",
+                onClickLabel = "See what shaped your Recovery",
                 onClick = onTap,
             )
             .semantics { contentDescription = a11y },
@@ -486,25 +484,18 @@ private fun SleepCard(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Box(modifier = Modifier.size(96.dp), contentAlignment = Alignment.Center) {
-                // The sleep-performance ring becomes a liquid VESSEL filled to the performance fraction in the
-                // rest tint, with the number counting up over it (the Today HeroScoreVessel idiom). Empty draws
-                // a posed empty vessel, no number.
-                LiquidVessel(
+                // The sleep-performance ring as a WHOOP ring dial (replaces the old LiquidVessel): the 96dp
+                // frame matches com.noop.ui.components.RingDialSize.Trio exactly, so this is a straight swap.
+                // Fills to the performance fraction in the rest tint, with the number shown as a centred
+                // D-DIN numeral. Empty (no score yet) draws the arc at zero with a blank centre.
+                com.noop.ui.components.RingDial(
                     value = ((sleepPerformance ?: 0.0) / 100.0).coerceIn(0.0, 1.0),
+                    display = sleepPerformance?.roundToInt()?.toString() ?: "",
+                    label = "",
                     tint = Palette.restColor,
-                    animated = sleepPerformance != null,
-                    modifier = Modifier.size(96.dp),
+                    size = com.noop.ui.components.RingDialSize.Trio,
+                    showsLabel = false,
                 )
-                if (sleepPerformance != null) {
-                    CountUpText(
-                        value = sleepPerformance,
-                        format = { it.roundToInt().toString() },
-                        style = NoopType.number(26f, weight = FontWeight.Bold)
-                            .copy(shadow = Shadow(color = Color.Black.copy(alpha = 0.5f), offset = Offset(0f, 1f), blurRadius = 6f)),
-                        color = Color.White,
-                        modifier = Modifier.clearAndSetSemantics {},
-                    )
-                }
             }
 
             Column(

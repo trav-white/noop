@@ -1,9 +1,9 @@
 import SwiftUI
 import StrandDesign
 
-/// Caffeine window (#526) — log a caffeine intake (time + OPTIONAL mg) and see a plain on-device
+/// Caffeine window (#526): log a caffeine intake (time + OPTIONAL mg) and see a plain on-device
 /// "still active" hint. OPT-IN, manual-first: nothing shows until the user logs an intake, and the
-/// estimate is clearly framed as a rough guide from a ~5–6 h half-life decay, never a measurement or a
+/// estimate is clearly framed as a rough guide from a ~5-6 h half-life decay, never a measurement or a
 /// health claim. Reuses the journal logging patterns (UserDefaults-backed store, pill controls, NoopCard).
 ///
 /// Honesty is enforced in the model (`CaffeineDecay` / `CaffeineLogStore`): an unknown amount stays
@@ -18,10 +18,10 @@ struct CaffeineLogCard: View {
     private let ticker = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
 
     @State private var mgDraft = ""
-    /// "How long ago" quick options for logging — hours back from now.
+    /// "How long ago" quick options for logging: hours back from now.
     private let quickHoursAgo: [Int] = [0, 1, 2, 3]
 
-    // PR#566 (mvanhorn) — caffeine cutoff window + late-intake nudge. OPT-IN (default OFF, manual-first):
+    // PR#566 (mvanhorn): caffeine cutoff window + late-intake nudge. OPT-IN (default OFF, manual-first):
     // when enabled, NOOP works back from the user's bedtime by the dose's decay lead and flags any logged
     // intake that lands past that cutoff, with a calm inline nudge. Keys MIRROR the Android prefs
     // (KEY_CAFFEINE_CUTOFF / KEY_CAFFEINE_BEDTIME_MIN, default 23:00) so a layout reads the same on both.
@@ -42,13 +42,13 @@ struct CaffeineLogCard: View {
 
                     activeHint
 
-                    // PR#566 — the late-intake nudge sits right under the active hint when the cutoff is on
+                    // PR#566: the late-intake nudge sits right under the active hint when the cutoff is on
                     // and a logged intake is past it, so the timing warning is the first thing read.
                     lateIntakeNudge
 
                     Divider().overlay(StrandPalette.hairline)
 
-                    // Optional amount — leave blank if you don't know it. We never invent a number.
+                    // Optional amount: leave blank if you don't know it. We never invent a number.
                     HStack {
                         TextField("Amount in mg (optional)", text: $mgDraft)
                             .textFieldStyle(.roundedBorder)
@@ -60,7 +60,7 @@ struct CaffeineLogCard: View {
                             .foregroundStyle(StrandPalette.textTertiary)
                     }
 
-                    // Log "now" or a quick number of hours ago — mirrors the journal's day-pill row.
+                    // Log "now" or a quick number of hours ago, mirrors the journal's day-pill row.
                     HStack {
                         Text("Had it")
                             .font(StrandFont.footnote)
@@ -84,10 +84,10 @@ struct CaffeineLogCard: View {
         .onReceive(ticker) { tick = $0 }
     }
 
-    // MARK: - Cutoff window (PR#566) — bedtime + late-intake nudge
+    // MARK: - Cutoff window (PR#566): bedtime + late-intake nudge
 
     /// The bedtime + cutoff controls: a toggle, and (when on) a bedtime picker plus the derived "stop after"
-    /// time. OFF by default — nothing here surfaces or nags until the user opts in. The cutoff time itself is
+    /// time. OFF by default: nothing here surfaces or nags until the user opts in. The cutoff time itself is
     /// computed from the dose-decay lead (`CaffeineDecay.cutoffMinutesSinceMidnight`), so it's never a magic
     /// number and matches the "still active" math.
     @ViewBuilder private var cutoffSection: some View {
@@ -125,7 +125,7 @@ struct CaffeineLogCard: View {
         }
     }
 
-    /// The late-intake nudge — shown only when the cutoff is ON and at least one logged intake (today) falls
+    /// The late-intake nudge: shown only when the cutoff is ON and at least one logged intake (today) falls
     /// past the cutoff for the user's bedtime. Honest: it warns about TIMING ("may keep you up"), never a
     /// health claim, and it disappears the moment no logged intake is past cutoff.
     @ViewBuilder private var lateIntakeNudge: some View {

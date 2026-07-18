@@ -145,7 +145,7 @@ struct WeeklyDigestContent: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: NoopMetrics.gap) {
-            // Headline over a subtle scenic backdrop (Charge-tinted starfield).
+            // Headline over a subtle scenic backdrop (Charge-tinted radial gradient).
             header
 
             // The three headline scores as frosted, domain-tinted summary cards — each a
@@ -305,7 +305,7 @@ struct WeeklyDigestContent: View {
         VStack(alignment: .leading, spacing: 6) {
             Divider().overlay(StrandPalette.hairline)
             if let sd = digest.sleepConsistencySD {
-                Text("Sleep steadiness: Rest varied ±\(fmt1(sd)) pts night to night.")
+                Text("Sleep steadiness: Sleep varied ±\(fmt1(sd)) pts night to night.")
                     .font(StrandFont.footnote)
                     .foregroundStyle(StrandPalette.textTertiary)
             }

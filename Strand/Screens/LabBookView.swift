@@ -59,9 +59,9 @@ struct LabBookView: View {
             // categories on demand — byte-identical layout — so a logbook with many categories doesn't
             // render every section + sparkline up-front.
             lazy: true,
-            // Liquid finish: the day-of-sky backdrop, so Lab Book sits in the same liquid atmosphere as
+            // WHOOP finish: the slate canvas backdrop, so Lab Book sits in the same atmosphere as
             // Today and the other analysis screens.
-            topBackground: liquidScaffoldSky()
+            topBackground: AnyView(CanvasBackground())
         ) {
             VStack(alignment: .leading, spacing: NoopMetrics.sectionGap) {
                 headerCard
@@ -700,7 +700,7 @@ private struct MarkerDetailView: View {
                     }
 
                     if signal == nil {
-                        Text("Pick a wearable signal (resting HR, HRV, sleep, Charge, weight…) to line it up against this marker. NOOP averages the signal over the \(window.phrase) before each reading.")
+                        Text("Pick a wearable signal (resting HR, HRV, sleep, Recovery, weight…) to line it up against this marker. NOOP averages the signal over the \(window.phrase) before each reading.")
                             .font(StrandFont.subhead)
                             .foregroundStyle(StrandPalette.textTertiary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -772,10 +772,11 @@ private struct MarkerDetailView: View {
         let tint = LabBookSignals.correlationColor(c.r)
         return VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 10) {
-                // A small liquid vessel posed at the association STRENGTH (|r|, a neutral 0–1 statistical
-                // magnitude — never a clinical value), tinted by the relationship's own colour. Matches
-                // Compare's pair card. Decorative — the r read-out + sentence carry the meaning.
-                LiquidVessel(value: min(abs(c.r), 1), tint: tint, animated: false)
+                // A small ring dial posed at the association STRENGTH (|r|, a neutral 0 to 1 statistical
+                // magnitude, never a clinical value), tinted by the relationship's own colour. Matches
+                // Compare's pair card. Decorative, the r read-out + sentence carry the meaning.
+                RingDial(value: min(abs(c.r), 1), display: "", label: "", tint: tint, size: .mini)
+                    .scaleEffect(30 / 44.0)
                     .frame(width: 30, height: 30)
                     .accessibilityHidden(true)
                 Text("\(displayName) ↔ \(signal?.title ?? "")")

@@ -4,7 +4,7 @@ import StrandDesign
 import HealthKit
 #endif
 
-// MARK: - WatchWorkoutView — record a workout ON the wrist (M3)
+// MARK: - WatchWorkoutView , record a workout ON the wrist (M3)
 //
 // This is the one ACTIVE feature where the watch is the brain, not the phone. The phone owns SCORES; this
 // screen owns a real HKWorkoutSession + HKLiveWorkoutBuilder running on the watch's own sensors, so the
@@ -13,7 +13,7 @@ import HealthKit
 // to HealthKit so it shows up in Activity / Fitness like any other.
 //
 // We deliberately reimplement the phone's LiveWorkoutView rather than link it: that screen reads the strap
-// feed and the shared scorers off AppModel, which don't exist on the watch. The framing is kept though —
+// feed and the shared scorers off AppModel, which don't exist on the watch. The framing is kept though:
 // a generic "functional" workout (functionalStrengthTraining), a big live HR hero in SF-Rounded, elapsed
 // time, and the building Effort idea expressed honestly here as the live calorie burn from the wrist.
 //
@@ -299,7 +299,7 @@ struct WatchWorkoutView: View {
     }
 }
 
-// MARK: - WatchWorkoutSession — the HKWorkoutSession + HKLiveWorkoutBuilder engine
+// MARK: - WatchWorkoutSession , the HKWorkoutSession + HKLiveWorkoutBuilder engine
 //
 // Owns the live workout lifecycle on the watch. The view is pure; this object is the only thing that talks
 // to HealthKit. Every published value comes from the builder's own statistics (HR / active energy) or the

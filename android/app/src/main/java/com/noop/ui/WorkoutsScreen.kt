@@ -199,12 +199,11 @@ fun WorkoutsScreen(vm: AppViewModel) {
     LazyScreenScaffold(
         title = "Workouts",
         subtitle = "Every session, threaded together.",
-        // LIQUID SKY BACKDROP (the pilot pattern — LiquidScreenSky.kt): the time-of-day liquid sky settles
-        // into the theme canvas behind the header + top rows (bled full-width up behind the status bar via
-        // the scaffold's topBackground plumbing), and the cards float OVER it on the flat surface below. The
-        // Android equivalent of the iOS `ScreenScaffold(topBackground: liquidScaffoldSky())`. This screen has
-        // no day-cycle preference gate (unlike Today), so the sky is always on.
-        topBackground = { LiquidScreenSky() },
+        // WHOOP SLATE BACKDROP: the flat WHOOP canvas gradient (WhoopScreenSky) settles into the theme
+        // canvas behind the header and top rows (bled full-width up behind the status bar via the
+        // scaffold's topBackground plumbing), and the cards float OVER it on the flat surface below. This
+        // screen has no day-cycle preference gate (unlike Today), so it is always on.
+        topBackground = { WhoopScreenSky() },
     ) {
         // Start (or stop) a workout right here, not only on Live — mirrors the Live control (#115).
         item {
@@ -593,13 +592,13 @@ private fun sessionSelectionKey(row: WorkoutRow): String = "${row.startTs}|${row
 // MARK: - Liquid hero tokens (the liquid Workouts restyle)
 //
 // The frosted card the Effort vessel floats on, mirroring the iOS/Today LiquidTodayView heroCard. `fill`
-// is a translucent near-black (mock rgba(13,14,20,.80)) so it floats over the day-of-sky; the vessel + the
+// is a translucent near-black (mock rgba(13,14,20,.80)) so it floats over the WHOOP slate backdrop; the vessel + the
 // white count-up read crisp on it. Radius 26 + a white@0.11 hairline give the frosted-glass edge. (These
 // are file-scoped to Workouts — the Today equivalents are private to that file.)
 private val LIQUID_HERO_FILL: Color = Color(red = 13f / 255f, green = 14f / 255f, blue = 20f / 255f, alpha = 0.80f)
 private val LIQUID_HERO_RADIUS: Dp = 26.dp
 
-// MARK: - Effort hero (typical-effort liquid vessel over the day-of-sky)
+// MARK: - Effort hero (typical-effort liquid vessel over the WHOOP slate backdrop)
 //
 // The liquid restyle of the Effort hero: the typical session Effort as a filling LiquidVessel with the
 // headline number counting up over it (the Today HeroScoreVessel idiom), inside a translucent near-black
@@ -626,7 +625,7 @@ private fun EffortHero(
     val totalTimeH = rows.mapNotNull { it.durationS }.sum() / 3600.0
     val modal = groups.firstOrNull()
 
-    // The liquid hero CARD: a translucent near-black that floats over the day-of-sky so the vessel + white
+    // The liquid hero CARD: a translucent near-black that floats over the WHOOP slate backdrop so the vessel + white
     // count-up read crisp. Radius 26 + a faint white hairline give the frosted-glass edge of the iOS liquid
     // heroCard (heroFill = rgba(13,14,20,.80), stroke white@0.11). Matches the Today pilot.
     Box(
@@ -673,7 +672,7 @@ private fun EffortHero(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 Text(
-                    "Effort this ${effectiveRange.heroWord}",
+                    "Strain this ${effectiveRange.heroWord}",
                     style = NoopType.headline,
                     color = Palette.textPrimary,
                 )
@@ -1330,7 +1329,7 @@ private fun WorkoutDetailSheet(vm: AppViewModel, row: WorkoutRow, onDismiss: () 
                 val captured = row.strain != null || !row.zonesJSON.isNullOrEmpty()
                 if (captured && row.avgHr != null && kotlin.math.abs(row.avgHr - traceMean) > 3.0) {
                     Text(
-                        "The average above was edited. The graph, zones and Effort stay from the recorded session.",
+                        "The average above was edited. The graph, zones and Strain stay from the recorded session.",
                         style = NoopType.footnote,
                         color = Palette.textTertiary,
                     )
@@ -1381,7 +1380,7 @@ private fun WorkoutDetailSheet(vm: AppViewModel, row: WorkoutRow, onDismiss: () 
 private fun SessionEffortCard(strain: Double, effortScale: EffortScale) {
     val shown = UnitFormatter.effortValue(strain, effortScale)
     Column(verticalArrangement = Arrangement.spacedBy(Metrics.space8)) {
-        SectionHeader("Effort", overline = "This session")
+        SectionHeader("Strain", overline = "This session")
         NoopCard(tint = Palette.effortColor) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -1391,8 +1390,8 @@ private fun SessionEffortCard(strain: Double, effortScale: EffortScale) {
                     verticalArrangement = Arrangement.spacedBy(Metrics.space2),
                     modifier = Modifier.semantics {
                         contentDescription =
-                            "This session's Effort, ${oneDecimal(shown)} on the " +
-                                (if (effortScale == EffortScale.WHOOP) "0 to 21 strain" else "0 to 100 Effort") +
+                            "This session's Strain, ${oneDecimal(shown)} on the " +
+                                (if (effortScale == EffortScale.WHOOP) "0 to 21 strain" else "0 to 100 Strain") +
                                 " scale."
                     },
                 ) {
@@ -1403,13 +1402,13 @@ private fun SessionEffortCard(strain: Double, effortScale: EffortScale) {
                         color = Palette.effortBright,
                     )
                     Text(
-                        if (effortScale == EffortScale.WHOOP) "strain (0-21)" else "Effort (0-100)",
+                        if (effortScale == EffortScale.WHOOP) "strain (0-21)" else "Strain (0-100)",
                         style = NoopType.footnote,
                         color = Palette.textTertiary,
                     )
                 }
                 Text(
-                    "This session's contribution to the day's Effort, as captured during the workout.",
+                    "This session's contribution to the day's Strain, as captured during the workout.",
                     style = NoopType.subhead,
                     color = Palette.textSecondary,
                     modifier = Modifier.weight(1f),
@@ -1618,7 +1617,7 @@ private fun ManualWorkoutDialog(
                 // We do NOT re-score from one number. Parity with macOS ManualWorkoutSheet.avgHrEditedNote.
                 if (built != null && WorkoutEditing.avgHrEdited(built, editing)) {
                     Text(
-                        "Avg HR is shown as typed. The HR graph, zones and Effort stay from the recorded session.",
+                        "Avg HR is shown as typed. The HR graph, zones and Strain stay from the recorded session.",
                         style = NoopType.footnote, color = Palette.statusWarning,
                     )
                 }

@@ -100,7 +100,7 @@ private enum class Outcome(
     val format: (Double) -> String,
 ) {
     Recovery(
-        label = "Charge", outcomeName = "Charge", higherIsBetter = true, domain = DomainTheme.Charge,
+        label = "Recovery", outcomeName = "Charge", higherIsBetter = true, domain = DomainTheme.Charge,
         pick = { it.recovery }, format = { "${it.roundToInt()}%" },
     ),
     Hrv(
@@ -108,7 +108,7 @@ private enum class Outcome(
         pick = { it.avgHrv }, format = { "${it.roundToInt()} ms" },
     ),
     Sleep(
-        label = "Rest", outcomeName = "Rest", higherIsBetter = true, domain = DomainTheme.Rest,
+        label = "Sleep", outcomeName = "Rest", higherIsBetter = true, domain = DomainTheme.Rest,
         pick = { it.efficiency }, format = { "${it.roundToInt()}%" },
     ),
     Rhr(
@@ -305,16 +305,14 @@ fun InsightsScreen(vm: AppViewModel, onOpenInsightsHub: () -> Unit = {}) {
     // otherwise insert a 0-height row that the 20dp arrangement flanks, shifting layout. The one
     // composable-only block (`run { … remember(snapshot) … }`) moves inside its `item { }` (which is
     // @Composable). Order is preserved exactly.
-    // LIQUID SKY BACKDROP (the pilot pattern — LiquidScreenSky.kt): the static time-of-day liquid sky
-    // settles into the theme canvas behind the header + the first cards (and bleeds full-width up behind the
-    // status bar via the scaffold's topBackground plumbing), top-aligned, so the analysis cards float OVER
-    // the sky on the flat surface below. The Android equivalent of the iOS
-    // `ScreenScaffold(topBackground: liquidScaffoldSky())`; reuses the shared LiquidScreenSky() slot verbatim.
-    // Insights has no day-cycle gate of its own, so the sky is always drawn (matching the liquid explorer).
+    // WHOOP SLATE BACKDROP: the flat WHOOP canvas gradient settles into the theme canvas behind the header
+    // and the first cards (and bleeds full-width up behind the status bar via the scaffold's topBackground
+    // plumbing), top-aligned, so the analysis cards float OVER it on the flat surface below. Reuses the
+    // shared WhoopScreenSky() slot verbatim. Insights has no day-cycle gate of its own, so it is always drawn.
     LazyScreenScaffold(
         title = "Insights",
         subtitle = "Interrogate what affects what.",
-        topBackground = { LiquidScreenSky() },
+        topBackground = { WhoopScreenSky() },
     ) {
 
         // --- "What moves you" deep-link into the v5 Insights Hub (ranked, lag-aware ranked-effect feed +
@@ -559,7 +557,7 @@ private fun WhatMovesYouLink(onOpen: () -> Unit) {
                 // glyph (mirrors the iOS "WHAT MOVES YOU ›" overline). The descriptive line sits beneath.
                 Overline("What moves you ›", color = Palette.textPrimary)
                 Text(
-                    "Ranked, lag-aware: which of your habits actually move your Charge, plus your " +
+                    "Ranked, lag-aware: which of your habits actually move your Recovery, plus your " +
                         "personal alcohol/caffeine dose-response.",
                     style = NoopType.footnote,
                     color = Palette.textTertiary,
@@ -683,12 +681,12 @@ private fun ActivityCostCard(cost: com.noop.analytics.ActivityCost) {
                     modifier = Modifier.weight(1f),
                     label = "Next morning",
                     value = "${cost.meanNextMorning.roundToInt()}",
-                    caption = "Charge · $pointsLabel pts",
+                    caption = "Recovery · $pointsLabel pts",
                     accent = accent,
                 )
                 StatTile(
                     modifier = Modifier.weight(1f),
-                    label = "Rest baseline",
+                    label = "Sleep baseline",
                     value = "${cost.baselineMean.roundToInt()}",
                     caption = "untouched days",
                     accent = Palette.textPrimary,
@@ -1617,32 +1615,32 @@ private fun computeRelationships(model: InsightModel): List<Relationship> {
     pearsonAligned(series(Outcome.Hrv), series(Outcome.Recovery))?.let { (r, n) ->
         out.add(
             Relationship(
-                "hrv-rec", "HRV ↔ Charge",
-                "Heart-rate variability as the engine behind your charge score.", r, n,
+                "hrv-rec", "HRV ↔ Recovery",
+                "Heart-rate variability as the engine behind your recovery score.", r, n,
             ),
         )
     }
     pearsonAligned(series(Outcome.Sleep), series(Outcome.Recovery))?.let { (r, n) ->
         out.add(
             Relationship(
-                "sleep-rec", "Rest ↔ Charge",
-                "How closely a good night tracks next-morning charge.", r, n,
+                "sleep-rec", "Sleep ↔ Recovery",
+                "How closely a good night tracks next-morning recovery.", r, n,
             ),
         )
     }
     pearsonAligned(series(Outcome.Rhr), series(Outcome.Recovery))?.let { (r, n) ->
         out.add(
             Relationship(
-                "rhr-rec", "Resting HR ↔ Charge",
-                "A lower resting heart rate usually means a higher charge.", r, n,
+                "rhr-rec", "Resting HR ↔ Recovery",
+                "A lower resting heart rate usually means a higher recovery.", r, n,
             ),
         )
     }
     pearsonLagged(series(Outcome.Recovery), lagDays = 1)?.let { (r, n) ->
         out.add(
             Relationship(
-                "rec-lag", "Charge → Next-day charge",
-                "How much one day's charge carries into the next.", r, n,
+                "rec-lag", "Recovery → Next-day recovery",
+                "How much one day's recovery carries into the next.", r, n,
             ),
         )
     }

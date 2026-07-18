@@ -4,7 +4,7 @@ import Combine
 import HealthKit
 #endif
 
-// MARK: - WatchLiveHR — the watch's own live heart rate
+// MARK: - WatchLiveHR , the watch's own live heart rate
 //
 // This is the one number the watch measures itself rather than receiving from the phone: the wrist's
 // current heart rate, read from HealthKit via a streaming HKAnchoredObjectQuery. It is GUARDED at every
@@ -34,7 +34,7 @@ final class WatchLiveHR: ObservableObject {
             denied = true
             return
         }
-        // Read-only — we never write HR from the watch. If the user declines, the streaming query simply
+        // Read-only , we never write HR from the watch. If the user declines, the streaming query simply
         // returns no samples and we surface "HR unavailable".
         store.requestAuthorization(toShare: [], read: [hrType]) { [weak self] granted, _ in
             guard let self else { return }

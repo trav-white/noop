@@ -65,10 +65,10 @@ struct StressView: View {
                        // alignment/spacing/header). The content is one inner eager VStack, so the staggered
                        // section reveal is unchanged; this only defers building that stack until it scrolls in.
                        lazy: true,
-                       // The day-of-sky liquid backdrop, matching Today / Health / Live / Sleep / Trends: a
-                       // fixed, full-bleed time-of-day sky behind the scroll content (does not scroll), so the
-                       // Stress screen sits in the same liquid atmosphere as every other tab.
-                       topBackground: liquidScaffoldSky()) {
+                       // The WHOOP slate canvas backdrop, matching Today / Health / Live / Sleep / Trends: a
+                       // fixed, full-bleed dark gradient behind the scroll content (does not scroll), so the
+                       // Stress screen sits on the same canvas as every other tab.
+                       topBackground: AnyView(CanvasBackground())) {
             if let model {
                 content(model)
             } else if !loaded {
@@ -285,12 +285,11 @@ struct StressView: View {
         return date.formatted(.dateTime.hour())
     }
 
-    // MARK: 1 · Hero — the liquid stress-level vessel.
+    // MARK: 1 · Hero: the WHOOP stress-level ring dial.
     //
-    // The 0–3 stress score reads as the signature liquid gauge: a LiquidVessel that fills to score/3
-    // and is tinted by the live band (calm blue → steady green → tense amber), with the count-up value +
-    // "of 3" over it (the Today HeroScoreCell / Live BPM-gauge idiom). The band pill sits top-trailing and
-    // one plain-English line explains the number below. Frosted card, liquid finish.
+    // The 0 to 3 stress score reads on a RingDial that fills to score/3 and is tinted by the live band
+    // (calm blue, steady green, tense amber). The band pill sits top-trailing and one plain-English
+    // line explains the number below. Frosted card, WHOOP finish.
 
     private func heroCard(_ model: StressModel) -> some View {
         NoopCard(tint: StressRamp.calm) {
@@ -569,39 +568,24 @@ struct StressView: View {
     }
 }
 
-// MARK: - Stress hero gauge (liquid vessel + count-up score)
+// MARK: - Stress hero gauge (WHOOP ring dial)
 
-/// The stress-level vessel: a LiquidVessel filled to `score`/3 and tinted to the live band, with the
-/// 0–3 value counting up over it and "of 3" beneath (the Today HeroScoreCell / Live BPM-gauge idiom).
-/// CountUpText self-animates the number roll; the numeral is hit-transparent so a tap reaches the
-/// vessel and splashes it.
+/// The stress-level dial: a `RingDial` filled to `score`/3 and tinted to the live band, with the
+/// 0-3 value centred and "of 3" as the tracked caps label.
 private struct StressHeroGauge: View {
-    let score: Double        // 0–3
+    let score: Double        // 0-3
     let tint: Color
 
     private var frac: Double { max(0, min(1, score / 3.0)) }
 
     var body: some View {
-        ZStack {
-            LiquidVessel(value: frac, tint: tint, animated: true)
-                .frame(width: 104, height: 104)
-            VStack(spacing: 0) {
-                // CountUpText self-animates (counts up from 0 on appear, re-rolls on value change),
-                // so the score is passed straight through — no external roll state needed.
-                CountUpText(
-                    value: score,
-                    format: { String(format: "%.1f", $0) },
-                    font: StrandFont.rounded(34, weight: .bold),
-                    color: .white
-                )
-                .shadow(color: .black.opacity(0.5), radius: 6, y: 1)
-                Text("of 3")
-                    .font(StrandFont.caption)
-                    .foregroundStyle(StrandPalette.textSecondary)
-            }
-            .allowsHitTesting(false)   // taps fall through to the vessel → splash
-        }
-        .accessibilityElement(children: .ignore)
+        RingDial(
+            value: frac,
+            display: String(format: "%.1f", score),
+            label: "of 3",
+            tint: tint,
+            size: .trio
+        )
         .accessibilityLabel("Stress \(String(format: "%.1f", score)) of 3")
     }
 }

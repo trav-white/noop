@@ -6,7 +6,7 @@ import StrandDesign
 /// `WindowGroup`; the glanceable menu-bar role is filled by the Home/Lock-Screen widget instead.
 ///
 /// The iOS shell is `RootTabView` (a `TabView`), NOT the macOS `ContentView`. `ContentView` embeds
-/// `RootView()` — the `NavigationSplitView` sidebar shell — and `RootView.swift` is excluded from the
+/// `RootView()` , the `NavigationSplitView` sidebar shell , and `RootView.swift` is excluded from the
 /// iOS target in `project.yml` (the sidebar has no iPhone analogue), so `ContentView` cannot compile
 /// on iOS. The first-run onboarding/pairing wizard, the Terms acknowledgment gate, and the post-update
 /// "What's New" sheet that `ContentView` layers on are reproduced here as `iOSRootView`, wrapped around
@@ -32,7 +32,7 @@ struct StrandiOSApp: App {
         #if DEBUG
         // DEBUG-only promo-screenshot harness: when launched with `--demo-hour <Int>`, pin Today to that
         // hour's day-cycle scene + a per-hour stat frame. No-op (active stays nil) when the arg is absent.
-        // MUST live here, not in StrandApp.swift — that is the macOS @main and is excluded from the iOS
+        // MUST live here, not in StrandApp.swift , that is the macOS @main and is excluded from the iOS
         // target, so the hook there never runs on iOS.
         DemoDayHarness.applyLaunchArgsIfNeeded()
         #endif
@@ -40,7 +40,7 @@ struct StrandiOSApp: App {
         // silent no-op (PendingIntents, WidgetSnapshot.publish, Live Activity) can mask the issue as
         // "the widget doesn't show anything yet." No-op in Release.
         WidgetSnapshot.assertGroupProvisioned()
-        // #510: register the scheduled debug auto-export's BGTask handler BEFORE launch finishes — iOS
+        // #510: register the scheduled debug auto-export's BGTask handler BEFORE launch finishes , iOS
         // only delivers a background task whose identifier was registered at launch AND listed in the
         // target's BGTaskSchedulerPermittedIdentifiers (project.yml). Without this the overnight drop
         // never fires; the macOS timer, foreground catch-up, and "Run now" already work without it.
@@ -140,7 +140,7 @@ struct StrandiOSApp: App {
                 }
         }
         // HealthKit authorization is intentionally NOT requested on launch. The system permission
-        // dialog without prior in-app rationale violates Apple HIG / App Review guidance — the user
+        // dialog without prior in-app rationale violates Apple HIG / App Review guidance , the user
         // sees the prompt before any context. It is requested from an explicit user action instead:
         // the "Enable Apple Health" affordance in AppleHealthView (More → Data → Apple Health).
         // Below, `refreshAuthIfPreviouslyGranted` re-primes `auth` for users who already granted
@@ -164,7 +164,7 @@ struct StrandiOSApp: App {
                 }
             } else if phase == .background {
                 // #155: refresh the Documents/noop_sync.txt drop file the user's Siri Shortcut logs
-                // into Apple Health. Gated inside writeIfEnabled on the opt-in default (OFF) — a
+                // into Apple Health. Gated inside writeIfEnabled on the opt-in default (OFF) , a
                 // no-op until the user turns on Shortcuts Export.
                 Task { await ShortcutHealthExport.writeIfEnabled(repo: model.repo) }
             }
@@ -172,7 +172,7 @@ struct StrandiOSApp: App {
     }
 }
 
-/// iOS root — the `RootTabView` shell with the first-run onboarding/pairing wizard overlaid until
+/// iOS root , the `RootTabView` shell with the first-run onboarding/pairing wizard overlaid until
 /// complete, the Terms acknowledgment gate over everything until the current version is accepted, and
 /// a "What's New" changelog sheet shown automatically after an update.
 ///
@@ -211,14 +211,14 @@ private struct iOSRootView: View {
             if !onboarded && !demoBypass {
                 OnboardingWizard(onFinished: {
                     onboarded = true
-                    // A brand-new user just saw the expectations in onboarding — don't also pop the
+                    // A brand-new user just saw the expectations in onboarding , don't also pop the
                     // changelog at them; mark them current.
                     lastSeenChangelog = AppChangelog.currentVersion
                 })
                 .transition(.opacity)
                 .zIndex(1)
             }
-            // Terms acknowledgment gate — over EVERYTHING (before onboarding/pairing/Bluetooth) until
+            // Terms acknowledgment gate , over EVERYTHING (before onboarding/pairing/Bluetooth) until
             // the current terms version is accepted; re-appears if the terms materially change.
             if acceptedTerms != Terms.currentVersion && !demoBypass {
                 TermsGateView(onAccept: { acceptedTerms = Terms.currentVersion })
@@ -234,7 +234,7 @@ private struct iOSRootView: View {
                 showWhatsNew = false
             })
         }
-        // The Terms gate must stay "over everything" — don't pop What's New on top of it after a
+        // The Terms gate must stay "over everything" , don't pop What's New on top of it after a
         // combined terms+version update. Gate on terms being current, and re-check when they're
         // accepted (onAppear already fired before acceptance), so What's New shows right after.
         .onAppear {

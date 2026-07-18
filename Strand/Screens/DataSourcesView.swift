@@ -11,22 +11,22 @@ struct DataSourcesView: View {
     @EnvironmentObject var live: LiveState
     @State private var showingImporter = false
     @State private var importTarget: ImportTarget = .whoop
-    // Nutrition CSV import state — local to this screen (the import is a quick, self-contained
+    // Nutrition CSV import state, local to this screen (the import is a quick, self-contained
     // metric-series write; it doesn't need AppModel's heavyweight import pipeline).
     @State private var nutritionImporting = false
     @State private var nutritionSummary: String?
     @State private var nutritionFailed = false
-    // Lifting (Hevy / Liftosaur) import state — same lightweight, self-contained pattern: parse the
+    // Lifting (Hevy / Liftosaur) import state, same lightweight, self-contained pattern: parse the
     // file, upsert workout rows under the "lifting" source, refresh. No HR Effort is touched.
     @State private var liftingImporting = false
     @State private var liftingSummary: String?
     @State private var liftingFailed = false
-    // Activity-file (GPX / TCX / FIT) import state — same lightweight, self-contained pattern: parse the
+    // Activity-file (GPX / TCX / FIT) import state, same lightweight, self-contained pattern: parse the
     // file, upsert one workout row under the "activity-file" source, refresh. No HR Effort is touched.
     @State private var activityFileImporting = false
     @State private var activityFileSummary: String?
     @State private var activityFileFailed = false
-    // Wearable export (Oura / Fitbit / Garmin own-data export) import state — same lightweight,
+    // Wearable export (Oura / Fitbit / Garmin own-data export) import state, same lightweight,
     // self-contained pattern: parse the file, upsert daily metrics + sleep sessions under the brand's
     // own source, refresh. The brand's own scores are stored as reference only, never NOOP scores.
     @State private var wearableImporting = false
@@ -41,13 +41,13 @@ struct DataSourcesView: View {
 
     // "Broadcast heart rate" (opt-in, OFF by default): make NOOP a standard BLE Heart Rate peripheral
     // (0x180D / 0x2A37) so a gym treadmill / Zwift / Peloton can read the live strap HR NOOP receives.
-    // LOCAL Bluetooth only — nothing leaves the device. The toggle is persisted; the broadcaster is owned
+    // LOCAL Bluetooth only, nothing leaves the device. The toggle is persisted; the broadcaster is owned
     // here (a pure consumer of LiveState, isolated from the WHOOP/central path).
     @AppStorage(HrBroadcaster.defaultsKey) private var broadcastHrEnabled = false
 
     // The broadcaster's diagnostic sink forwards to THIS box, which `onAppear` points at the screen's
     // `live`. A reference box lets the `@StateObject` capture a stable target at init even though the
-    // `@EnvironmentObject` `live` isn't available until the view runs — so the broadcast-out lifecycle
+    // `@EnvironmentObject` `live` isn't available until the view runs, so the broadcast-out lifecycle
     // lines (advertised / who subscribed / why the radio refused) reach the SAME exported strap log the
     // WHOOP path writes, mirroring Android's `HrBroadcaster(log = { ble.externalLog(it) })`. Every line is
     // already prefixed "HR-out: " inside HrBroadcaster; privacy-safe (statuses + a subscriber COUNT only).
@@ -59,7 +59,7 @@ struct DataSourcesView: View {
         let sink = LogSink()
         self.broadcastLogSink = sink
         _hrBroadcaster = StateObject(wrappedValue: HrBroadcaster(log: { [weak sink] line in
-            // HrBroadcaster is @MainActor, so it only ever calls this closure from the main actor — assume
+            // HrBroadcaster is @MainActor, so it only ever calls this closure from the main actor, assume
             // that isolation to forward straight into LiveState (also @MainActor) without an extra runloop
             // hop, matching Android's synchronous `ble.externalLog(it)`.
             MainActor.assumeIsolated { sink?.live?.append(log: line) }
@@ -76,7 +76,7 @@ struct DataSourcesView: View {
                        // for pixel-identical spacing, so the lazy win is partial until they're promoted to
                        // direct children. NOTE: this screen still observes `LiveState` for the broadcaster
                        // lifecycle binding in onAppear/onDisappear, so a ~1 Hz tick still re-evaluates the
-                       // built cards — that observation can't be removed here (see the lane-B2 note).
+                       // built cards, that observation can't be removed here (see the lane-B2 note).
                        lazy: true) {
             VStack(alignment: .leading, spacing: NoopMetrics.sectionSpacing) {
                 whoopCard.staggeredAppear(index: 0)
@@ -99,7 +99,7 @@ struct DataSourcesView: View {
             if broadcastHrEnabled { hrBroadcaster.start() }
         }
         .onDisappear {
-            // The broadcast is a foreground convenience tied to this screen's owned object — release the
+            // The broadcast is a foreground convenience tied to this screen's owned object, release the
             // radio when the screen goes away; toggling it back on (or revisiting) re-starts it.
             hrBroadcaster.stop()
         }
@@ -227,7 +227,7 @@ struct DataSourcesView: View {
     private var liftingCard: some View {
         card(title: String(localized: "Lifting log (Hevy / Liftosaur)"), icon: "dumbbell.fill",
              tint: DomainTheme.effort.color,
-             subtitle: String(localized: "Import your strength-training history from a Hevy CSV export or a Liftosaur JSON export. Each workout becomes a Strength session with a training-volume estimate (weight × reps). It's a volume figure, not a measured strain. It never changes your Effort.")) {
+             subtitle: String(localized: "Import your strength-training history from a Hevy CSV export or a Liftosaur JSON export. Each workout becomes a Strength session with a training-volume estimate (weight × reps). It's a volume figure, not a measured strain. It never changes your Strain.")) {
             HStack(spacing: NoopMetrics.space3) {
                 Button { presentImporter(.lifting) } label: {
                     Label(liftingImporting ? "Importing…" : "Choose export…", systemImage: "tray.and.arrow.down")
@@ -286,7 +286,7 @@ struct DataSourcesView: View {
         #if os(iOS)
         // iOS: go through UIDocumentPickerViewController with asCopy:true (DocumentPicker) rather than
         // SwiftUI's `.fileImporter` (#179). asCopy makes iOS DOWNLOAD an iCloud-Drive placeholder and
-        // hand us a readable local copy — `.fileImporter` instead returns a security-scoped URL that,
+        // hand us a readable local copy; `.fileImporter` instead returns a security-scoped URL that,
         // for an undownloaded iCloud file, can't be read, and the whole import silently did nothing.
         Task {
             guard let url = await DocumentPicker.importFile(target.allowedContentTypes) else { return } // cancelled
@@ -303,9 +303,9 @@ struct DataSourcesView: View {
             guard let url = urls.first else { return }
             handlePickedURL(url, for: target)
         case .failure(let error):
-            // Surface the failure instead of swallowing it (#179) — a silent return read as
+            // Surface the failure instead of swallowing it (#179): a silent return read as
             // "import does nothing", with no clue why.
-            NSLog("Import: file picker failed for \(target) — \(error.localizedDescription)")
+            NSLog("Import: file picker failed for \(target): \(error.localizedDescription)")
         }
     }
 
@@ -387,7 +387,7 @@ struct DataSourcesView: View {
 
     /// Parse a Hevy CSV / Liftosaur JSON lifting export and upsert each workout as a Strength session
     /// (source "lifting") with a transparent volume-load note. No `strain` is stored, so these never
-    /// feed the HR-based Effort — lifting volume is reported alongside it, never folded into it.
+    /// feed the HR-based Effort; lifting volume is reported alongside it, never folded into it.
     private func importLifting(url: URL) {
         liftingImporting = true
         liftingSummary = nil
@@ -458,7 +458,7 @@ struct DataSourcesView: View {
     /// Parse a single GPX / TCX / FIT activity file and upsert it as one workout (source
     /// "activity-file"). The route polyline isn't persisted on macOS (the shared WorkoutRow has no route
     /// column), but distance / HR / energy / ascent and an honest "N GPS points · M HR samples" note are.
-    /// No `strain` is stored unless the file carried one — imported files never feed the HR-based Effort.
+    /// No `strain` is stored unless the file carried one; imported files never feed the HR-based Effort.
     private func importActivityFile(url: URL) {
         activityFileImporting = true
         activityFileSummary = nil
@@ -521,7 +521,7 @@ struct DataSourcesView: View {
 
     /// Parse a user's own Oura / Fitbit / Garmin data export and upsert it under the brand's own source
     /// (daily metrics + sleep sessions + reference-only metric series). The brand's own readiness/sleep
-    /// score is NEVER mapped to a NOOP Charge/Effort/Rest — NOOP recomputes its own from the raw inputs.
+    /// score is NEVER mapped to a NOOP Charge/Effort/Rest; NOOP recomputes its own from the raw inputs.
     private func importWearable(url: URL) {
         wearableImporting = true
         wearableSummary = nil
@@ -578,7 +578,7 @@ struct DataSourcesView: View {
     /// ah-delete (#616): purge every row stored under the "apple-health" source by calling
     /// `DeviceRegistryStore.deleteAllData(deviceId:)` (via the device registry's `deleteDeviceData`,
     /// which clears all `deviceId`-keyed tables in one transaction). The registry row itself is the
-    /// seeded WHOOP device — "apple-health" is a source, not a paired device — so nothing in the
+    /// seeded WHOOP device ("apple-health" is a source, not a paired device), so nothing in the
     /// Devices list changes; only the imported recordings go. Refresh so Today/Explore/Insights drop
     /// the now-empty source, and clear the import summary so the card reads as "nothing imported".
     private func deleteAppleHealthData() {
@@ -637,7 +637,7 @@ struct DataSourcesView: View {
         var allowedContentTypes: [UTType] {
             // `.folder` lets macOS users point at an *unzipped* export directory. On iOS the Files
             // picker can't meaningfully pick a folder here, and including `UTType.folder` in the type
-            // list greys out the .zip itself — so the picker opens but nothing is selectable
+            // list greys out the .zip itself, so the picker opens but nothing is selectable
             // (issue #179). iOS therefore offers only the concrete file types.
             switch self {
             case .whoop:
@@ -664,7 +664,7 @@ struct DataSourcesView: View {
             case .nutrition:
                 return [.commaSeparatedText, .plainText]
             case .lifting:
-                // Hevy exports .csv, Liftosaur exports .json — accept both (plus plain text, since some
+                // Hevy exports .csv, Liftosaur exports .json, accept both (plus plain text, since some
                 // share sheets type a .csv as text/plain). The importer sniffs the actual format.
                 return [.commaSeparatedText, .json, .plainText]
             case .activityFile:
@@ -713,7 +713,7 @@ struct DataSourcesView: View {
                 .foregroundStyle(StrandPalette.textTertiary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            // FI-2 (#490) — the 4.0-vs-5.0 explainer. Broadcast works for BOTH strap generations because it
+            // FI-2 (#490): the 4.0-vs-5.0 explainer. Broadcast works for BOTH strap generations because it
             // re-shares whatever LIVE heart rate NOOP already has off the strap; it doesn't depend on the
             // 5/MG-only deep-data path. The honest distinction is WHERE that live HR comes from (4.0 = the
             // strap's standard HR characteristic; 5/MG = PPG-derived once connected), not whether broadcast
@@ -748,9 +748,9 @@ struct DataSourcesView: View {
         }
     }
 
-    /// FI-2 (#490) — a compact, honest "works with both strap generations" explainer under the broadcast
+    /// FI-2 (#490): a compact, honest "works with both strap generations" explainer under the broadcast
     /// toggle. Two short lines (4.0 / 5.0·MG) frame WHERE the live HR comes from on each, so a WHOOP 4.0
-    /// owner knows broadcast is for them and a 5/MG owner understands the PPG-derived source — without
+    /// owner knows broadcast is for them and a 5/MG owner understands the PPG-derived source, without
     /// over-promising. Plain copy, no claim that either generation is "better".
     private var generationExplainer: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -788,7 +788,7 @@ struct DataSourcesView: View {
     }
 
     private var liveCard: some View {
-        // Three-state, consistent with the Live screen's connection pill — a connected-but-
+        // Three-state, consistent with the Live screen's connection pill: a connected-but-
         // not-yet-streaming strap (e.g. an experimental WHOOP 5/MG link) no longer reads as
         // "Not connected" on one screen and "Connected" on another (issue #8).
         let (tone, label): (StrandTone, LocalizedStringKey) =

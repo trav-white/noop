@@ -158,10 +158,12 @@ struct MindSection: View {
             ForEach(lines) { line in
                 NoopCard(tint: StrandPalette.restColor) {
                     HStack(alignment: .top, spacing: 12) {
-                        // A small liquid vessel filled to the link's strength (|r|) marks the row and reads
-                        // its magnitude at a glance — the leading-gauge idiom Insights' effect cards use.
+                        // A small ring dial filled to the link's strength (|r|) marks the row and reads
+                        // its magnitude at a glance, the leading-gauge idiom Insights' effect cards use.
                         // Rest-tinted so it carries no valence (a link is just a link, never good or bad).
-                        LiquidVessel(value: line.strength, tint: StrandPalette.restBright, animated: false)
+                        RingDial(value: line.strength, display: "", label: "",
+                                 tint: StrandPalette.restBright, size: .mini)
+                            .scaleEffect(22 / 44.0)
                             .frame(width: 22, height: 22)
                             .accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 4) {

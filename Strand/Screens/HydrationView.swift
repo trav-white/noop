@@ -4,12 +4,12 @@ import StrandAnalytics
 
 // MARK: - Hydration detail (MVP, opt-in, local-only)
 //
-// Liquid finish: water in a vessel is the literal metaphor, so the hero is the canonical `LiquidVessel`
-// tinted the action blue, filling to today's fraction of goal with the litre figure counting up over it.
-// The day total sits in a filling `LiquidTube` (the same horizontal vessel Today's grid uses), the three
-// quick-log buttons (Sip / Cup / Bottle) stay in the secondary NoopButton style, and the 7-day mini bars
-// remain. Frosted `card {}` surfaces (rounded 22 + resting hairline), the day-of-sky backdrop, and
-// `LiquidPressStyle` on the tappable drink rows line the screen up with the liquid Today + batch-1 tabs.
+// WHOOP finish: the hero is a `RingDial` tinted the action blue, filling to today's fraction of goal
+// with the litre figure counting up over it. The day total sits in a filling `LiquidTube` (the same
+// horizontal vessel Today's grid uses), the three quick-log buttons (Sip / Cup / Bottle) stay in the
+// secondary NoopButton style, and the 7-day mini bars remain. Frosted `card {}` surfaces (rounded 22 +
+// resting hairline), the WHOOP slate canvas backdrop, and `LiquidPressStyle` on the tappable drink rows
+// line the screen up with the Today + batch-1 tabs.
 // BYTE-PARITY twin of the Android `HydrationScreen`: the day total + history come from the local-only
 // `HydrationStore` series (additive day total), and the goal is the pure `HydrationGoal` engine (profile
 // sex + today's Effort bump). Per-tap rows aren't separately persisted on either platform — the day total
@@ -42,9 +42,9 @@ struct HydrationView: View {
         ScreenScaffold(title: "Hydration",
                        subtitle: "Your fluid intake today, on \(Platform.deviceNounPhrase) only.",
                        onRefresh: { await reload() },
-                       // Liquid finish: the same full-bleed day-of-sky backdrop Today + the other liquid
+                       // WHOOP finish: the same full-bleed slate canvas backdrop Today + the other
                        // tabs carry, so Hydration sits in one atmosphere.
-                       topBackground: liquidScaffoldSky()) {
+                       topBackground: AnyView(CanvasBackground())) {
             VStack(alignment: .leading, spacing: NoopMetrics.sectionGap) {
                 ringSection
                 logSection
@@ -87,12 +87,13 @@ struct HydrationView: View {
     private var ringSection: some View {
         card {
             VStack(spacing: NoopMetrics.cardInnerSpacing) {
-                // The signature liquid gauge, filling the "of goal" fraction in the action blue. Water in
-                // a vessel is the literal metaphor here, so it replaces the old flat progress ring. The
-                // litre figure counts up over it; the vessel fills to the SAME animated `heroFraction`
-                // driven on appear / after a log, so the fill and the number roll-up land together.
+                // The WHOOP ring dial, filling the "of goal" fraction in the action blue. The litre
+                // figure counts up over it; the ring fills to the SAME animated `heroFraction` driven on
+                // appear / after a log, so the fill and the number roll-up land together. Numeral-free
+                // (display/label empty) since the litre figure + caption are drawn separately on top.
                 ZStack {
-                    LiquidVessel(value: heroFraction, tint: StrandPalette.accent, animated: true)
+                    RingDial(value: heroFraction, display: "", label: "", tint: StrandPalette.accent, size: .mini)
+                        .scaleEffect(184 / 44.0)
                         .frame(width: 184, height: 184)
                     VStack(spacing: 2) {
                         CountUpText(value: HydrationGoal.litres(fromML: totalML),
@@ -104,7 +105,7 @@ struct HydrationView: View {
                             .font(StrandFont.subhead)
                             .foregroundStyle(StrandPalette.textSecondary)
                     }
-                    .allowsHitTesting(false)   // taps fall through to the vessel → splash
+                    .allowsHitTesting(false)
                 }
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel("Hydration today")

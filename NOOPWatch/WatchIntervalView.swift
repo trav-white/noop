@@ -1,7 +1,7 @@
 import SwiftUI
 import StrandDesign
 
-// MARK: - WatchIntervalView — silent haptic HIIT, on the wrist
+// MARK: - WatchIntervalView , silent haptic HIIT, on the wrist
 //
 // The watch-native sibling of the phone's Interval Timer (Strand/Screens/IntervalTimerView.swift). Same
 // model: a WORK / REST state machine over a number of rounds with the session total derived from
@@ -13,13 +13,13 @@ import StrandDesign
 // Defaults match the phone: 30s work / 15s rest / 8 rounds. Scaled for the watch: one big countdown ring
 // is the whole screen (flat track + solid phase-tinted arc, SF-Rounded number in the centre, WHOOP-grey
 // card), with the WORK/REST chip and ROUND x/N above it and compact Start/Pause + Reset below. No config
-// steppers up here on the small face — the wrist is for running the session, the phone owns setup.
+// steppers up here on the small face , the wrist is for running the session, the phone owns setup.
 struct WatchIntervalView: View {
 
     // Cross-lane contract: a no-arg init, fully self-contained.
     init() {}
 
-    // MARK: Config (the phone's defaults — fixed on the watch, run-only surface)
+    // MARK: Config (the phone's defaults , fixed on the watch, run-only surface)
 
     private let workSeconds = 30
     private let restSeconds = 15
@@ -112,7 +112,7 @@ struct WatchIntervalView: View {
         .onAppear { if remaining == 0 { resetToStart() } }
     }
 
-    // MARK: Header — phase chip + round chip
+    // MARK: Header , phase chip + round chip
 
     private var header: some View {
         HStack {
@@ -153,7 +153,7 @@ struct WatchIntervalView: View {
         .accessibilityLabel("Round \(min(currentRound, rounds)) of \(rounds)")
     }
 
-    // MARK: Hero ring — the countdown
+    // MARK: Hero ring , the countdown
 
     /// Flat phase-progress ring (visible track + solid reset-token arc, no glow) with the countdown number
     /// + caption centred, scaled down to the wrist. Same look as the phone's heroRing, just smaller. The
@@ -168,7 +168,7 @@ struct WatchIntervalView: View {
             Circle()
                 .stroke(StrandPalette.textPrimary.opacity(0.10),
                         style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
-            // Flat, crisp solid arc — no glow.
+            // Flat, crisp solid arc , no glow.
             Circle()
                 .trim(from: 0, to: max(0.0001, CGFloat(min(max(fraction, 0), 1))))
                 .rotation(.degrees(-90))
@@ -197,7 +197,7 @@ struct WatchIntervalView: View {
                                         : String(localized: "\(remaining) seconds remaining in \(phase.label)"))
     }
 
-    // MARK: Controls — Start/Pause + Reset
+    // MARK: Controls , Start/Pause + Reset
 
     private var controls: some View {
         HStack(spacing: 6) {
@@ -228,7 +228,7 @@ struct WatchIntervalView: View {
         .controlSize(.small)
     }
 
-    /// True when nothing has run yet — disables Reset so it never looks active on a fresh session.
+    /// True when nothing has run yet , disables Reset so it never looks active on a fresh session.
     private var isCleanStart: Bool {
         !running && phase == .work && currentRound == 1
             && remaining == max(1, workSeconds) && elapsed == 0
@@ -239,7 +239,7 @@ struct WatchIntervalView: View {
     private func tick() {
         guard running, !isFinished else { return }
 
-        // 3-2-1 countdown tick on the last seconds of the current phase — a light wrist tap.
+        // 3-2-1 countdown tick on the last seconds of the current phase , a light wrist tap.
         if remaining <= 3 && remaining >= 1 {
             StrandHaptic.selection.play()
         }
@@ -250,7 +250,7 @@ struct WatchIntervalView: View {
             return
         }
 
-        // remaining hits 0 — advance to the next phase/round.
+        // remaining hits 0 , advance to the next phase/round.
         elapsed += 1
         advancePhase()
     }
@@ -262,13 +262,13 @@ struct WatchIntervalView: View {
                 // Last work block finished → session complete.
                 finishSession()
             } else {
-                // Into rest — a soft single cue.
+                // Into rest , a soft single cue.
                 phase = .rest
                 remaining = max(1, restSeconds)
                 StrandHaptic.light.play()
             }
         case .rest:
-            // Rest done → next round's work — a strong cue so you feel it without looking.
+            // Rest done → next round's work , a strong cue so you feel it without looking.
             currentRound += 1
             phase = .work
             remaining = max(1, workSeconds)

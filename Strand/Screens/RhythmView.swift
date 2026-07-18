@@ -308,9 +308,9 @@ struct RhythmView: View {
             // methodology card). The LazyVStack path builds the off-screen cards — including the scatter
             // plot's point set — on demand; byte-identical layout.
             lazy: true,
-            // Liquid finish: the day-of-sky backdrop, so the visualization sits in the same liquid
+            // WHOOP finish: the slate canvas backdrop, so the visualization sits in the same
             // atmosphere as Today. The calm Rest-blue world of the cards stays unchanged over it.
-            topBackground: liquidScaffoldSky(),
+            topBackground: AnyView(CanvasBackground()),
             trailing: { closeButton }
         ) {
             SourceBadge("Experimental", tint: StrandPalette.restColor)

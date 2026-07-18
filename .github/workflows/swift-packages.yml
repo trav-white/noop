@@ -48,3 +48,5 @@ jobs:
       - name: Test ${{ matrix.package }}
         run: swift test
         working-directory: Packages/${{ matrix.package }}
+
+# CI re-registration touch (fork enablement)

@@ -10,7 +10,7 @@ import StrandAnalytics
 //
 // It only ever SUGGESTS: tapping Save creates a manual-style "Workout" for the window (via the
 // same manual-save path the edit sheet uses); the X dismisses it durably so it never re-prompts.
-// Nothing is created automatically. Design-Reset compliant — a flat NoopCard using NoopMetrics /
+// Nothing is created automatically. Design-Reset compliant: a flat NoopCard using NoopMetrics /
 // StrandPalette / StrandFont, no gold, matching the other Today cards.
 
 struct AutoWorkoutCard: View {
@@ -89,7 +89,7 @@ struct AutoWorkoutCard: View {
         .accessibilityElement(children: .contain)
     }
 
-    /// "Looks like a workout [yesterday ]around 14:05–14:32 (avg HR 148, 27 min). Save it?"
+    /// "Looks like a workout [yesterday ]around 14:05-14:32 (avg HR 148, 27 min). Save it?"
     /// Three whole-phrase variants (today / yesterday / dated, #719) so translators see complete
     /// sentences rather than a stitched day-label fragment.
     private func promptText(_ w: DetectedWorkout) -> String {

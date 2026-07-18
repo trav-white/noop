@@ -168,10 +168,10 @@ struct SettingsView: View {
     var body: some View {
         ScreenScaffold(title: "Settings",
                        subtitle: "Your numbers, your strap, and how NOOP works. All on \(Platform.deviceNounPhrase).",
-                       // The day-of-sky liquid backdrop, matching Today / Health / Sleep / Trends / Devices:
-                       // a fixed, full-bleed time-of-day sky behind the scroll content (it does not scroll).
-                       // Settings' own frosted cards sit on the dark canvas below the sky band, unchanged.
-                       topBackground: liquidScaffoldSky()) {
+                       // The WHOOP slate canvas backdrop, matching Today / Health / Sleep / Trends / Devices:
+                       // a fixed, full-bleed dark gradient behind the scroll content (it does not scroll).
+                       // Settings' own frosted cards sit on the dark canvas below, unchanged.
+                       topBackground: AnyView(CanvasBackground())) {
             VStack(alignment: .leading, spacing: NoopMetrics.sectionSpacing) {
                 // Everyday sections stay expanded (S3): the ones a first-run user actually needs.
                 profilePhotoCard.staggeredAppear(index: 0)
@@ -206,12 +206,12 @@ struct SettingsView: View {
         } message: {
             Text(backupAlertMessage)
         }
-        .confirmationDialog("Recalibrate your Charge baseline?",
+        .confirmationDialog("Recalibrate your Recovery baseline?",
                             isPresented: $showRecalibrateConfirm, titleVisibility: .visible) {
             Button("Recalibrate") { recalibrateHrvBaseline() }
             Button("Cancel", role: .cancel) { }
         } message: {
-            Text("This restarts the roughly 4-night build-up for Charge and your HRV baseline. Your history stays. Use it if a bad first week, like wearing it while sick, set your baseline off.")
+            Text("This restarts the roughly 4-night build-up for Recovery and your HRV baseline. Your history stays. Use it if a bad first week, like wearing it while sick, set your baseline off.")
         }
         .sheet(isPresented: $showWhatsNew) {
             WhatsNewView(onClose: { showWhatsNew = false })
@@ -580,7 +580,7 @@ struct SettingsView: View {
         SettingsSection(
             icon: "ruler",
             title: "Units",
-            blurb: "Choose how distances, weights, heights, temperatures and Effort are shown. Your data is always stored the same way. This only changes the display."
+            blurb: "Choose how distances, weights, heights, temperatures and Strain are shown. Your data is always stored the same way. This only changes the display."
         ) {
             VStack(spacing: 0) {
                 FormRow(label: "Measurement system") {
@@ -610,15 +610,15 @@ struct SettingsView: View {
                 rowDivider
                 // Effort scale (#268) — show NOOP's native 0–100 Effort or WHOOP's 0–21 Day Strain axis.
                 // Display-only; the stored value never changes, so a flip just re-labels every Effort read-out.
-                FormRow(label: "Effort scale") {
-                    Picker("Effort scale", selection: $effortScaleRaw) {
+                FormRow(label: "Strain scale") {
+                    Picker("Strain scale", selection: $effortScaleRaw) {
                         Text("0-100").tag(EffortScale.hundred.rawValue)
                         Text("0-21").tag(EffortScale.whoop.rawValue)
                     }
                     .labelsHidden()
                     .pickerStyle(.segmented)
                     .fixedSize()
-                    .accessibilityLabel("Effort scale")
+                    .accessibilityLabel("Strain scale")
                 }
             }
         }
@@ -903,14 +903,14 @@ struct SettingsView: View {
         SettingsSection(
             icon: "heart.text.square",
             title: "Recovery",
-            blurb: "Your Charge score learns a personal baseline from your heart-rate variability, resting heart rate and more over time. If a bad first week set it off, you can re-learn it from tonight. Your history stays."
+            blurb: "Your Recovery score learns a personal baseline from your heart-rate variability, resting heart rate and more over time. If a bad first week set it off, you can re-learn it from tonight. Your history stays."
         ) {
             VStack(alignment: .leading, spacing: NoopMetrics.rowSpacing) {
-                NoopButton("Recalibrate Charge baseline", systemImage: "arrow.triangle.2.circlepath", kind: .secondary) {
+                NoopButton("Recalibrate Recovery baseline", systemImage: "arrow.triangle.2.circlepath", kind: .secondary) {
                     showRecalibrateConfirm = true
                 }
 
-                Text("Restarts the roughly 4-night build-up for Charge and your HRV baseline from tonight. Use it if a bad first week set your baseline off. Your history stays.")
+                Text("Restarts the roughly 4-night build-up for Recovery and your HRV baseline from tonight. Use it if a bad first week set your baseline off. Your history stays.")
                     .font(StrandFont.caption)
                     .foregroundStyle(StrandPalette.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -930,7 +930,7 @@ struct SettingsView: View {
             await model.intelligence.analyzeRecent()
             await model.repo.refresh()
         }
-        backupAlertTitle = String(localized: "Charge baseline recalibrating")
+        backupAlertTitle = String(localized: "Recovery baseline recalibrating")
         backupAlertMessage = String(localized: "NOOP will re-learn your baseline from tonight's data onward. Your history is kept, and it takes a few nights to settle.")
         showBackupAlert = true
     }
@@ -1045,7 +1045,7 @@ struct SettingsView: View {
         SettingsSection(
             icon: "drop.fill",
             title: "Experimental · Liquid Today",
-            blurb: "A redesigned Today screen in the new liquid language: the scores as living liquid, a time-of-day sky, and a calmer layout. Same numbers, new look."
+            blurb: "A redesigned Today screen in the new liquid language: the scores as living liquid, and a calmer layout. Same numbers, new look."
         ) {
             VStack(alignment: .leading, spacing: NoopMetrics.rowSpacing) {
                 Toggle(isOn: $liquidTodayEnabled) {
@@ -1071,7 +1071,7 @@ struct SettingsView: View {
         SettingsSection(
             icon: "shield.lefthalf.filled",
             title: "Experimental · Live Sessions",
-            blurb: "A one-tap guarded workout: the strap watches your heart rate against a band gated on today's Charge, and only ever buzzes to correct course. Silence means you're on track."
+            blurb: "A one-tap guarded workout: the strap watches your heart rate against a band gated on today's Recovery, and only ever buzzes to correct course. Silence means you're on track."
         ) {
             VStack(alignment: .leading, spacing: NoopMetrics.rowSpacing) {
                 Toggle(isOn: $liveSessionsBeta) {
@@ -1749,7 +1749,7 @@ struct SettingsView: View {
                             Text("How your scores work")
                                 .font(StrandFont.body)
                                 .foregroundStyle(StrandPalette.textPrimary)
-                            Text("Charge, Effort and Rest (and how they differ from WHOOP).")
+                            Text("Recovery, Strain and Sleep (and how they differ from WHOOP).")
                                 .font(StrandFont.footnote)
                                 .foregroundStyle(StrandPalette.textTertiary)
                                 .fixedSize(horizontal: false, vertical: true)

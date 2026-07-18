@@ -78,7 +78,7 @@ import kotlinx.coroutines.launch
 
 // MARK: - Liquid hero tokens (the liquid Devices restyle)
 //
-// The ACTIVE device card is the screen's hero: it floats over the day-of-sky as a translucent near-black
+// The ACTIVE device card is the screen's hero: it floats over the WHOOP slate backdrop as a translucent near-black
 // frosted card so the strap name + the live battery tube stay crisp on it. Same tokens as the liquid Today
 // hero (heroFill = rgba(13,14,20,.80), radius 26, white@0.11 hairline). Those Today constants are private to
 // TodayScreen, so the identical values are declared here. Mirrors the iOS liquid heroCard.
@@ -131,11 +131,11 @@ fun DevicesScreen(
     LazyScreenScaffold(
         title = "Devices",
         subtitle = "Pair and manage the bands NOOP reads from.",
-        // LIQUID SKY BACKDROP (the pilot pattern — LiquidScreenSky.kt): the time-of-day liquid sky settles
-        // into the flat canvas behind the top of the screen so the frosted device cards float over it. The
-        // static sky (LiquidSkyStatic inside the helper) carries no per-frame cost on this scrolling list.
-        // Gated on the same "Day-cycle background" setting as Today; off passes null for the plain canvas.
-        topBackground = if (showDayCycleBackground) { { LiquidScreenSky() } } else null,
+        // WHOOP SLATE BACKDROP: the flat WHOOP canvas gradient (WhoopScreenSky) settles into the flat canvas
+        // behind the top of the screen so the frosted device cards float over it. Static, no per-frame cost
+        // on this scrolling list. Gated on the same "Day-cycle background" setting as Today; off passes null
+        // for the plain canvas.
+        topBackground = if (showDayCycleBackground) { { WhoopScreenSky() } } else null,
     ) {
         if (devices == null) {
             // The registry resolves a beat after launch. Show a calm pending note in that brief window.
@@ -322,7 +322,7 @@ private fun DeviceCard(
         ) { menuOpen = true }
 
     // The ACTIVE device is the hero: the liquid translucent-black frosted card (rgba(13,14,20,.80), radius
-    // 26, white@0.11 hairline) so it floats over the day-of-sky, matching the liquid Today hero. Every other
+    // 26, white@0.11 hairline) so it floats over the WHOOP slate backdrop, matching the liquid Today hero. Every other
     // card (paired / removed) keeps the crisp neutral NoopCard frosted surface.
     val body: @Composable () -> Unit = {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -778,9 +778,9 @@ private fun deviceProfile(device: PairedDeviceRow): DeviceCapabilityProfile {
         return DeviceCapabilityProfile(
             displayModel = "Gym equipment (FTMS)",
             captures = "Speed · Cadence · Power · Distance · Energy · Heart rate (if the machine sends it)",
-            powers = "Records a live machine workout, Effort-scored from HR when the machine reports it",
+            powers = "Records a live machine workout, Strain-scored from HR when the machine reports it",
             footnote = "Live machine data over Bluetooth FTMS. No sleep, recovery, skin temp or SpO₂. " +
-                "Effort needs the machine's heart rate; without it the session logs the machine metrics only.",
+                "Strain needs the machine's heart rate; without it the session logs the machine metrics only.",
         )
     }
     // EXPERIMENTAL Huami device (Amazfit / Zepp / Mi Band): best-effort live HR only, honest about it.
@@ -788,7 +788,7 @@ private fun deviceProfile(device: PairedDeviceRow): DeviceCapabilityProfile {
         return DeviceCapabilityProfile(
             displayModel = "${device.brand} (experimental)",
             captures = "Heart rate (live, best-effort)",
-            powers = "Powers the live console + Effort. No Charge, Rest or Sleep",
+            powers = "Powers the live console + Strain. No Recovery or Sleep",
             footnote = "Experimental: live heart rate where the band exposes it. Some bands need a pairing " +
                 "we can't do yet. NOOP will say so honestly and never show a made-up number. No sleep, " +
                 "recovery, skin temp, SpO₂ or steps.",
@@ -809,9 +809,9 @@ private fun deviceProfile(device: PairedDeviceRow): DeviceCapabilityProfile {
         else
             "Heart rate · HRV* · Sleep · Resting HR · Skin temp* · Battery"
         val powers = if (newer)
-            "Powers Effort now; Charge and Rest once enough nights and decode are confirmed"
+            "Powers Strain now; Recovery and Sleep once enough nights and decode are confirmed"
         else
-            "Powers Charge, Effort, Rest and Sleep"
+            "Powers Recovery, Strain and Sleep"
         return DeviceCapabilityProfile(
             displayModel = "${gen.displayName} (Beta)",
             captures = captures,
@@ -826,12 +826,12 @@ private fun deviceProfile(device: PairedDeviceRow): DeviceCapabilityProfile {
         return DeviceCapabilityProfile(
             displayModel = "Heart-rate strap",
             captures = "Heart rate · HRV (live)* · Strain",
-            powers = "Powers the live console + Effort. No Charge, Rest or Sleep",
+            powers = "Powers the live console + Strain. No Recovery or Sleep",
             footnote = "Live HR + R-R only · no sleep, recovery, skin temp, SpO₂, steps or battery " +
                 "(those are WHOOP-only).",
         )
     }
-    val whoopPowers = "Powers Charge, Effort, Rest, Sleep + Health Monitor"
+    val whoopPowers = "Powers Recovery, Strain, Sleep + Health Monitor"
     val model = device.model.lowercase()
     // WHOOP 5.0 / MG — adds a (raw) step count the 4.0 can't read over BLE.
     if (model.contains("5") || model.contains("mg")) {

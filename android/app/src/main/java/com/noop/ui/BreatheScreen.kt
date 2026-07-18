@@ -123,7 +123,7 @@ private enum class Phase { Inhale, Exhale }
 // MARK: - Liquid hero tokens (the liquid Breathe restyle)
 //
 // The frosted hero panel the breathe vessel floats on, matching the liquid Today heroCard. `heroFill` is a
-// translucent near-black (mock rgba(13,14,20,.80)) so it floats over the day-of-sky and the vessel + white
+// translucent near-black (mock rgba(13,14,20,.80)) so it floats over the WHOOP slate backdrop and the vessel + white
 // count-up read crisp on it; radius 26 + a white@0.11 hairline give the frosted-glass edge. Declared here
 // (not shared from Today) because the Today copies are file-private — same values, kept in lockstep.
 private val LIQUID_HERO_FILL: Color = Color(red = 13f / 255f, green = 14f / 255f, blue = 20f / 255f, alpha = 0.80f)
@@ -292,11 +292,10 @@ fun BreatheScreen(viewModel: AppViewModel) {
     ScreenScaffold(
         title = "Breathe",
         subtitle = "Haptic-paced breathing · find your pace · calm down",
-        // LIQUID SKY BACKDROP (the pilot pattern — LiquidScreenSky.kt): the time-of-day liquid sky settles
-        // into the theme canvas behind the header + top card and bleeds full-width up behind the status bar
-        // via the scaffold's topBackground plumbing. The Android equivalent of the iOS
-        // `ScreenScaffold(topBackground: liquidScaffoldSky())`; the cards float OVER it on the flat canvas.
-        topBackground = { LiquidScreenSky() },
+        // WHOOP SLATE BACKDROP: the flat WHOOP canvas gradient (WhoopScreenSky) settles into the theme
+        // canvas behind the header and top card and bleeds full-width up behind the status bar via the
+        // scaffold's topBackground plumbing; the cards float OVER it on the flat canvas.
+        topBackground = { WhoopScreenSky() },
     ) {
         // Mode switch — Breathe / Resonance / Calm me.
         SegmentedPillControl(
@@ -357,7 +356,7 @@ fun BreatheScreen(viewModel: AppViewModel) {
         }
 
         // The liquid hero CARD: a translucent near-black frosted panel (mock rgba(13,14,20,.80), radius 26,
-        // white@0.11 hairline) that floats over the day-of-sky so the breathe vessel + white count-up stay
+        // white@0.11 hairline) that floats over the WHOOP slate backdrop so the breathe vessel + white count-up stay
         // crisp — the card does the contrast work, not a muted sky. Mirrors the iOS liquid heroCard.
         Box(
             modifier = Modifier

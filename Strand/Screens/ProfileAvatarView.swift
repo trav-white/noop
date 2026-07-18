@@ -44,12 +44,13 @@ struct ProfileAvatarView: View {
                 // A faint hairline ring so the photo edge reads cleanly on any card/canvas.
                 .overlay(Circle().strokeBorder(StrandPalette.hairline, lineWidth: 1))
         } else {
-            // Fallback: the NOOP loop BrandMark (the green ring + white core) instead of a generic
-            // person glyph — the default avatar is now on-brand. BrandMark is intrinsically square and
-            // sized off a single edge length, so it fills the same `size` footprint a photo / the old
-            // symbol did, keeping the header and Settings layouts unchanged.
-            BrandMark(size: size)
+            // Fallback: a neutral person glyph in the same `size` footprint a photo / the brand
+            // mark used, keeping the header and Settings layouts unchanged.
+            Image(systemName: "person.crop.circle.fill")
+                .resizable()
+                .scaledToFit()
                 .frame(width: size, height: size)
+                .foregroundStyle(fallbackTint)
         }
     }
 

@@ -628,7 +628,7 @@ fun DataSourcesScreen(vm: AppViewModel) {
             subtitle = "Import your strength-training history from a Hevy CSV export or a Liftosaur " +
                 "JSON export. Each workout becomes a Strength session with a training-volume " +
                 "estimate (weight × reps). It's a volume figure, not a measured strain, so it never " +
-                "changes your Effort.",
+                "changes your Strain.",
         ) {
             val hasLifting = (liftingWorkouts ?: 0) > 0
             StatePill(

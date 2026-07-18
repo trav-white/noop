@@ -144,7 +144,7 @@ struct LiveWorkoutView: View {
         let strain = model.activeWorkout?.liveStrain ?? 0
         return NoopCard(padding: NoopMetrics.cardInnerPadding, tint: StrandPalette.effortColor) {
             VStack(spacing: NoopMetrics.rowSpacing) {
-                Text("EFFORT BUILDING")
+                Text("STRAIN BUILDING")
                     .font(StrandFont.overline).tracking(StrandFont.overlineTracking)
                     .foregroundStyle(StrandPalette.effortColor)
                 StrainGauge(
@@ -199,7 +199,7 @@ struct LiveWorkoutView: View {
                  tint: (w?.avgHr ?? 0) > 0 ? StrandPalette.metricRose : StrandPalette.textPrimary)
             stat(String(localized: "PEAK"), (w?.peakHr ?? 0) > 0 ? "\(w!.peakHr)" : "—",
                  tint: (w?.peakHr ?? 0) > 0 ? StrandPalette.metricRose : StrandPalette.textPrimary)
-            stat(String(localized: "EFFORT"), UnitFormatter.effortDisplay(w?.liveStrain ?? 0, scale: effortScale),
+            stat(String(localized: "STRAIN"), UnitFormatter.effortDisplay(w?.liveStrain ?? 0, scale: effortScale),
                  tint: StrandPalette.strainColor(w?.liveStrain ?? 0))
         }
     }

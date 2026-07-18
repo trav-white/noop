@@ -492,7 +492,7 @@ private fun CorrelationResult(
     val n = pairs.size
     when {
         signal == null -> Text(
-            "Pick a wearable signal (resting HR, HRV, sleep, Charge, weight…) to line it up against this " +
+            "Pick a wearable signal (resting HR, HRV, sleep, Recovery, weight…) to line it up against this " +
                 "marker. NOOP averages the signal over the ${window.phrase} before each reading.",
             style = NoopType.subhead,
             color = Palette.textTertiary,
@@ -645,10 +645,10 @@ data class LabSignal(val key: String, val title: String, val source: String)
 private val LAB_SIGNALS = listOf(
     LabSignal("rhr", "Resting Heart Rate", "my-whoop"),
     LabSignal("hrv", "Heart Rate Variability", "my-whoop"),
-    LabSignal("recovery", "Charge", "my-whoop"),
-    LabSignal("sleep_performance", "Rest", "my-whoop"),
+    LabSignal("recovery", "Recovery", "my-whoop"),
+    LabSignal("sleep_performance", "Sleep", "my-whoop"),
     LabSignal("sleep_total_min", "Asleep Time", "my-whoop"),
-    LabSignal("strain", "Effort", "my-whoop"),
+    LabSignal("strain", "Strain", "my-whoop"),
     LabSignal("skin_temp", "Skin Temperature", "my-whoop"),
     LabSignal("steps", "Steps", "apple-health"),
     LabSignal("weight", "Weight", "apple-health"),

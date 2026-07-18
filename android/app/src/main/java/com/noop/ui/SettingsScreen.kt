@@ -553,12 +553,12 @@ fun SettingsScreen(vm: AppViewModel, onOpenTestCentre: () -> Unit = {}) {
     ScreenScaffold(
         title = "Settings",
         subtitle = "Your numbers, your strap, and how NOOP works. All on this phone.",
-        // LIQUID SKY BACKDROP (the pilot pattern — LiquidScreenSky.kt): the static time-of-day sky settles
-        // into the theme canvas behind the top of the list, exactly like the liquid Today. This is a long,
-        // scroll-heavy list with NO hero gauge, so the liquid finish here is just the sky + liquidPress on
-        // the tappable rows. Gated on the same day-cycle background pref Today reads, so turning that off
-        // returns Settings to the plain dark canvas too.
-        topBackground = if (showDayCycleBackground) { { LiquidScreenSky() } } else null,
+        // WHOOP SLATE BACKDROP: the flat WHOOP canvas gradient (WhoopScreenSky) settles into the theme
+        // canvas behind the top of the list, exactly like Today. This is a long, scroll-heavy list with NO
+        // hero gauge, so the finish here is just the slate backdrop plus liquidPress on the tappable rows.
+        // Gated on the same day-cycle background pref Today reads, so turning that off returns Settings to
+        // the plain dark canvas too.
+        topBackground = if (showDayCycleBackground) { { WhoopScreenSky() } } else null,
     ) {
         // Read the revision counter so every profile write recomposes this subtree
         // (SharedPreferences is not observable; `mutate` bumps `rev` after each write).
@@ -828,7 +828,7 @@ fun SettingsScreen(vm: AppViewModel, onOpenTestCentre: () -> Unit = {}) {
         SettingsSection(
             icon = Icons.Filled.Straighten,
             title = "Units",
-            blurb = "Choose how distances, weights, heights, temperatures and Effort are shown. Your data is always stored the same way. This only changes the display.",
+            blurb = "Choose how distances, weights, heights, temperatures and Strain are shown. Your data is always stored the same way. This only changes the display.",
         ) {
             Column {
                 FormRow(label = "Measurement system") {
@@ -865,7 +865,7 @@ fun SettingsScreen(vm: AppViewModel, onOpenTestCentre: () -> Unit = {}) {
                 RowDivider()
                 // Effort scale (#268) — NOOP's native 0–100 Effort or WHOOP's 0–21 Day Strain axis.
                 // Display-only; the stored value never changes, so a flip just re-labels every read-out.
-                FormRow(label = "Effort scale") {
+                FormRow(label = "Strain scale") {
                     SegmentedPillControl(
                         items = listOf(EffortScale.HUNDRED, EffortScale.WHOOP),
                         selection = effortScale,
@@ -1828,24 +1828,24 @@ fun SettingsScreen(vm: AppViewModel, onOpenTestCentre: () -> Unit = {}) {
         // foldHistory drops every night before that epoch and re-seeds. Mirrors the iOS/Mac button.
         SettingsSection(
             icon = Icons.Filled.Favorite,
-            title = "Charge",
-            blurb = "Charge is NOOP's daily readiness score, learned from your own HRV, resting heart rate and more over time. Your history stays.",
+            title = "Recovery",
+            blurb = "Recovery is NOOP's daily readiness score, learned from your own HRV, resting heart rate and more over time. Your history stays.",
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text("Recalibrate Charge baseline", style = NoopType.subhead, color = Palette.textPrimary)
+                    Text("Recalibrate Recovery baseline", style = NoopType.subhead, color = Palette.textPrimary)
                     Text(
-                        "Restarts the roughly 4-night build-up for Charge and your HRV baseline from tonight. Use it if a bad first week set your baseline off. Your history stays.",
+                        "Restarts the roughly 4-night build-up for Recovery and your HRV baseline from tonight. Use it if a bad first week set your baseline off. Your history stays.",
                         style = NoopType.footnote,
                         color = Palette.textTertiary,
                     )
                 }
                 NoopButton(
-                    text = "Recalibrate Charge baseline",
+                    text = "Recalibrate Recovery baseline",
                     leadingIcon = Icons.Filled.Autorenew,
                     kind = NoopButtonKind.Secondary,
                     fullWidth = true,
-                    modifier = Modifier.semantics { contentDescription = "Recalibrate Charge baseline" },
+                    modifier = Modifier.semantics { contentDescription = "Recalibrate Recovery baseline" },
                     onClick = { showRecalibrateConfirm = true },
                 )
             }
@@ -1855,10 +1855,10 @@ fun SettingsScreen(vm: AppViewModel, onOpenTestCentre: () -> Unit = {}) {
             AlertDialog(
                 onDismissRequest = { showRecalibrateConfirm = false },
                 containerColor = Palette.surfaceOverlay,
-                title = { Text("Recalibrate your Charge baseline?", style = NoopType.title2, color = Palette.textPrimary) },
+                title = { Text("Recalibrate your Recovery baseline?", style = NoopType.title2, color = Palette.textPrimary) },
                 text = {
                     Text(
-                        "This restarts the roughly 4-night build-up for Charge and your HRV baseline. Your history stays. Use it if a bad first week, like wearing it while sick, set your baseline off.",
+                        "This restarts the roughly 4-night build-up for Recovery and your HRV baseline. Your history stays. Use it if a bad first week, like wearing it while sick, set your baseline off.",
                         style = NoopType.subhead,
                         color = Palette.textSecondary,
                     )
@@ -1883,7 +1883,7 @@ fun SettingsScreen(vm: AppViewModel, onOpenTestCentre: () -> Unit = {}) {
                             vm.syncNow()
                             Toast.makeText(
                                 context,
-                                "Charge baseline reset. NOOP will re-learn it from tonight. Your history stays, and it takes a few nights to settle.",
+                                "Recovery baseline reset. NOOP will re-learn it from tonight. Your history stays, and it takes a few nights to settle.",
                                 Toast.LENGTH_LONG,
                             ).show()
                         },
@@ -2185,7 +2185,7 @@ fun SettingsScreen(vm: AppViewModel, onOpenTestCentre: () -> Unit = {}) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text("How your scores work", style = NoopType.headline, color = Palette.textPrimary)
                             Text(
-                                "Charge, Effort and Rest, and how they differ from WHOOP",
+                                "Recovery, Strain and Sleep, and how they differ from WHOOP",
                                 style = NoopType.footnote,
                                 color = Palette.textSecondary,
                             )

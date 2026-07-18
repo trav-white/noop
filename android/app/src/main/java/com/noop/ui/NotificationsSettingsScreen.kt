@@ -449,7 +449,7 @@ fun NotificationsSettingsScreen(vm: AppViewModel) {
         ) {
             FormToggleRow(
                 label = "Morning recap",
-                help = "After last night is processed, a notification with your Charge and Rest. Posts " +
+                help = "After last night is processed, a notification with your Recovery and Sleep. Posts " +
                     "once a day, after your strap has synced the night.",
                 checked = morningReport,
                 onChange = {
@@ -460,7 +460,7 @@ fun NotificationsSettingsScreen(vm: AppViewModel) {
             RowDivider()
             FormToggleRow(
                 label = "Post-workout summary",
-                help = "When a new workout syncs in, a notification with its Effort, duration and average " +
+                help = "When a new workout syncs in, a notification with its Strain, duration and average " +
                     "heart rate. Shows up after the session reaches NOOP on the next sync.",
                 checked = postWorkoutReport,
                 onChange = {

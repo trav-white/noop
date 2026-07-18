@@ -76,3 +76,5 @@ jobs:
           -destination '${{ matrix.destination }}'
           CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
           build
+
+# CI re-registration touch (fork enablement)

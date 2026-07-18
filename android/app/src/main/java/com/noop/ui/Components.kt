@@ -862,13 +862,14 @@ fun BevelGauge(
 // o'clock and re-animates when the value changes (day nav). minSdk-safe (no RenderEffect blur).
 
 /**
- * The centre-number text style for a ring of the given [diameter] — the house numeral at `diameter * 0.36`,
- * Bold. The ONE source of truth for a ring's centre number, shared by [GlowRing]'s live label and the
- * carried-value overlay on the Today hero so a carried Charge, a clean value and (at the headline size)
- * "No Data" read with one consistent size + weight. Mirrors iOS `GlowRing.centerFont(diameter:)`.
+ * The centre-number text style for a ring of the given [diameter]: the house numeral at `diameter * 0.36`,
+ * Bold, in D-DIN (the WHOOP two-font rule, numerals get [NoopType.number]). The ONE source of truth for a
+ * ring's centre number, shared by [GlowRing]'s live label and the carried-value overlay on the Today hero
+ * so a carried Charge, a clean value and (at the headline size) "No Data" read with one consistent size,
+ * weight and font. Mirrors iOS `GlowRing.centerFont(diameter:)`.
  */
 fun glowRingCenterTextStyle(diameter: Dp, color: Color = Palette.textPrimary): TextStyle =
-    TextStyle(fontWeight = FontWeight.Bold, fontSize = (diameter.value * 0.36f).sp, color = color)
+    NoopType.number(diameter.value * 0.36f, FontWeight.Bold).copy(color = color)
 
 @Composable
 fun GlowRing(
@@ -983,11 +984,10 @@ fun RecoveryRing(
         lineWidth = lineWidth,
         showsLabel = showsLabel,
         // Brand-glyph geometry: open ~80% ring (288° of 360°), 12-o'clock start, clockwise,
-        // plus the solid gold core dot + micro NOOP wordmark that mark the recovery hero.
+        // plus the solid gold core dot that marks the recovery hero.
         startDeg = -90f,
         spanDeg = 288f,
         coreDot = Palette.gold,
-        wordmark = "NOOP",
         modifier = modifier,
     )
 }
